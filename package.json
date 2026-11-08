@@ -1,0 +1,16 @@
+{
+  "name": "healthy-women",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node -e \"require('fs').accessSync('site/index.html');console.log('Healthy Women PWA ready')\""
+  },
+  "dependencies": {
+    "@capacitor/core": "^7.0.0",
+    "@capacitor/android": "^7.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.0.0"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "appId": "org.healthywomen.cycle",
+  "appName": "Healthy Women",
+  "webDir": "site",
+  "android": {
+    "allowMixedContent": false
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "name": "Healthy Women — Sog‘lom ayollar",
+  "short_name": "Healthy Women",
+  "description": "Hayz sikli kalendari, kundalik va manbali tibbiy kutubxona",
+  "lang": "uz",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#fbf3f5",
+  "theme_color": "#fbf3f5",
+  "icons": [
+    {
+      "src": "./icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
