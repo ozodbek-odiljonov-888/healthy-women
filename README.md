@@ -138,6 +138,14 @@ For empty diaries, restoration works as before after explicit confirmation. The 
 - The app immediately locks after rotation. The old passphrase no longer unlocks the newly encrypted local diary, but remains necessary to open **older recovery backups**. Losing the new passphrase can permanently prevent local journal access.
 - Browser or OS downloaded files, extensions, screen captures, compromised devices, and key material in transient JavaScript memory are outside this protection. Avoid real medical data until independent security testing.
 
+## Scoped plaintext report exports (v1.7)
+- The Journal offers 90, 180, 365-day or full-history data scopes for **TXT** and **CSV** reports. The default is 180 days. These windows affect exports only; no diary entries are deleted.
+- Period entries overlapping the start boundary keep their original period start date, rather than reporting a false shortened period.
+- Both file types now require explicit confirmation that the export is **not encrypted** and may contain sensitive information. Cancelling creates no new file.
+- The app awaits pending writes and checks its local cross-tab erasure marker before generating a download. This is a convenience/safety guard, not comprehensive multi-device conflict management.
+- The optional encrypted `.hwbak` backup remains the recommended private transfer method. The previously added v1.6 local password rotation feature remains intact.
+- This version is a PR preview only until CI, browser checks, Android rebuild and real-device testing complete; there has been no independent clinical or security audit.
+
 ## Health and privacy limits
 - By default, legacy journal records are unencrypted in browser `localStorage`. When the user opts into v1.0 local encryption, new saved journal records are encrypted. Shared-device use remains risky; use fictitious test data until an independent security review.
 - Historical dates produce estimates, not guaranteed forecasts. Do not use them as contraception or a pregnancy test.

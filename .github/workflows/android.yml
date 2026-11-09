@@ -8,6 +8,14 @@ on:
       - 'package.json'
       - 'scripts/harden-android.mjs'
       - '.github/workflows/android.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'site/**'
+      - 'capacitor.config.json'
+      - 'package.json'
+      - 'scripts/harden-android.mjs'
+      - '.github/workflows/android.yml'
   workflow_dispatch:
 permissions:
   contents: read

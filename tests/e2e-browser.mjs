@@ -42,6 +42,14 @@ try{
  assert.equal(await page.locator("#view-journal [data-edit-checkin]").count(),1);
  const originalLegacy=await page.evaluate(()=>localStorage.getItem("healthywomen.events.v1"));
  console.log("PASS: fictional daily diary entry saved.");
+ assert.equal(await page.locator("#exportRange").inputValue(),"180");
+ await page.locator("#exportRange").selectOption("90");
+ const canceled= new Promise(resolve=>page.once("dialog",async dialog=>{
+  const message=dialog.message(); await dialog.dismiss(); resolve(message);
+ }));
+ await page.locator("#exportReport").click();
+ assert.match(await canceled,/SHIFRLANMAYDI/);
+ console.log("PASS: export window selection and plaintext disclosure.");
  await page.locator('#mainNav [data-view="settings"]').click();
  await page.locator("#secureEnable").click();
  await page.locator("#secureNewPassword").fill(PASS);
@@ -224,6 +232,33 @@ try{
  await page.waitForFunction(()=>JSON.parse(localStorage.getItem("healthywomen.events.v1")||"[]").length===1);
  assert(!(await page.evaluate(()=>localStorage.getItem("healthywomen.events.v1"))).includes("FICTIONAL-HEALTH-NOTE-NEVER-REAL"));
  console.log("PASS: privacy-page erasure clears old data, reloads other tabs and allows a fresh empty journal.");
+
+
+ // A clean phone-sized profile models Mini App layout and local persistence.
+ const compact=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+ const mobile=await compact.newPage();
+ mobile.on("pageerror",err=>errors.push(String(err)));
+ await mobile.goto(base+"/index.html");
+ await mobile.locator("#view-home .hero").waitFor();
+ const day=offset=>{const date=new Date();date.setDate(date.getDate()+offset);return [date.getFullYear(),String(date.getMonth()+1).padStart(2,"0"),String(date.getDate()).padStart(2,"0")].join("-");};
+ await mobile.locator("#heroAdd").click();
+ await mobile.locator("#periodStart").fill(day(-14));
+ await mobile.locator("#periodEnd").fill(day(-10));
+ await mobile.locator('#periodForm button[type="submit"]').click();
+ await mobile.waitForFunction(()=>JSON.parse(localStorage.getItem("healthywomen.events.v1")||"[]").some(x=>x.type==="period"));
+ await mobile.locator('.mobile-nav [data-view="journal"]').click();
+ await mobile.locator('#checkinForm textarea[name="note"]').fill("FICTIONAL-MINIAPP-QA");
+ await mobile.locator('#checkinForm button[type="submit"]').click();
+ await mobile.waitForFunction(()=>JSON.parse(localStorage.getItem("healthywomen.events.v1")||"[]").filter(x=>!x.deleted).length===2);
+ await mobile.reload();
+ await mobile.locator("#view-home .hero").waitFor();
+ assert.equal(await mobile.evaluate(()=>JSON.parse(localStorage.getItem("healthywomen.events.v1")||"[]").filter(x=>!x.deleted).length),2);
+ await mobile.locator('.mobile-nav [data-view="calendar"]').click();
+ assert.equal(await mobile.locator("#view-calendar [data-edit]").count(),1);
+ await mobile.locator('.mobile-nav [data-view="journal"]').click();
+ assert.equal(await mobile.locator("#view-journal [data-edit-checkin]").count(),1);
+ await compact.close();
+ console.log("PASS: mobile-sized calendar and diary survive reopen with fictional local records.");
 
  assert.deepEqual(errors,[]);
  console.log("PASS: no JavaScript runtime errors.");
