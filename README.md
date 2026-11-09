@@ -116,6 +116,14 @@ Run `npm test` with Node.js 22+ to execute all Node unit tests and static-site i
 
 For real Chromium integration checks, install Playwright in your own development environment and run `npm run test:browser`. Browsers require local loopback access. The simulated test records are fictional. If GitHub Actions fails before creating any jobs, check provider status and repository Actions settings rather than assuming tests failed; `npm test` remains usable independently. See `BROWSER_TESTING.md`.
 
+## Safer encrypted backup restoration (v1.4)
+Restoring an encrypted `.hwbak` file replaces the current local diary. **If the current diary contains any records, v1.4 requires an extra recovery step** before allowing replacement:
+1. The user supplies the imported archive and its passphrase. The app encrypts a fresh backup of the **current** diary with that same passphrase, decrypts it in memory to verify its contents, and offers the archive for download.
+2. The user checks that the file was saved, acknowledges the recovery step, and separately confirms the destructive replacement.
+3. Immediately before replacement, the app compares the current diary against the backup snapshot inside its serialized write operation. If records changed in another tab, it rejects the replacement and requires a new backup.
+
+For empty diaries, restoration works as before after explicit confirmation. The recovery file is encrypted, but its passphrase is the password entered for the **incoming** backup; do not lose it. The browser cannot guarantee the downloaded file is saved, so explicit user verification remains necessary. This reduces accidental data loss but is not a substitute for physical-device validation or independently audited storage.
+
 ## Health and privacy limits
 - By default, legacy journal records are unencrypted in browser `localStorage`. When the user opts into v1.0 local encryption, new saved journal records are encrypted. Shared-device use remains risky; use fictitious test data until an independent security review.
 - Historical dates produce estimates, not guaranteed forecasts. Do not use them as contraception or a pregnancy test.

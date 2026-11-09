@@ -49,3 +49,11 @@ test("encrypted mode never deletes stale plaintext from a storage event",()=>{
  assert(protector.includes("mergeLegacySafely"));
  assert(protector.includes("legacyDownload"));
 });
+
+test("encrypted backup import requires a current-diary snapshot and explicit acknowledgement",()=>{
+ const ui=read("../site/vault-ui.mjs"),app=read("../site/app.mjs");
+ assert(ui.includes("createVerifiedRecoveryBackup(current,secret)"));
+ assert(ui.includes("restoreAck.checked"));
+ assert(ui.includes("await replaceEvents(entries,currentSnapshot)"));
+ assert(app.includes("assertCurrentJournal(current,expectedSnapshot)"));
+});

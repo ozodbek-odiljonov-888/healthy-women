@@ -112,6 +112,24 @@ try{
  const backup=join(tmp,"final.hwbak");
  await (await arch).saveAs(backup);
  assert((await readFile(backup,"utf8")).includes("AES-256-GCM"));
+ // Restoring over a nonempty diary now requires a second encrypted recovery backup.
+ await page.locator("#restoreBtn").click();
+ await page.locator("#vaultFile").setInputFiles(backup);
+ await page.locator("#vaultPassword").fill(PASS);
+ const recoveryDownload=page.waitForEvent("download");
+ await page.locator("#vaultSubmit").click();
+ const recoveryFile=join(tmp,"before-replacement.hwbak");
+ await (await recoveryDownload).saveAs(recoveryFile);
+ assert((await readFile(recoveryFile,"utf8")).includes("AES-256-GCM"));
+ assert(await page.locator("#vaultRestoreWrap").isVisible());
+ assert.equal(await page.locator("#vaultRestoreAck").isChecked(),false);
+ assert.equal(await page.locator("#vaultDialog").isVisible(),true);
+ await page.locator("#vaultRestoreAck").check();
+ page.once("dialog",d=>d.accept());
+ await page.locator("#vaultSubmit").click();
+ await page.locator("#vaultDialog").waitFor({state:"hidden"});
+ assert.equal(await page.locator("#view-settings #restoreBtn").count(),1);
+ console.log("PASS: nonempty diary cannot be overwritten without a verified encrypted recovery download and acknowledgement.");
  page.once("dialog",d=>d.accept());
  await page.locator("#clearBtn").click();
  await page.waitForFunction(()=>localStorage.getItem("healthywomen.encrypted-local.v1")===null&&localStorage.getItem("healthywomen.events.v1")===null);
