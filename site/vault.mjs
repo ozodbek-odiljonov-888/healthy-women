@@ -25,7 +25,7 @@ function from64(s,expectedLength) {
   return bytes;
 }
 function sanitizeEvent(entry) {
-  if(!entry||typeof entry!=="object"||Array.isArray(entry)||typeof entry.id!=="string"||entry.id.length<1||entry.id.length>90||
+  if(!entry||typeof entry!=="object"||Array.isArray(entry)||typeof entry.id!=="string"||!/^[A-Za-z0-9_-]{1,90}$/.test(entry.id)||
      !Number.isSafeInteger(entry.updated_at)||entry.updated_at<0||entry.updated_at>Number.MAX_SAFE_INTEGER||
      !["period","checkin"].includes(entry.type)||!entry.payload||typeof entry.payload!=="object"||Array.isArray(entry.payload)) throw Error("Invalid event");
   const payload=entry.payload;

@@ -31,4 +31,8 @@ test("backup input validates identifiers and invalid period dates",()=>{
  assert.throws(()=>validateBackupEvents([records[0],records[0]]));
  assert.deepEqual(validateBackupEvents(records),records);
 });
+test("HTML-like identifiers and duplicate records are rejected",()=>{
+ assert.throws(()=>validateBackupEvents([{...records[0],id:'"><img src=x onerror=alert(1)>'}]));
+ assert.throws(()=>validateBackupEvents([records[0],records[0]]));
+});
 test("password length required",async()=>{await assert.rejects(encryptBackup(records,"short"));});
