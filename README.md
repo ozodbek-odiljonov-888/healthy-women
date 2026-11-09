@@ -43,6 +43,13 @@ The independent `bot-vercel/` folder provides `/health` (no secrets) and `/webho
 - The Journal allows a deliberate **CSV export** of recorded periods and symptoms. CSV is **not encrypted**; treat it as sensitive medical data, and use the encrypted backup feature for private transfers.
 - The CSV exporter neutralizes common spreadsheet formula injection prefixes in notes.
 
+## Symptom trends and opt-in Android reminders (v0.7)
+The Journal now displays an **offline, six-month symptom summary**: recorded average pain per month, number of logs and severe-pain observations. Missing diary days are not treated as pain-free days. This is descriptive statistics, **not a medical assessment**.
+
+The **Android APK** (Capacitor 7 with `@capacitor/local-notifications`) can show a **generic daily reminder** after the user explicitly enables it and grants Android notification permission. The message contains no menstrual dates, symptoms or user identity. Reminders run **locally on the phone**, without a Telegram bot or internet service. Users can change the reminder time or switch off reminders in Settings; clearing app records also attempts to cancel the reminder. Delivery time may shift due to Android battery policies. The browser/PWA does not schedule background reminders. No exact-alarm permission was added.
+
+**Important:** Availability is implemented and build-tested, but notification delivery on a real Android device must still be verified. The locally stored diary remains unencrypted; only exported .hwbak archives are encrypted.
+
 ## Health and privacy limits
 - Browser test data currently lives in unencrypted browser `localStorage`. Use fictitious data only on shared devices.
 - Historical dates produce estimates, not guaranteed forecasts. Do not use them as contraception or a pregnancy test.

@@ -11,3 +11,6 @@
 
 ## Ommaviy ishga tushirishdan oldin
 Mustaqil xavfsizlik va tibbiy kontent tekshiruvi, shifrlash, xavfsiz autentifikatsiya, foydalanuvchi roziligi, ma’lumotni eksport/o‘chirish va tegishli qonunchilik talablarini yakunlash kerak.
+
+## Android mahalliy eslatmalari (v0.7)
+Android APK foydalanuvchi tanlagan vaqtda umumiy (shaxsiy salomatlik sanalarisiz) eslatmani qurilmaning o‘zida rejalashtirishi mumkin. Eslatma faqat foydalanuvchi yoqsa va tizim ruxsat bersa ishlaydi. Ma’lumotlar serverga yuborilmaydi. Oddiy brauzer veb-sayti push/bildirishnoma jo‘natmaydi. Qurilmadagi ma’lumotlarni o‘chirganda eslatma bekor qilinadi; bekor qilish muvaffaqiyatsiz bo‘lsa, foydalanuvchiga ogohlantirish ko‘rsatiladi.
