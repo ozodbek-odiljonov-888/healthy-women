@@ -23,7 +23,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: node --test worker/index.test.js tests/checkins.test.mjs tests/site.test.mjs tests/vault.test.mjs tests/deployment.test.mjs tests/bot-vercel.test.mjs tests/cycle-safety.test.mjs tests/insights.test.mjs tests/reminders.test.mjs tests/diary.test.mjs tests/inline-syntax.test.mjs tests/privacy-screen.test.mjs tests/local-crypto.test.mjs tests/local-crypto-ui.test.mjs tests/local-storage-integration.test.mjs tests/android-native.test.mjs tests/android-release.test.mjs tests/android-backup.test.mjs tests/journal-guard.test.mjs tests/legacy-recovery.test.mjs
+      - run: npm test
       - uses: actions/upload-artifact@v4
         with:
           name: Healthy-Women-PWA-preview

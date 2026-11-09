@@ -111,6 +111,11 @@ The v1.2 backup export checks the normalized journal contents after decrypting i
 - An unencrypted rescue JSON is sensitive; keep it out of shared folders and remove it securely when no longer required. Previously made exports or device backups are **not** cleaned up by this feature.
 - This is a local recovery aid, **not** device-wide encryption, an automatic conflict resolver, or independent security certification.
 
+## Local verification without GitHub Actions
+Run `npm test` with Node.js 22+ to execute all Node unit tests and static-site integrity checks **without installing packages**. The runner discovers every `tests/*.test.mjs` file, so new tests are not silently omitted. Use `npm run test:site` for the static/offline cache and JavaScript checks only.
+
+For real Chromium integration checks, install Playwright in your own development environment and run `npm run test:browser`. Browsers require local loopback access. The simulated test records are fictional. If GitHub Actions fails before creating any jobs, check provider status and repository Actions settings rather than assuming tests failed; `npm test` remains usable independently. See `BROWSER_TESTING.md`.
+
 ## Health and privacy limits
 - By default, legacy journal records are unencrypted in browser `localStorage`. When the user opts into v1.0 local encryption, new saved journal records are encrypted. Shared-device use remains risky; use fictitious test data until an independent security review.
 - Historical dates produce estimates, not guaranteed forecasts. Do not use them as contraception or a pregnancy test.
