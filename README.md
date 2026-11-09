@@ -21,6 +21,11 @@ The static app is in `site/index.html`. Once Pages is enabled, run **Actions →
 
 To test without GitHub Pages, download the **Healthy-Women-PWA-preview** ZIP artifact from a successful **Verify Healthy Women preview** workflow and extract it. The real website still requires Pages publishing to be enabled.
 
+## Private, encrypted local backup (v0.5)
+Settings now provides **encrypted backup export and restore**. The exported `.hwbak` file uses browser-native PBKDF2-SHA256 (310,000 iterations, a fresh salt) and AES-256-GCM (fresh IV and authentication tag); no passwords or archives are sent to our servers. Passwords require at least 12 characters and are not recoverable.
+
+**Critical:** Only the exported backup file is encrypted. The app's live data in localStorage remains **unencrypted**. Import replaces local records only after explicit user confirmation and disables any synchronization opt-in. Never share a decrypted archive or password; use fictitious data in this unreviewed preview.
+
 ## Android
 Choose **Actions → Build Healthy Women Android debug APK**, open the successful run, download **Healthy-Women-Android-debug**, unzip and install the APK. Android can warn that a sideloaded debug build is from an unknown source. Do not distribute it as a clinically validated product.
 

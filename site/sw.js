@@ -1,5 +1,5 @@
-const VERSION="healthy-women-pwa-v5";
-const CACHE_FILES=["./","./index.html","./manifest.webmanifest","./icons/icon.svg","./sw.js","./privacy.html","./checkins.mjs","./checkin-ui.mjs"];
+const VERSION="healthy-women-pwa-v6";
+const CACHE_FILES=["./","./index.html","./manifest.webmanifest","./icons/icon.svg","./sw.js","./privacy.html","./checkins.mjs","./checkin-ui.mjs","./vault.mjs","./vault-ui.mjs"];
 self.addEventListener("install",event=>event.waitUntil(caches.open(VERSION).then(cache=>cache.addAll(CACHE_FILES)).then(()=>self.skipWaiting())));
 self.addEventListener("activate",event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==VERSION).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
 self.addEventListener("fetch",event=>{

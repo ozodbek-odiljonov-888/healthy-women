@@ -18,7 +18,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: node --test worker/index.test.js tests/checkins.test.mjs tests/site.test.mjs
+      - run: node --test worker/index.test.js tests/checkins.test.mjs tests/site.test.mjs tests/vault.test.mjs
       - uses: actions/upload-artifact@v4
         with:
           name: Healthy-Women-PWA-preview
