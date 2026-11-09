@@ -72,6 +72,9 @@ The **Android APK** (Capacitor 7 with `@capacitor/local-notifications`) can show
 - The erase controls clear both encrypted and legacy local journal storage. **No recovery or password reset is available**, beyond a user-held encrypted backup with its passphrase.
 - **Limitations:** this does not provide end-to-end encryption, hardware-backed keystores, protection from malicious browser extensions, snapshots, existing filesystem backups or prior unencrypted exports. Existing plaintext may persist in device backups and flash-memory remnants. This has not undergone independent security review. Use fictitious test data until reviewed.
 
+## Stable Android release signing (prepared, not yet enabled)
+A new manual-only GitHub Actions workflow **Build Healthy Women signed Android release** can sign repeatable APK updates with the same private keystore. Four encrypted repository secrets must first be configured by the owner; no signing key or password is included in source files. See `ANDROID_RELEASE.md`. The workflow has **not** yet produced a signed release APK; existing debug APKs remain incompatible with the first new release signature.
+
 ## Android debug APK upgrade warning
 The GitHub-hosted Android debug APK is signed with a new, ephemeral debug keystore on each CI runner. We inspected v0.9 and v1.0 test APKs and confirmed different signing certificate containers. **Android cannot normally upgrade one in place over the other** under the same app ID (`org.healthywomen.cycle`). Do **not** uninstall a previous app with needed data until its backup is exported and verified. Uninstalling typically deletes the app's private localStorage data.
 
