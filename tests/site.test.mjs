@@ -1,16 +1,16 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
-import {renderCheckinCard} from "./checkin-ui.mjs";
+import {renderCheckinCard} from "../site/checkin-ui.mjs";
 test("home, diary and settings include phase questionnaires",()=>{
- const html=readFileSync(new URL("./index.html",import.meta.url),"utf8");
+ const html=readFileSync(new URL("../site/index.html",import.meta.url),"utf8");
  for(const name of ["renderCheckinCard","openCheckinDialog","phaseToggle","PROMPT_PREF_KEY","./checkin-ui.mjs"]){
   assert(html.includes(name),"Integration is missing: "+name);
  }
- assert(!/ozodbek|odiljonov|odiljonovich/i.test(html));
+ assert(!/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/.test(html));
 });
 test("PWA pre-caches the questionnaire modules",()=>{
- const sw=readFileSync(new URL("./sw.js",import.meta.url),"utf8");
+ const sw=readFileSync(new URL("../site/sw.js",import.meta.url),"utf8");
  assert(sw.includes("./checkins.mjs"));
  assert(sw.includes("./checkin-ui.mjs"));
 });

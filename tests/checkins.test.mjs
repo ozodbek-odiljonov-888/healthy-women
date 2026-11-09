@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {validDate,daysBetween,selectCheckinPhase,validatePhaseEntry,riskAdvice} from "./checkins.mjs";
+import {validDate,daysBetween,selectCheckinPhase,validatePhaseEntry,riskAdvice} from "../site/checkins.mjs";
 const p=(start,end=null)=>[{start,end,id:"p-1"}];
 const c=(phase,date)=>[{phase,date,periodStart:"2026-10-01"}];
 test("calendar validates leap dates",()=>{assert.equal(validDate("2024-02-29"),true);assert.equal(validDate("2025-02-29"),false);assert.equal(daysBetween("2026-10-01","2026-10-04"),3);});
