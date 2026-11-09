@@ -56,10 +56,10 @@ export function attachVaultControls({getEvents,replaceEvents,download,notify}){
     const text=await chosenFile.text();
     const entries=await decryptBackup(text,secret);
     if(!confirm(entries.length+" ta yozuv tiklanadi. Hozirgi mahalliy qaydlar ALMASHTIRILADI. Davom etasizmi?")){status.textContent="Tiklash bekor qilindi.";return;}
-    replaceEvents(entries);
+    await replaceEvents(entries);
     dialog.close();notify("Shifrlangan zaxiradan "+entries.length+" ta yozuv tiklandi.");
    }
-  }catch(error){status.textContent=chosenMode==="restore"?"Parol noto‘g‘ri, fayl buzilgan yoki format mos emas.":"Zaxira yaratilmadi: "+String(error?.message||"xatolik");}
+  }catch(error){status.textContent=chosenMode==="restore"?"Tiklash bajarilmadi: "+String(error?.message||"parol, fayl yoki saqlash xatosi"):"Zaxira yaratilmadi: "+String(error?.message||"xatolik");}
   finally{get("vaultSubmit").disabled=false;get("vaultCancel").disabled=false;busy=false;}
  };
 }
