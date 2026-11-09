@@ -8,7 +8,7 @@ The public-facing app, documents, reports, and bot messages are branded **Health
 ## Status
 - ✅ Responsive PWA prototype in `site/` with offline caching.
 - ✅ Android **debug/test** APK builds through GitHub Actions; download build artifacts from the Actions tab.
-- ⏳ GitHub Pages publishing requires **Settings → Pages → Source → GitHub Actions** to be enabled by the repository owner.
+- ✅ GitHub Pages publishing workflow succeeded on 2026-11-09. Confirm public accessibility on the intended device; a successful workflow does not replace real-device testing.
 - ⏳ Telegram bot and server-side synchronization are not live. Do not collect real medical records until privacy/security controls have been reviewed.
 
 ## On-device cycle questionnaires (v0.4)
@@ -17,9 +17,9 @@ A short questionnaire appears while the app is **open** near menstruation onset,
 **No scheduled background/push notifications are active.** Cycle midpoint is not an ovulation prediction or diagnosis. The app is not clinically validated. Medical guidance links: [ACOG](https://www.acog.org/womens-health/faqs/abnormal-uterine-bleeding) and [NHS](https://www.nhs.uk/symptoms/period-pain/).
 
 ## Website
-The static app is in `site/index.html`. Once Pages is enabled, run **Actions → Publish Healthy Women website**.
+The static app is in `site/index.html`. **Actions → Publish Healthy Women website** has a successful deployment. Alternatively, Vercel can import this repo using **Root Directory: `site`**, Framework **Other**, and an empty Build Command. See `DEPLOYMENT.md`.
 
-To test without GitHub Pages, download the **Healthy-Women-PWA-preview** ZIP artifact from a successful **Verify Healthy Women preview** workflow and extract it. The real website still requires Pages publishing to be enabled.
+To test offline, download the **Healthy-Women-PWA-preview** ZIP artifact from a successful **Verify Healthy Women preview** workflow and extract it. Static files require serving over HTTPS or localhost for full service-worker behavior.
 
 ## Private, encrypted local backup (v0.5)
 Settings now provides **encrypted backup export and restore**. The exported `.hwbak` file uses browser-native PBKDF2-SHA256 (310,000 iterations, a fresh salt) and AES-256-GCM (fresh IV and authentication tag); no passwords or archives are sent to our servers. Passwords require at least 12 characters and are not recoverable.
@@ -28,6 +28,11 @@ Settings now provides **encrypted backup export and restore**. The exported `.hw
 
 ## Android
 Choose **Actions → Build Healthy Women Android debug APK**, open the successful run, download **Healthy-Women-Android-debug**, unzip and install the APK. Android can warn that a sideloaded debug build is from an unknown source. Do not distribute it as a clinically validated product.
+
+## Telegram preview and deployment
+The FAQ bot now has inline topic buttons and sourced answers. Source is in `worker/index.js`. The **manual-only** Cloudflare deployment workflow never deploys on ordinary commits and requires account-specific authorization. No BotFather token is in the repository; `scripts/register-telegram-webhook.mjs` registers a webhook only when run locally with private environment variables. This bot has **not** been deployed from this chat, and cloud synchronization is disabled.
+
+Vercel Hobby is limited to **personal, non-commercial use**. Do not host a commercial startup on its free tier. See `DEPLOYMENT.md` for platform-specific steps.
 
 ## Health and privacy limits
 - Browser test data currently lives in unencrypted browser `localStorage`. Use fictitious data only on shared devices.
