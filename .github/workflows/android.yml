@@ -23,8 +23,7 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '21'
-      - uses: android-actions/setup-android@v3
-      - name: Install Capacitor
+      # GitHub-hosted ubuntu runner includes the Android SDK. The setup-android\n      # action currently fails when trying to install removed legacy 'tools'.\n      - name: Verify installed Android SDK\n        run: test -d "$ANDROID_HOME" && echo "SDK: $ANDROID_HOME"\n      - name: Install Capacitor
         run: npm install --no-audit --no-fund
       - name: Create native Android project
         run: |
