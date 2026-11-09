@@ -96,8 +96,35 @@ try{
  await page.setViewportSize({width:390,height:844});
  await page.locator('.mobile-nav [data-view="calendar"]').click();
  await page.locator("#view-calendar .calendar-box").waitFor({state:"visible"});
+ console.log("PASS: mobile navigation works.");
+ await page.setViewportSize({width:1280,height:900});
+ const second=await context.newPage();
+ second.on("pageerror",e=>errors.push(String(e)));
+ await second.goto(base+"/index.html");
+ await second.locator("#view-home .hero").waitFor();
+ await second.locator('#mainNav [data-view="journal"]').click();
+ assert.equal(await second.locator("#view-journal [data-edit-checkin]").count(),1);
+ await page.locator('#mainNav [data-view="journal"]').click();
+ await page.locator("#view-journal [data-edit-checkin]").click();
+ await page.locator('#checkinForm select[name="pain"]').selectOption("5");
+ await page.locator('#checkinForm button[type="submit"]').click();
+ await second.waitForFunction(()=>document.querySelector("#view-journal")?.textContent?.includes("Og‘riq: 5/10"));
+ await second.close();
+ console.log("PASS: second browser tab refreshes after another tab edits a diary record.");
+
+ await page.evaluate(()=>localStorage.setItem("healthywomen.events.v1","{broken-example-json"));
+ await page.reload();
+ await page.locator("#rescueLegacy").waitFor({state:"visible"});
+ const corrupted=await page.evaluate(()=>localStorage.getItem("healthywomen.events.v1"));
+ await page.locator('#mainNav [data-view="journal"]').click();
+ await page.locator('#checkinForm textarea[name="note"]').fill("FICTIONAL NEW ENTRY THAT MUST NOT OVERWRITE");
+ await page.locator('#checkinForm button[type="submit"]').click();
+ await page.waitForFunction(()=>document.querySelector("#diaryFormError")?.textContent?.length>0);
+ assert.equal(await page.evaluate(()=>localStorage.getItem("healthywomen.events.v1")),corrupted);
+ console.log("PASS: corrupt local journal remains preserved, and accidental overwrites are blocked.");
+
  assert.deepEqual(errors,[]);
- console.log("PASS: mobile navigation and no JS runtime errors.");
+ console.log("PASS: no JavaScript runtime errors.");
  console.log("BROWSER E2E PASSED.");
 }catch(e){
  console.error("BROWSER E2E FAILED: "+String(e));
