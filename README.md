@@ -50,6 +50,12 @@ The **Android APK** (Capacitor 7 with `@capacitor/local-notifications`) can show
 
 **Important:** Availability is implemented and build-tested, but notification delivery on a real Android device must still be verified. The locally stored diary remains unencrypted; only exported .hwbak archives are encrypted.
 
+## Daily diary reliability (v0.8)
+- Ordinary daily diary entries can be edited or removed from the Journal. Phase-specific questionnaires retain their specialized data and are not edited with the generic diary form.
+- A second ordinary diary entry on the same day now opens the existing record for review instead of creating a duplicate.
+- Validates dates, pain (0–10), flow, mood and note length before saving. Ordinary journal entries with notable symptoms also show a source-linked medical warning; this does not diagnose.
+- The change is local-first and introduces no new cloud transfer. Existing records remain in localStorage, which is **not encrypted**.
+
 ## Health and privacy limits
 - Browser test data currently lives in unencrypted browser `localStorage`. Use fictitious data only on shared devices.
 - Historical dates produce estimates, not guaranteed forecasts. Do not use them as contraception or a pregnancy test.
