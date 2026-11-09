@@ -172,6 +172,28 @@ try{
  assert.equal(await page.evaluate(()=>localStorage.getItem("healthywomen.events.v1")),corrupted);
  console.log("PASS: corrupt local journal remains preserved, and accidental overwrites are blocked.");
 
+ // The Privacy page must erase in one coordinated operation and notify other tabs.
+ const erasedEpochBefore=await page.evaluate(()=>localStorage.getItem("healthywomen.erase-epoch.v1"));
+ const privacyTab=await context.newPage();
+ await privacyTab.goto(base+"/privacy.html");
+ privacyTab.once("dialog",d=>d.accept());
+ await privacyTab.locator("#erase").click();
+ await privacyTab.waitForFunction(()=>localStorage.getItem("healthywomen.events.v1")===null&&localStorage.getItem("healthywomen.erase-epoch.v1")!==null);
+ const erasedEpochAfter=await privacyTab.evaluate(()=>localStorage.getItem("healthywomen.erase-epoch.v1"));
+ assert.notEqual(erasedEpochAfter,erasedEpochBefore);
+ await page.waitForFunction(()=>localStorage.getItem("healthywomen.events.v1")===null);
+ await page.locator("#view-home .hero").waitFor({state:"visible"});
+ assert.equal(await page.locator("#rescueLegacy").count(),0);
+ await privacyTab.close();
+ await page.locator('#mainNav [data-view="journal"]').click();
+ await page.locator('#checkinForm textarea[name="note"]').fill("FICTIONAL-FRESH-AFTER-ERASURE");
+ await page.locator('#checkinForm select[name="pain"]').selectOption("2");
+ await page.locator('#checkinForm select[name="flow"]').selectOption("light");
+ await page.locator('#checkinForm button[type="submit"]').click();
+ await page.waitForFunction(()=>JSON.parse(localStorage.getItem("healthywomen.events.v1")||"[]").length===1);
+ assert(!(await page.evaluate(()=>localStorage.getItem("healthywomen.events.v1"))).includes("FICTIONAL-HEALTH-NOTE-NEVER-REAL"));
+ console.log("PASS: privacy-page erasure clears old data, reloads other tabs and allows a fresh empty journal.");
+
  assert.deepEqual(errors,[]);
  console.log("PASS: no JavaScript runtime errors.");
  console.log("BROWSER E2E PASSED.");

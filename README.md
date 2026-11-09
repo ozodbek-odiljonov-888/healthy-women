@@ -124,6 +124,13 @@ Restoring an encrypted `.hwbak` file replaces the current local diary. **If the 
 
 For empty diaries, restoration works as before after explicit confirmation. The recovery file is encrypted, but its passphrase is the password entered for the **incoming** backup; do not lose it. The browser cannot guarantee the downloaded file is saved, so explicit user verification remains necessary. This reduces accidental data loss but is not a substitute for physical-device validation or independently audited storage.
 
+## Coordinated cross-tab erasure (v1.5)
+- Both the in-app **Delete all local records** action and the public Privacy page use the same `eraseLocalJournal` routine and, where supported, the Web Locks API to serialize deletion with diary mutations.
+- A new **local erasure epoch** is written before clearing encrypted/plaintext journal keys. Any already-open app tab with an older epoch rejects future writes, preventing stale records from silently reappearing.
+- Other open tabs receive the erasure notification through the browser storage event and reload, clearing their visible journal and transient interface state. A new session can intentionally start an empty diary after deletion.
+- Local sync preferences are cleared. **Previously downloaded exports, independent device backups, Telegram messages, or data stored in third-party systems are not erased.** Browser vendors differ in storage-event timing; the epoch guard adds a second defense.
+- This is not secure erasure of flash memory and is not a substitute for a formal privacy/security review.
+
 ## Health and privacy limits
 - By default, legacy journal records are unencrypted in browser `localStorage`. When the user opts into v1.0 local encryption, new saved journal records are encrypted. Shared-device use remains risky; use fictitious test data until an independent security review.
 - Historical dates produce estimates, not guaranteed forecasts. Do not use them as contraception or a pregnancy test.

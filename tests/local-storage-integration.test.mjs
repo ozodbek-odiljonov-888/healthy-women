@@ -10,10 +10,14 @@ test("no unencrypted backup restore bypass in main application",()=>{
  assert(s.includes("hasEncryptedJournal()||syncBusy"));
  assert(s.includes("savePhaseRecord"));
 });
-test("privacy delete erases encrypted and old journal keys",()=>{
- const s=read("../site/privacy-page.mjs");
- assert(s.includes("healthywomen.encrypted-local.v1"));
- assert(s.includes("healthywomen.events.v1"));
+test("privacy-page uses the same coordinated erasure as the main app",()=>{
+ const s=read("../site/privacy-page.mjs"),app=read("../site/app.mjs"),erase=read("../site/erasure.mjs");
+ assert(s.includes("await eraseLocalJournal()"));
+ assert(app.includes("await eraseLocalJournal()"));
+ assert(app.includes("if(e.key===ERASE_EPOCH_KEY)"));
+ assert(app.includes("assertEraseEpoch(localStorage,eraseEpoch)"));
+ assert(erase.includes("healthywomen.encrypted-local")===false);
+ assert(erase.includes("removeAllJournalData(storage)"));
 });
 test("offline app pre-caches the encryption UI and algorithm",()=>{
  const s=read("../site/sw.js");
