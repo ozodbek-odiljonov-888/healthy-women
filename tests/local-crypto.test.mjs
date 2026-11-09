@@ -63,3 +63,18 @@ test("a stale tab cannot overwrite encrypted journal changes",async()=>{
  await writeEncryptedJournal(records,first.session,s);
  await assert.rejects(writeEncryptedJournal(records,second.session,s),/boshqa oynada/);
 });
+
+test("phase questionnaire observations survive encrypted migration",async()=>{
+ const s=store();
+ const rows=[...records,{id:"questionnaire",type:"checkin",payload:{date:"2026-10-16",phase:"middle",periodStart:"2026-10-04",pain:3,flow:"none",mood:"neutral",hourly:false,dizzy:false,between:false,note:"Private phase note"},updated_at:1790000000005,deleted:0}];
+ s.setItem(LEGACY_EVENTS_KEY,JSON.stringify(rows));
+ const {session}=await migratePlainJournal(PASSWORD,s);
+ const out=await unlockEncryptedJournal(PASSWORD,s);
+ assert.equal(out.events.length,rows.length);
+ const phase=out.events.find(x=>x.id==="questionnaire");
+ assert.equal(phase.payload.phase,"middle");
+ assert.equal(phase.payload.periodStart,"2026-10-04");
+ assert.equal(phase.payload.note,"Private phase note");
+ await writeEncryptedJournal(out.events,session,s);
+ assert(!s.getItem(LOCAL_VAULT_KEY).includes("Private phase note"));
+});

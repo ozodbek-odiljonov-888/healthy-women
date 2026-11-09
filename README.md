@@ -72,8 +72,15 @@ The **Android APK** (Capacitor 7 with `@capacitor/local-notifications`) can show
 - The erase controls clear both encrypted and legacy local journal storage. **No recovery or password reset is available**, beyond a user-held encrypted backup with its passphrase.
 - **Limitations:** this does not provide end-to-end encryption, hardware-backed keystores, protection from malicious browser extensions, snapshots, existing filesystem backups or prior unencrypted exports. Existing plaintext may persist in device backups and flash-memory remnants. This has not undergone independent security review. Use fictitious test data until reviewed.
 
+## Android debug APK upgrade warning
+The GitHub-hosted Android debug APK is signed with a new, ephemeral debug keystore on each CI runner. We inspected v0.9 and v1.0 test APKs and confirmed different signing certificate containers. **Android cannot normally upgrade one in place over the other** under the same app ID (`org.healthywomen.cycle`). Do **not** uninstall a previous app with needed data until its backup is exported and verified. Uninstalling typically deletes the app's private localStorage data.
+
+For a test-only migration: while the old APK is still installed, use **Settings → Parol bilan shifrlangan zaxira → Zaxira yaratish** to export a `.hwbak` file and retain its password. Verify the file exists in safe storage. Only then remove the old APK, install the new test APK, and import the backup from **Sozlamalar → Zaxiradan qayta tiklash**. Finally, enable the new optional local at-rest encryption. This process has not been validated across all Android device versions; ideally retain a second copy of the backup before upgrading.
+
+Before any public release, configure a **private, stable release signing key** with appropriate access controls. Do not commit the key or use a public fixed debug signing key. The current APK is for development/testing only, not a release-ready app.
+
 ## Health and privacy limits
-- Browser test data currently lives in unencrypted browser `localStorage`. Use fictitious data only on shared devices.
+- By default, legacy journal records are unencrypted in browser `localStorage`. When the user opts into v1.0 local encryption, new saved journal records are encrypted. Shared-device use remains risky; use fictitious test data until an independent security review.
 - Historical dates produce estimates, not guaranteed forecasts. Do not use them as contraception or a pregnancy test.
 - The offline helper searches a fixed knowledge library: it is **not** a generative medical AI and must not diagnose.
 - Emergency symptoms require qualified medical care.
