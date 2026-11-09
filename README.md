@@ -94,6 +94,13 @@ Before any public release, configure a **private, stable release signing key** w
 - Privacy statements distinguish the default plaintext journal from the **optional** local encrypted journal. Stronger web headers do not encrypt localStorage, downloads or old device backups.
 - The CSS currently uses `style-src 'unsafe-inline'` for inline style attributes and runtime styling. This reduces the strength of style injection defenses; independent security auditing remains necessary.
 
+## Cross-tab journal integrity and backup checks (v1.2)
+- All journal mutations are serialized with the Web Locks API **where the platform supports it**, alongside optimistic storage-revision checks. The app rejects a stale browser tab overwriting newer local journal content.
+- Malformed legacy JSON is **preserved rather than replaced by an empty journal**. The app blocks writes, displays a persistent warning, and offers a manual **unencrypted rescue copy** for technical recovery. Treat this rescue file as sensitive.
+- Encrypted saves check the record revision both before and after cryptographic processing; migration checks for legacy changes before cleanup.
+- A separately encrypted `.hwbak` export is decrypted and checked in memory before it is offered for download, and pending app writes are awaited before backup.
+- Some browsers do not implement Web Locks. Revision checks still reduce conflicts, but simultaneous writes outside the app or across devices are not fully preventable.
+
 ## Health and privacy limits
 - By default, legacy journal records are unencrypted in browser `localStorage`. When the user opts into v1.0 local encryption, new saved journal records are encrypted. Shared-device use remains risky; use fictitious test data until an independent security review.
 - Historical dates produce estimates, not guaranteed forecasts. Do not use them as contraception or a pregnancy test.

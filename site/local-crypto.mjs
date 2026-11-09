@@ -87,16 +87,20 @@ export async function writeEncryptedJournal(events,session,storage=globalThis.lo
  const saved=parseRecord(source);
  if(bytes64(saved.salt)!==bytes64(session.salt)||source!==session.lastRecord)throw Error("Kundalik boshqa oynada o‘zgartirilgan. Qaytadan qulfni oching.");
  const bytes=encodeEvents(events),next=await encryptedRecord(bytes,session.key,session.salt);
+ if(storage.getItem(LOCAL_VAULT_KEY)!==source)throw Error("Kundalik boshqa oynada o‘zgartirilgan. Qaytadan qulfni oching.");
  storage.setItem(LOCAL_VAULT_KEY,next);
  session.lastRecord=next;
  return true;
 }
 export async function migratePlainJournal(password,storage=globalThis.localStorage){
  if(hasEncryptedJournal(storage))throw Error("Shifrlangan kundalik allaqachon mavjud.");
+ const legacyRevision=storage.getItem(LEGACY_EVENTS_KEY);
  const plain=readPlainJournal(storage),bytes=encodeEvents(plain);
  const salt=crypto.getRandomValues(new Uint8Array(16));
  const key=await derive(password,salt);
  const record=await encryptedRecord(bytes,key,salt);
+ if(storage.getItem(LEGACY_EVENTS_KEY)!==legacyRevision||hasEncryptedJournal(storage))
+  throw Error("Eski qaydlar boshqa oynada yangilandi. Ko‘chirishni qaytadan boshlang.");
  // Write and verify ciphertext BEFORE deleting anything. If verification fails,
  // the old, readable data remains available.
  storage.setItem(LOCAL_VAULT_KEY,record);
@@ -108,6 +112,10 @@ export async function migratePlainJournal(password,storage=globalThis.localStora
   throw err;
  }
  try {
+  if(storage.getItem(LEGACY_EVENTS_KEY)!==legacyRevision){
+   if(storage.getItem(LOCAL_VAULT_KEY)===record)storage.removeItem(LOCAL_VAULT_KEY);
+   throw Error("Eski yozuvlar boshqa oynada o‘zgargan, ochiq nusxa saqlab qolindi.");
+  }
   storage.removeItem(LEGACY_EVENTS_KEY);
   if(storage.getItem(LEGACY_EVENTS_KEY)!==null)throw Error("Eski shifrlanmagan nusxani o‘chirib bo‘lmadi.");
  }catch {

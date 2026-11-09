@@ -78,3 +78,12 @@ test("phase questionnaire observations survive encrypted migration",async()=>{
  await writeEncryptedJournal(out.events,session,s);
  assert(!s.getItem(LOCAL_VAULT_KEY).includes("Private phase note"));
 });
+
+test("migration does not delete a newer plaintext revision arriving during encryption",async()=>{
+ const s=store();s.setItem(LEGACY_EVENTS_KEY,JSON.stringify(records));
+ let checkCount=0;const updated=JSON.stringify([...records,{id:"new2",type:"period",payload:{start:"2026-11-02",end:null},updated_at:1791000000000,deleted:0}]);
+ const raced={getItem:k=>{if(k===LEGACY_EVENTS_KEY&&++checkCount===2)s.setItem(LEGACY_EVENTS_KEY,updated);return s.getItem(k);},setItem:s.setItem,removeItem:s.removeItem};
+ await assert.rejects(migratePlainJournal(PASSWORD,raced),/boshqa oynada/);
+ assert.equal(s.getItem(LEGACY_EVENTS_KEY),updated);
+ assert.equal(s.getItem(LOCAL_VAULT_KEY),null);
+});

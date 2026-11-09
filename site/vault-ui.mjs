@@ -8,7 +8,7 @@ const markup=[
 '<label id="vaultFileWrap" hidden>Shifrlangan zaxira fayli<input type="file" id="vaultFile" accept=".hwbak,.json,application/json"/></label>',
 '<label>Parol (kamida 12 belgi)<input id="vaultPassword" type="password" minlength="12" maxlength="256" autocomplete="off" required/></label>',
 '<label id="vaultRepeatWrap">Parolni qayta kiriting<input id="vaultRepeat" type="password" minlength="12" maxlength="256" autocomplete="off"/></label>',
-'<p class="warning">🔒 Bu funksiya faqat eksport qilinadigan faylni shifrlaydi. Qurilmada saqlangan qaydlar hozircha shifrlanmagan. Parol unutilsa, faylni tiklab bo‘lmaydi.</p>',
+'<p class="warning">🔒 Zaxira fayli shifrlanadi. Qurilmadagi qaydlar esa mahalliy shifrlash alohida yoqilgan bo‘lsagina shifrlangan. Parolni unutmang.</p>',
 '<p class="status" id="vaultStatus" role="alert" aria-live="polite"></p>',
 '<div class="vault-actions"><button class="button ghost" id="vaultCancel" type="button">Bekor qilish</button><button class="button primary" id="vaultSubmit" type="submit">Saqlash</button></div>',
 '</form></dialog>'
@@ -49,7 +49,10 @@ export function attachVaultControls({getEvents,replaceEvents,download,notify}){
   try{
    if(!globalThis.crypto?.subtle)throw Error("Qurilmada xavfsiz shifrlash mavjud emas (HTTPS talab qilinadi).");
    if(chosenMode==="export"){
-    const result=await encryptBackup(getEvents(),secret);
+    const latest=await getEvents();
+    const result=await encryptBackup(latest,secret);
+    const verified=await decryptBackup(result,secret);
+    if(JSON.stringify(verified)!==JSON.stringify(latest))throw Error('Shifrlangan zaxirani tekshirib bo‘lmadi.');
     download(result,"healthy-women-"+new Date().toISOString().slice(0,10)+".hwbak","application/json");
     dialog.close();notify("Shifrlangan zaxira fayli saqlandi.");
    } else {

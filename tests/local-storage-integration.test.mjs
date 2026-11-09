@@ -19,3 +19,11 @@ test("offline app pre-caches the encryption UI and algorithm",()=>{
  const s=read("../site/sw.js");
  assert(s.includes("./local-crypto.mjs")&&s.includes("./local-crypto-ui.mjs"));
 });
+
+test("main app serializes writes and blocks corrupted legacy overwrites",()=>{
+ const app=read("../site/app.mjs");
+ assert(app.includes("withJournalWriteLock(async()=>"));
+ assert(app.includes("assertJournalRevision(localStorage,KEY,plainRevision)"));
+ assert(app.includes("if(plainCorrupt)throw Error"));
+ assert(app.includes("Asl nusxani saqlash"));
+});
