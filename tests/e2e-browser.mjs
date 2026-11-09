@@ -42,6 +42,14 @@ try{
  assert.equal(await page.locator("#view-journal [data-edit-checkin]").count(),1);
  const originalLegacy=await page.evaluate(()=>localStorage.getItem("healthywomen.events.v1"));
  console.log("PASS: fictional daily diary entry saved.");
+ assert.equal(await page.locator("#exportRange").inputValue(),"180");
+ await page.locator("#exportRange").selectOption("90");
+ const canceled= new Promise(resolve=>page.once("dialog",async dialog=>{
+  const message=dialog.message(); await dialog.dismiss(); resolve(message);
+ }));
+ await page.locator("#exportReport").click();
+ assert.match(await canceled,/SHIFRLANMAYDI/);
+ console.log("PASS: export window selection and plaintext disclosure.");
  await page.locator('#mainNav [data-view="settings"]').click();
  await page.locator("#secureEnable").click();
  await page.locator("#secureNewPassword").fill(PASS);
