@@ -26,7 +26,7 @@ const dialogMarkup=[
  '<div class="modal-actions"><button type="button" id="phaseCancel" class="button ghost">Bekor qilish</button><button type="submit" class="button primary">✓ Qaydni saqlash</button></div></form></dialog>'
 ].join("");
 function ensureDialog(){if(document.getElementById("phaseDialog"))return;const tpl=document.createElement("template");tpl.innerHTML=dialogMarkup;document.body.appendChild(tpl.content);}
-export function openCheckinDialog({periods,checkins,today,average,getLatest,savePeriod,saveCheckin,notify}){
+export function openCheckinDialog({periods,checkins,today,average,getLatest,savePhase,notify}){
  const phase=selectCheckinPhase(periods,checkins,today,average);
  if(!phase)return;
  ensureStyles();ensureDialog();
@@ -40,7 +40,7 @@ export function openCheckinDialog({periods,checkins,today,average,getLatest,save
  get("phaseCancel").onclick=()=>dialog.close();
  get("phasePain").oninput=e=>{get("phasePainValue").textContent=e.target.value+"/10";};
  get("phaseEnded").onchange=e=>{const ended=e.target.value==="yes";get("phaseEndDateWrap").hidden=!ended;get("phaseEndDate").required=ended;};
- form.onsubmit=e=>{
+ form.onsubmit=async e=>{
   e.preventDefault();
   const current=getLatest();
   if(!current||current.id!==phase.period.id){get("phaseError").textContent="Hayz qaydi yangilandi. Savolnomani qayta oching.";return;}
@@ -53,12 +53,17 @@ export function openCheckinDialog({periods,checkins,today,average,getLatest,save
    ...(ended?{endDate:String(data.get("endDate")||"")}:{})};
   if(!validatePhaseEntry(entry,today)){get("phaseError").textContent="Javoblar yoki sanalar to‘g‘ri kiritilmagan.";return;}
   if(ended&&daysBetween(current.start,entry.endDate)>30){get("phaseError").textContent="30 kundan ortiq davom etgan qon ketishi bo‘yicha shifokor bilan maslahatlashib, sanani tekshiring.";return;}
-  dialog.close();
-  if(ended)savePeriod(current.id,{start:current.start,end:entry.endDate});
-  saveCheckin(entry);
-  const warning=riskAdvice(entry);
-  if(warning.level==="routine")notify("Savollar kundalikka saqlandi.");
-  else window.alert(warning.text+"\nManba: "+warning.url);
+  const button=form.querySelector('button[type="submit"]');
+  button.disabled=true;
+  try{
+   await savePhase({ended,entry,current});
+   dialog.close();
+   const warning=riskAdvice(entry);
+   if(warning.level==="routine")notify("Savollar kundalikka saqlandi.");
+   else window.alert(warning.text+"\nManba: "+warning.url);
+  }catch(error){
+   get("phaseError").textContent="Saqlash bajarilmadi: "+String(error?.message||"Qayta urinib ko‘ring.");
+  }finally{button.disabled=false;}
  };
  dialog.showModal();
 }
