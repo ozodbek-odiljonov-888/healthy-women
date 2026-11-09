@@ -1,4 +1,4 @@
-import {encryptBackup,decryptBackup} from "./vault.mjs";
+import {encryptBackup,decryptBackup,validateBackupEvents} from "./vault.mjs";
 const BACKUP_LIMIT=1024*1024*2;
 const css=".vault-dialog{width:min(94vw,480px);max-height:90dvh;padding:0;overflow-y:auto;border:0;border-radius:22px;box-shadow:0 24px 75px #33233150;color:#493647;background:#fff}.vault-dialog::backdrop{background:#251a25a0}.vault-form{padding:25px}.vault-form h2{font-size:21px;margin:0 0 8px}.vault-form p{font-size:12px;line-height:1.7;color:#685762}.vault-form label{display:grid;gap:7px;font-size:13px;margin:15px 0}.vault-form input{display:block;width:100%;border:1px solid #e6d6de;border-radius:12px;padding:13px;color:#46333e;background:white}.vault-form .hint{font-size:11px;color:#856f7d}.vault-form .warning{font-size:11px;background:#fff9f0;padding:12px;border-radius:10px;color:#765b58;margin:11px 0}.vault-form .status{min-height:17px;font-size:12px;color:#ad416d}.vault-actions{display:flex;justify-content:flex-end;gap:9px;flex-wrap:wrap;margin-top:20px}@media(max-width:600px){.vault-form{padding:19px}}";
 const markup=[
@@ -52,7 +52,7 @@ export function attachVaultControls({getEvents,replaceEvents,download,notify}){
     const latest=await getEvents();
     const result=await encryptBackup(latest,secret);
     const verified=await decryptBackup(result,secret);
-    if(JSON.stringify(verified)!==JSON.stringify(latest))throw Error('Shifrlangan zaxirani tekshirib bo‘lmadi.');
+    if(JSON.stringify(verified)!==JSON.stringify(validateBackupEvents(latest)))throw Error('Shifrlangan zaxirani tekshirib bo‘lmadi.');
     download(result,"healthy-women-"+new Date().toISOString().slice(0,10)+".hwbak","application/json");
     dialog.close();notify("Shifrlangan zaxira fayli saqlandi.");
    } else {

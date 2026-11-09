@@ -87,3 +87,16 @@ test("migration does not delete a newer plaintext revision arriving during encry
  assert.equal(s.getItem(LEGACY_EVENTS_KEY),updated);
  assert.equal(s.getItem(LOCAL_VAULT_KEY),null);
 });
+
+test("plaintext revision changed after ciphertext verification is never deleted",async()=>{
+ const s=store();s.setItem(LEGACY_EVENTS_KEY,JSON.stringify(records));
+ const newer=JSON.stringify([...records,{id:"recent",type:"period",payload:{start:"2026-11-02",end:null},updated_at:1791000000000,deleted:0}]);
+ let reads=0;
+ const racing={getItem:k=>{
+  if(k===LEGACY_EVENTS_KEY&&++reads===4)s.setItem(LEGACY_EVENTS_KEY,newer);
+  return s.getItem(k);
+ },setItem:s.setItem,removeItem:s.removeItem};
+ await assert.rejects(migratePlainJournal(PASSWORD,racing));
+ assert.equal(s.getItem(LEGACY_EVENTS_KEY),newer);
+ assert.equal(s.getItem(LOCAL_VAULT_KEY),null);
+});

@@ -27,3 +27,15 @@ test("main app serializes writes and blocks corrupted legacy overwrites",()=>{
  assert(app.includes("if(plainCorrupt)throw Error"));
  assert(app.includes("Asl nusxani saqlash"));
 });
+
+test("backup export awaits writes and validates normalized encrypted contents",()=>{
+ const app=read("../site/app.mjs"),vault=read("../site/vault-ui.mjs");
+ assert(app.includes("getEvents:async()=>{await finishWrites()"));
+ assert(vault.includes("validateBackupEvents(latest)"));
+ assert(vault.includes("await decryptBackup(result,secret)"));
+ assert(vault.includes("await replaceEvents(entries)"));
+});
+test("encrypted migration is also guarded by cross-tab Web Locks",()=>{
+ const module=read("../site/local-crypto-ui.mjs");
+ assert(module.includes("withJournalWriteLock(()=>migratePlainJournal(p,storage))"));
+});

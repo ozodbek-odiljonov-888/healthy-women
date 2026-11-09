@@ -101,6 +101,9 @@ Before any public release, configure a **private, stable release signing key** w
 - A separately encrypted `.hwbak` export is decrypted and checked in memory before it is offered for download, and pending app writes are awaited before backup.
 - Some browsers do not implement Web Locks. Revision checks still reduce conflicts, but simultaneous writes outside the app or across devices are not fully preventable.
 
+### Backup export integrity and migration locking
+The v1.2 backup export checks the normalized journal contents after decrypting its newly generated encrypted archive. Browser tabs supporting Web Locks also serialize the critical plaintext-to-encrypted migration. This reduces data loss from conflicting local writes; it does **not** replace independent security testing or guarantee recovery from damaged device storage.
+
 ## Health and privacy limits
 - By default, legacy journal records are unencrypted in browser `localStorage`. When the user opts into v1.0 local encryption, new saved journal records are encrypted. Shared-device use remains risky; use fictitious test data until an independent security review.
 - Historical dates produce estimates, not guaranteed forecasts. Do not use them as contraception or a pregnancy test.

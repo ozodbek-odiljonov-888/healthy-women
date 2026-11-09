@@ -12,7 +12,7 @@ test("home, diary and settings include phase questionnaires",()=>{
 test("PWA pre-caches the questionnaire modules",()=>{
  const sw=readFileSync(new URL("../site/sw.js",import.meta.url),"utf8");
  assert(sw.includes("./checkins.mjs"));
- assert(sw.includes("./checkin-ui.mjs"));assert(sw.includes("./vault.mjs"));assert(sw.includes("./vault-ui.mjs"));assert(sw.includes("./cycle-safety.mjs"));assert(sw.includes("./insights.mjs"));assert(sw.includes("./reminders.mjs"));assert(sw.includes("./diary.mjs"));assert(sw.includes("./privacy-screen.mjs"));assert(sw.includes("./local-crypto.mjs"));assert(sw.includes("./local-crypto-ui.mjs"));assert(sw.includes("./app.mjs"));assert(sw.includes("./style.css"));assert(sw.includes("./privacy-page.mjs"));
+ assert(sw.includes("./checkin-ui.mjs"));assert(sw.includes("./vault.mjs"));assert(sw.includes("./vault-ui.mjs"));assert(sw.includes("./cycle-safety.mjs"));assert(sw.includes("./insights.mjs"));assert(sw.includes("./reminders.mjs"));assert(sw.includes("./diary.mjs"));assert(sw.includes("./privacy-screen.mjs"));assert(sw.includes("./local-crypto.mjs"));assert(sw.includes("./local-crypto-ui.mjs"));assert(sw.includes("./app.mjs"));assert(sw.includes("./style.css"));assert(sw.includes("./privacy-page.mjs"));assert(sw.includes("./journal-guard.mjs"));
 });
 
 test('app-open questionnaire card renders when a period starts',()=>{const markup=renderCheckinCard([{id:'p1',start:'2026-10-01',end:null}],[],'2026-10-01',28);assert(markup.includes('id="phaseOpen"'));});
