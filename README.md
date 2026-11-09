@@ -37,6 +37,12 @@ Vercel Hobby is limited to **personal, non-commercial use**. Do not host a comme
 ## Vercel bot endpoint
 The independent `bot-vercel/` folder provides `/health` (no secrets) and `/webhook` (requires configured Telegram webhook secret). **The bot service is deployed on Vercel** at `https://healthy-women-bot.vercel.app/`. The `/health` endpoint returned HTTP 200 on 2026-11-09 and the webhook correctly rejected GET with 405. The deployment has `APP_URL=https://healthy-women.vercel.app/` configured. **Telegram message delivery is not yet enabled**: the account owner must configure `BOT_TOKEN` and `WEBHOOK_SECRET` privately, redeploy, and register Telegram's webhook. It does not store patient information.
 
+## Safer cycle entry and doctor-readable export (v0.6)
+- Prevents duplicate or overlapping recorded period dates while allowing a new cycle after a previously unfinished entry.
+- Labels forecasts as overdue or stale instead of displaying a past date as the next period. It still cannot predict ovulation, pregnancy, or future bleeding precisely.
+- The Journal allows a deliberate **CSV export** of recorded periods and symptoms. CSV is **not encrypted**; treat it as sensitive medical data, and use the encrypted backup feature for private transfers.
+- The CSV exporter neutralizes common spreadsheet formula injection prefixes in notes.
+
 ## Health and privacy limits
 - Browser test data currently lives in unencrypted browser `localStorage`. Use fictitious data only on shared devices.
 - Historical dates produce estimates, not guaranteed forecasts. Do not use them as contraception or a pregnancy test.

@@ -31,7 +31,7 @@ test("estimate stays within future or current date; overdue and stale are labell
  assert.equal(forecastNext("2026-12-01",28,"2026-11-09").state,"unavailable");
 });
 test("CSV handles medical notes with spreadsheet formula prefixes",()=>{
- const csv=exportCycleCsv([{start:"2026-10-01",end:"2026-10-06"}],[{date:"2026-10-02",pain:3,flow:"normal",mood:"good",note:"=HYPERLINK(\\"https://bad\\")",between:false}]);
+ const csv=exportCycleCsv([{start:"2026-10-01",end:"2026-10-06"}],[{date:"2026-10-02",pain:3,flow:"normal",mood:"good",note:'=HYPERLINK("https://bad")',between:false}]);
  assert(csv.startsWith("\uFEFF"));assert(csv.includes("hayz"));assert(csv.includes("'=HYPERLINK"));
  assert(!csv.includes('\n"=HYPERLINK'));
 });
