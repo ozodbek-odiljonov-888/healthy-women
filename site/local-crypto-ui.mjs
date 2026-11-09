@@ -88,7 +88,8 @@ export function createLocalProtection({getLiveEvents,onUnlocked,onLocked,onMigra
   }catch(err){status.textContent=String(err?.message||"Shifrlash muvaffaqiyatsiz.");}
   finally{setBusy(false);}
  });
- doc.addEventListener("visibilitychange",()=>{if(doc.hidden&&session)void lock();});
+ doc.addEventListener("visibilitychange",()=>{if(!doc.hidden)return;if(dialog.open)dialog.close();password.value="";repeat.value="";unlockPassword.value="";resetStage();if(session)void lock();});
+ dialog.addEventListener("close",()=>{enableForm.reset();resetStage();});
  if(locked)showWall();
  return {bindSettings,lock,isLocked:()=>locked,getSession:()=>session,isEnabled:()=>hasEncryptedJournal(storage),
   onDeleted:()=>{session=null;hideWall();},
