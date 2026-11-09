@@ -33,7 +33,7 @@ test("backup export awaits writes and validates normalized encrypted contents",(
  assert(app.includes("getEvents:async()=>{await finishWrites()"));
  assert(vault.includes("validateBackupEvents(latest)"));
  assert(vault.includes("await decryptBackup(result,secret)"));
- assert(vault.includes("await replaceEvents(entries)"));
+ assert(vault.includes("await replaceEvents(entries,currentSnapshot)"));
 });
 test("encrypted migration is also guarded by cross-tab Web Locks",()=>{
  const module=read("../site/local-crypto-ui.mjs");
