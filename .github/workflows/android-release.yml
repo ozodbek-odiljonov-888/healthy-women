@@ -18,6 +18,7 @@ jobs:
   release:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    environment: android-release
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -44,6 +45,7 @@ jobs:
           npm install --no-audit --no-fund
           npx cap add android
           npx cap sync android
+          node scripts/harden-android.mjs
       - name: Configure private signing without logging secrets
         env:
           STORE_B64: ${{ secrets.HEALTHY_WOMEN_ANDROID_KEYSTORE_B64 }}
