@@ -131,6 +131,13 @@ For empty diaries, restoration works as before after explicit confirmation. The 
 - Local sync preferences are cleared. **Previously downloaded exports, independent device backups, Telegram messages, or data stored in third-party systems are not erased.** Browser vendors differ in storage-event timing; the epoch guard adds a second defense.
 - This is not secure erasure of flash memory and is not a substitute for a formal privacy/security review.
 
+## Encrypted on-device password rotation (v1.6)
+- **Settings → Kundalik parolini almashtirish** appears only when the user has opted into local AES-256-GCM encryption. It does not alter standalone `.hwbak` passwords or server credentials.
+- Requires the current passphrase and a different new passphrase (12–256 characters). Before rotation, the app downloads and decrypts to verify an encrypted recovery archive made with the *old* passphrase and requires an explicit user acknowledgement.
+- It then derives a fresh PBKDF2-SHA256 key with a new random salt, encrypts the same validated journal entries under AES-256-GCM with a random nonce, verifies the ciphertext, checks that the original storage revision is unchanged, persists it, and verifies unlock with the **new** passphrase.
+- The app immediately locks after rotation. The old passphrase no longer unlocks the newly encrypted local diary, but remains necessary to open **older recovery backups**. Losing the new passphrase can permanently prevent local journal access.
+- Browser or OS downloaded files, extensions, screen captures, compromised devices, and key material in transient JavaScript memory are outside this protection. Avoid real medical data until independent security testing.
+
 ## Health and privacy limits
 - By default, legacy journal records are unencrypted in browser `localStorage`. When the user opts into v1.0 local encryption, new saved journal records are encrypted. Shared-device use remains risky; use fictitious test data until an independent security review.
 - Historical dates produce estimates, not guaranteed forecasts. Do not use them as contraception or a pregnancy test.

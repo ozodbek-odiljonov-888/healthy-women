@@ -61,3 +61,13 @@ test("encrypted backup import requires a current-diary snapshot and explicit ack
  assert(ui.includes("await replaceEvents(entries,currentSnapshot)"));
  assert(app.includes("assertCurrentJournal(current,expectedSnapshot)"));
 });
+
+test("password rotation is only available for the encrypted diary and remains an offline asset",()=>{
+ const app=read("../site/app.mjs"),ui=read("../site/password-rotation-ui.mjs"),sw=read("../site/sw.js");
+ assert(app.includes("passwordRotationSettingsHtml(hasEncryptedJournal())"));
+ assert(app.includes("createPasswordRotationUI({"));
+ assert(ui.includes("rotateEncryptedJournalPassword(current,newPass,priorStage.source,storage)"));
+ assert(ui.includes("await decryptBackup(backup,current)"));
+ assert(ui.includes("await lock()"));
+ assert(sw.includes("./password-rotation-ui.mjs"));
+});

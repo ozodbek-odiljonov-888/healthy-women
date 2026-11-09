@@ -5,7 +5,9 @@ import {readFile,mkdtemp,rm} from "node:fs/promises";
 import {tmpdir} from "node:os";
 import {join,resolve,sep,extname} from "node:path";
 import {chromium} from "playwright";
-const ROOT=resolve("site"),PASS="Fictional-Diary-Passphrase-2026";
+const ROOT=resolve("site");
+let PASS="Fictional-Diary-Passphrase-2026";
+const NEW_PASS="Fictional-New-Rotation-Pass-2026";
 const TYPE={".html":"text/html",".js":"application/javascript",".mjs":"application/javascript",".css":"text/css",".svg":"image/svg+xml",".webmanifest":"application/manifest+json"};
 const tmp=await mkdtemp(join(tmpdir(),"hw-e2e-"));
 const server=createServer(async(req,res)=>{
@@ -54,6 +56,34 @@ try{
  const encrypted=await page.evaluate(()=>localStorage.getItem("healthywomen.encrypted-local.v1"));
  assert(!encrypted.includes("FICTIONAL-HEALTH-NOTE"));
  console.log("PASS: encrypted migration validated; plaintext removed.");
+
+ await page.locator("#rotateOpen").click();
+ await page.locator("#rotateOld").fill(PASS);
+ await page.locator("#rotateNew").fill(NEW_PASS);
+ await page.locator("#rotateRepeat").fill(NEW_PASS);
+ const beforeRotation=page.waitForEvent("download");
+ await page.locator("#rotateBackup").click();
+ const oldPasswordRecovery=join(tmp,"pre-rotation-backup.hwbak");
+ await (await beforeRotation).saveAs(oldPasswordRecovery);
+ const recoveryText=await readFile(oldPasswordRecovery,"utf8");
+ assert(recoveryText.includes("AES-256-GCM"));
+ assert(!recoveryText.includes("FICTIONAL-HEALTH-NOTE"));
+ await page.locator("#rotateAck").check();
+ await page.locator("#rotateSubmit").click();
+ await page.locator("#rotateDialog").waitFor({state:"hidden"});
+ await page.locator("#secureWall").waitFor({state:"visible"});
+ await page.locator("#secureUnlockPassword").fill(PASS);
+ await page.locator("#secureUnlockButton").click();
+ await page.waitForFunction(()=>/noto|buzil/i.test(document.querySelector("#secureUnlockError")?.textContent||""));
+ assert(await page.locator("#secureWall").isVisible());
+ await page.locator("#secureUnlockPassword").fill(NEW_PASS);
+ await page.locator("#secureUnlockButton").click();
+ await page.locator("#secureWall").waitFor({state:"hidden"});
+ PASS=NEW_PASS;
+ assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem("healthywomen.events.v1")||"[]").length),0);
+ assert.equal(await page.locator('#mainNav [data-view="settings"]').isVisible(),true);
+ console.log("PASS: local password changes only after encrypted backup; old password is rejected and fictional records survive new password unlock.");
+
  await page.locator("#secureLock").click();
  await page.locator("#secureWall").waitFor({state:"visible"});
  await page.locator("#secureUnlockPassword").fill("Incorrect-Password-For-Testing");

@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {webcrypto} from "node:crypto";
-import {LOCAL_VAULT_KEY,LEGACY_EVENTS_KEY,hasEncryptedJournal,readPlainJournal,unlockEncryptedJournal,writeEncryptedJournal,migratePlainJournal,removeAllJournalData} from "../site/local-crypto.mjs";
+import {LOCAL_VAULT_KEY,LEGACY_EVENTS_KEY,hasEncryptedJournal,readPlainJournal,unlockEncryptedJournal,writeEncryptedJournal,migratePlainJournal,rotateEncryptedJournalPassword,removeAllJournalData} from "../site/local-crypto.mjs";
 globalThis.crypto ||= webcrypto;
 const PASSWORD="Fair-Evening-Flowers-2026";
 const records=[{id:"a2",type:"period",payload:{start:"2026-10-04",end:"2026-10-08"},updated_at:1790000000000,deleted:0},{id:"b3",type:"checkin",payload:{date:"2026-10-06",pain:4,flow:"normal",mood:"good",between:false,note:"Sensitive test note"},updated_at:1790000000001,deleted:0}];
@@ -99,4 +99,51 @@ test("plaintext revision changed after ciphertext verification is never deleted"
  await assert.rejects(migratePlainJournal(PASSWORD,racing));
  assert.equal(s.getItem(LEGACY_EVENTS_KEY),newer);
  assert.equal(s.getItem(LOCAL_VAULT_KEY),null);
+});
+
+test("rotation changes salt and password without losing any medical entry",async()=>{
+ const s=store();s.setItem(LEGACY_EVENTS_KEY,JSON.stringify(records));
+ await migratePlainJournal(PASSWORD,s);
+ const before=s.getItem(LOCAL_VAULT_KEY),beforeSalt=JSON.parse(before).salt;
+ const pass2="A-New-Unique-Local-Pass-2026";
+ const rotated=await rotateEncryptedJournalPassword(PASSWORD,pass2,before,s);
+ assert.deepEqual(rotated.events,records);
+ assert.equal(s.getItem(LEGACY_EVENTS_KEY),null);
+ const after=s.getItem(LOCAL_VAULT_KEY);
+ assert.notEqual(after,before);
+ assert.notEqual(JSON.parse(after).salt,beforeSalt);
+ assert(!after.includes("Sensitive test note"));
+ await assert.rejects(unlockEncryptedJournal(PASSWORD,s),/noto‘g‘ri/);
+ assert.deepEqual((await unlockEncryptedJournal(pass2,s)).events,records);
+});
+test("wrong old password never alters ciphertext",async()=>{
+ const s=store();s.setItem(LEGACY_EVENTS_KEY,JSON.stringify(records));
+ await migratePlainJournal(PASSWORD,s);
+ const source=s.getItem(LOCAL_VAULT_KEY);
+ await assert.rejects(rotateEncryptedJournalPassword("Wrong-Old-Passphrase-123","Correct-New-Passphrase-456",source,s));
+ assert.equal(s.getItem(LOCAL_VAULT_KEY),source);
+});
+test("stale backed-up revision cannot be rotated",async()=>{
+ const s=store();s.setItem(LEGACY_EVENTS_KEY,JSON.stringify(records));
+ const original=await migratePlainJournal(PASSWORD,s);
+ const source=s.getItem(LOCAL_VAULT_KEY);
+ await writeEncryptedJournal(records,original.session,s);
+ await assert.rejects(rotateEncryptedJournalPassword(PASSWORD,"Correct-New-Passphrase-456",source,s),/o‘zgargan/);
+});
+test("password rotation cannot be attempted while an unresolved legacy plaintext copy remains",async()=>{
+ const s=store();s.setItem(LEGACY_EVENTS_KEY,JSON.stringify(records));
+ await migratePlainJournal(PASSWORD,s);
+ const source=s.getItem(LOCAL_VAULT_KEY);
+ s.setItem(LEGACY_EVENTS_KEY,JSON.stringify(records));
+ await assert.rejects(rotateEncryptedJournalPassword(PASSWORD,"Correct-New-Passphrase-456",source,s),/Eski ochiq nusxa/);
+ assert.equal(s.getItem(LOCAL_VAULT_KEY),source);
+});
+test("failure to save rekeyed ciphertext leaves previous encryption accessible",async()=>{
+ const s=store();s.setItem(LEGACY_EVENTS_KEY,JSON.stringify(records));
+ await migratePlainJournal(PASSWORD,s);
+ const original=s.getItem(LOCAL_VAULT_KEY);
+ const failed={getItem:s.getItem,removeItem:s.removeItem,setItem:(k,v)=>{if(k===LOCAL_VAULT_KEY)throw Error("Storage quota");s.setItem(k,v);}};
+ await assert.rejects(rotateEncryptedJournalPassword(PASSWORD,"Correct-New-Passphrase-456",original,failed),/Storage quota/);
+ assert.equal(s.getItem(LOCAL_VAULT_KEY),original);
+ assert.deepEqual((await unlockEncryptedJournal(PASSWORD,s)).events,records);
 });
