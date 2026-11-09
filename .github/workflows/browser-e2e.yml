@@ -7,6 +7,13 @@ on:
       - 'tests/e2e-browser.mjs'
       - 'scripts/**'
       - '.github/workflows/browser-e2e.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'site/**'
+      - 'tests/**'
+      - 'scripts/**'
+      - '.github/workflows/browser-e2e.yml'
   workflow_dispatch:
 permissions:
   contents: read
