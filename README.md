@@ -11,6 +11,11 @@ The public-facing app, documents, reports, and bot messages are branded **Health
 - ⏳ GitHub Pages publishing requires **Settings → Pages → Source → GitHub Actions** to be enabled by the repository owner.
 - ⏳ Telegram bot and server-side synchronization are not live. Do not collect real medical records until privacy/security controls have been reviewed.
 
+## On-device cycle questionnaires (v0.4)
+A short questionnaire appears while the app is **open** near menstruation onset, after several days of ongoing bleeding, and near the recorded cycle midpoint. Users can disable these prompts in Settings. Answers become a local diary entry and appear in the text report. Symptoms include pain (0–10), bleeding amount, dizziness, mood and bleeding between periods; an end date can be confirmed.
+
+**No scheduled background/push notifications are active.** Cycle midpoint is not an ovulation prediction or diagnosis. The app is not clinically validated. Medical guidance links: [ACOG](https://www.acog.org/womens-health/faqs/abnormal-uterine-bleeding) and [NHS](https://www.nhs.uk/symptoms/period-pain/).
+
 ## Website
 The static app is in `site/index.html`. Once Pages is enabled, run **Actions → Publish Healthy Women website**.
 

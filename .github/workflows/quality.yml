@@ -16,4 +16,4 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: node --test worker/index.test.js site/checkins.test.mjs
+      - run: node --test worker/index.test.js site/checkins.test.mjs site/site.test.mjs
