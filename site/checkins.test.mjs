@@ -1,0 +1,16 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import {validDate,daysBetween,selectCheckinPhase,validatePhaseEntry,riskAdvice} from "./checkins.mjs";
+const p=(start,end=null)=>[{start,end,id:"p-1"}];
+const c=(phase,date)=>[{phase,date,periodStart:"2026-10-01"}];
+test("calendar validates leap dates",()=>{assert.equal(validDate("2024-02-29"),true);assert.equal(validDate("2025-02-29"),false);assert.equal(daysBetween("2026-10-01","2026-10-04"),3);});
+test("start check-in appears in first 3 days",()=>{assert.equal(selectCheckinPhase(p("2026-10-01"),[],"2026-10-02").phase,"start");});
+test("start check-in is not repeated in same cycle",()=>{assert.equal(selectCheckinPhase(p("2026-10-01"),c("start","2026-10-01"),"2026-10-02"),null);});
+test("ending question starts on day 4 for ongoing period",()=>{assert.equal(selectCheckinPhase(p("2026-10-01"),[],"2026-10-04").phase,"end");});
+test("not yet ended can be checked on the next day",()=>{assert.equal(selectCheckinPhase(p("2026-10-01"),c("end-followup","2026-10-04"),"2026-10-04"),null);assert.equal(selectCheckinPhase(p("2026-10-01"),c("end-followup","2026-10-04"),"2026-10-05").phase,"end");});
+test("completed period gets midpoint check-in without ovulation claims",()=>{assert.equal(selectCheckinPhase(p("2026-10-01","2026-10-06"),[],"2026-10-14").phase,"middle");});
+test("completed midpoint is not repeated",()=>{assert.equal(selectCheckinPhase(p("2026-10-01","2026-10-06"),c("middle","2026-10-14"),"2026-10-14"),null);});
+test("new cycle prompts again",()=>{assert.equal(selectCheckinPhase([{start:"2026-10-01",end:"2026-10-05"},{start:"2026-11-01",end:null}],c("start","2026-10-02"),"2026-11-01").phase,"start");});
+test("future data excluded",()=>{assert.equal(selectCheckinPhase(p("2027-10-01"),[],"2026-10-01"),null);});
+test("check-in input validation accepts valid values and rejects invalid pain/end dates",()=>{const entry={date:"2026-10-04",periodStart:"2026-10-01",phase:"end",pain:4,flow:"normal",mood:"good",between:false,hourly:false,dizzy:false,note:"",endDate:"2026-10-04"};assert.equal(validatePhaseEntry(entry,"2026-10-04"),true);assert.equal(validatePhaseEntry({...entry,pain:12},"2026-10-04"),false);assert.equal(validatePhaseEntry({...entry,endDate:"2026-10-08"},"2026-10-04"),false);});
+test("danger signals are surfaced",()=>{assert.equal(riskAdvice({hourly:true,dizzy:true}).level,"urgent");assert.equal(riskAdvice({pain:9}).level,"medical");assert.equal(riskAdvice({between:true}).level,"medical");assert.equal(riskAdvice({pain:2}).level,"routine");});
