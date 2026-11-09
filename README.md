@@ -82,6 +82,12 @@ For a test-only migration: while the old APK is still installed, use **Settings 
 
 Before any public release, configure a **private, stable release signing key** with appropriate access controls. Do not commit the key or use a public fixed debug signing key. The current APK is for development/testing only, not a release-ready app.
 
+## Android privacy-hardened builds and stable signing preparation
+- Every newly generated Android debug build now disables system Auto Backup and cleartext traffic, explicitly excludes app data from cloud/device-transfer rules, and enables native `FLAG_SECURE`. This generally prevents screenshots and sensitive recent-app thumbnails on Android, but varies by device and does not replace local encryption.
+- An independent **signed-test** workflow is available from GitHub Actions, **manual only**, using a **separate test-only keystore** kept in an `android-signing` GitHub Environment with protected secrets. This workflow is not activated until the owner sets up the environment and keystore; it has produced **no signed-test APK** from this chat.
+- A separate future **release** workflow uses the `android-release` environment and a distinct signing key. Do not activate it as a clinical product until real-device and privacy/security review are complete. See [ANDROID_RELEASE.md](ANDROID_RELEASE.md).
+- Previous debug APK certificates are not compatible with new signed-test or release APKs. Back up any desired diary data as a verified `.hwbak` archive **before uninstalling** the previous test APK. App uninstallation can destroy its private storage.
+
 ## Health and privacy limits
 - By default, legacy journal records are unencrypted in browser `localStorage`. When the user opts into v1.0 local encryption, new saved journal records are encrypted. Shared-device use remains risky; use fictitious test data until an independent security review.
 - Historical dates produce estimates, not guaranteed forecasts. Do not use them as contraception or a pregnancy test.
