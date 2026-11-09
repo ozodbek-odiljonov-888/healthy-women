@@ -32,26 +32,56 @@ async function say(env,chat,text,keyboard) {
   return telegramAPI(env,"sendMessage",{chat_id:chat,text,disable_web_page_preview:true,...(keyboard?{reply_markup:keyboard}:{})});
 }
 function appButton(env) {
-  try { const u=new URL(String(env.APP_URL||"")); if (u.protocol==="https:") return {inline_keyboard:[[{text:"🌷 Ilovani ochish",web_app:{url:u.href}}]]}; } catch {}
-  return undefined;
+ try{
+  const u=new URL(String(env.APP_URL||""));
+  if(u.protocol==="https:"&&!u.username&&!u.password&&!u.hostname.endsWith(".example"))
+   return {text:"🌷 Ilovani ochish",web_app:{url:u.href}};
+ }catch{}
+ return null;
 }
-const HELP="🌷 Healthy Women — Sog‘lom ayollar\n\nHayz kalendari va tibbiy manbalarga asoslangan qisqa ma’lumotlar.\n\n/start — bosh menyu\n/ask savol — bilimlar bazasidan qidirish\n/privacy — maxfiylik\n/delete — ma’lumotlar holati\n/remind — eslatmalar holati\n\n⚠️ Bu bot tashxis qo‘ymaydi. Shaxsiy tibbiy ma’lumotlarni bot chatiga kiritmang.";
-async function handleUpdate(update,env) {
-  const msg=update?.message;
-  if (msg?.chat?.type!=="private" || !Number.isSafeInteger(msg.chat.id)) return;
-  const chat=msg.chat.id, cmd=String(msg.text||"").trim().slice(0,250);
-  if (cmd==="/start"||cmd==="/help") return say(env,chat,HELP,appButton(env));
-  if (cmd==="/privacy") return say(env,chat,"🔒 Preview bot salomatlik tarixi va savollar jurnalini o‘z bazasida saqlamaydi. Telegramga yuborilgan xabarlar Telegram infratuzilmasidan o‘tadi. Saytdagi test ma’lumotlari qurilmaning brauzerida saqlanadi.");
-  if (cmd==="/delete") return say(env,chat,"🔒 Bot serverida shaxsiy tibbiy qaydlar saqlanmaydi. Telegram chatini Telegram ilovasida va saytdagi test qaydlarini sayt sozlamalarida o‘chirishingiz mumkin.");
-  if (cmd==="/remind"||cmd==="/stop") return say(env,chat,"🔔 Shaxsiy eslatmalar hozir yoqilmagan. Ular faqat maxfiylik tekshiruvi va foydalanuvchi roziligidan so‘ng ishga tushiriladi.");
-  if (cmd==="/ask"||cmd.startsWith("/ask ")) {
-    const question=cmd.slice(4).trim();
-    if (!question) return say(env,chat,"Savol namunasi: /ask hayz og‘rig‘i");
-    if (urgent.test(question)) return say(env,chat,"⚠️ Kuchli qon ketishi, hushdan ketish, nafas qisishi yoki juda kuchli og‘riqda tez tibbiy yordamga murojaat qiling. Chat orqali tashxis qo‘yib bo‘lmaydi.");
-    const a=matches(question);
-    return say(env,chat,a.length?a.map(x=>x.title+"\n"+x.answer+"\nManba: "+x.url).join("\n\n").slice(0,3400)+"\n\nBu tibbiy tashxis emas.":"Ushbu savol uchun tekshirilgan qisqa ma’lumot topilmadi. Shifokor bilan maslahatlashish mumkin.");
-  }
-  return say(env,chat,"Menyu: /start. Ma’lumot izlash: /ask savolingiz.",appButton(env));
+function menu(env){
+ const rows=[
+  [{text:"📅 Hayz sikli",callback_data:"faq:sikl"},{text:"🩸 Qon ketishi",callback_data:"faq:qon"}],
+  [{text:"🌸 Hayz og‘rig‘i",callback_data:"faq:ogriq"},{text:"⏳ Hayz kechikishi",callback_data:"faq:kechikish"}],
+  [{text:"📚 Manbalar",callback_data:"info:sources"},{text:"🔒 Maxfiylik",callback_data:"info:privacy"}]
+ ];
+ const app=appButton(env);if(app)rows.push([app]);
+ return {inline_keyboard:rows};
+}
+const HELP="🌷 Healthy Women — Sog‘lom ayollar\n\nHayz sikli haqida manbali qisqa ma’lumotlar.\n\n/start — bosh menyu\n/topics — mavzular\n/ask savol — bilimlar bazasidan qidirish\n/sources — manbalar\n/privacy — maxfiylik\n/delete — ma’lumotlarni o‘chirish\n/remind — eslatmalar holati\n\n⚠️ Bot chatiga shaxsiy tibbiy tarix yoki boshqa maxfiy ma’lumotlarni yubormang.";
+const PRIVACY="🔒 Healthy Women botining sinov versiyasi hayz tarixi va savollarni o‘z serveri bazasida saqlamaydi. Telegram orqali yozilgan xabarlar Telegram tizimidan o‘tadi. Saytdagi qaydlar qurilmadagi shifrlanmagan mahalliy xotirada turadi.";
+const SOURCES_TEXT="📚 Tibbiy manbalar:\nACOG — https://www.acog.org/womens-health/\nNHS — https://www.nhs.uk/conditions/periods/\n\nBot tashxis qo‘ymaydi.";
+function articleText(article){return article.title+"\n"+article.answer+"\nManba: "+article.url+"\n\nTibbiy tashxis emas.";}
+async function handleUpdate(update,env){
+ const cb=update?.callback_query;
+ if(cb){
+  const chat=cb.message?.chat;
+  if(chat?.type!=="private"||!Number.isSafeInteger(chat.id)||typeof cb.id!=="string")return;
+  const choice=String(cb.data||"").slice(0,70);
+  if(!/^(faq:(sikl|qon|ogriq|kechikish|davomiylik|nomuntazam)|info:(privacy|sources))$/.test(choice))return;
+  await telegramAPI(env,"answerCallbackQuery",{callback_query_id:cb.id});
+  if(choice==="info:privacy")return say(env,chat.id,PRIVACY,menu(env));
+  if(choice==="info:sources")return say(env,chat.id,SOURCES_TEXT,menu(env));
+  const article=SOURCES.find(s=>s.key===choice.slice(4));
+  return article?say(env,chat.id,articleText(article),menu(env)):undefined;
+ }
+ const msg=update?.message;
+ if(msg?.chat?.type!=="private"||!Number.isSafeInteger(msg.chat.id))return;
+ const chat=msg.chat.id,cmd=String(msg.text||"").trim().slice(0,250);
+ if(cmd==="/start"||cmd==="/help"||cmd==="/topics")return say(env,chat,HELP,menu(env));
+ if(cmd==="/privacy")return say(env,chat,PRIVACY);
+ if(cmd==="/sources")return say(env,chat,SOURCES_TEXT);
+ if(cmd==="/delete")return say(env,chat,"🔒 Bot serverida shaxsiy tibbiy qaydlar saqlanmaydi. Telegram chatini Telegram ilovasidan, mahalliy qaydlarni esa sayt Sozlamalaridan o‘chiring.");
+ if(cmd==="/remind"||cmd==="/stop")return say(env,chat,"🔕 Shaxsiy eslatmalar hozir yoqilmagan. Maxfiylik va rozilik tekshiruvlaridan keyin qo‘shiladi.");
+ if(cmd==="/ask"||cmd.startsWith("/ask ")){
+  const question=cmd.slice(4).trim();
+  if(!question)return say(env,chat,"Namuna: /ask hayz og‘rig‘i");
+  if(urgent.test(question)||/prokladka.*har soat|tampon.*har soat/i.test(question))
+   return say(env,chat,"⚠️ Kuchli qon ketishi, hushdan ketish, nafas qisishi yoki keskin og‘riq holatida tez tibbiy yordamga murojaat qiling. Chat orqali tashxis qo‘yib bo‘lmaydi.");
+  const articles=matches(question);
+  return say(env,chat,articles.length?articles.slice(0,2).map(articleText).join("\n\n").slice(0,3400):"Bu savol uchun tekshirilgan manba asosida aniq javob topilmadi. Shifokor bilan maslahatlashishingiz mumkin.");
+ }
+ return say(env,chat,"Healthy Women menyusini ochish: /start. Savol: /ask savolingiz.",menu(env));
 }
 export default {
   async fetch(req,env) {
