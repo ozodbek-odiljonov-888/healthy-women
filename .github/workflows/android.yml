@@ -26,7 +26,7 @@ jobs:
       # GitHub-hosted ubuntu runner includes the Android SDK. The setup-android
       # action currently fails when trying to install removed legacy 'tools'.
       - name: Verify installed Android SDK
-        run: test -d "$ANDROID_HOME" && echo "SDK: $ANDROID_HOME"
+        run: test -d "$ANDROID_HOME" && echo "Android SDK OK"
       - name: Install Capacitor
         run: npm install --no-audit --no-fund
       - name: Create native Android project
