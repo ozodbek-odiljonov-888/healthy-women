@@ -1,0 +1,12 @@
+name = "healthy-women-api"
+main = "worker/index.js"
+compatibility_date = "2026-10-01"
+workers_dev = true
+
+# Values are placeholders. Replace with the final public site origin and URL.
+[vars]
+APP_URL = "https://YOUR_BRAND_SITE.example/"
+ALLOWED_ORIGINS = "https://YOUR_BRAND_SITE.example"
+
+# Set BOT_TOKEN and WEBHOOK_SECRET as Cloudflare secrets, NEVER here.
+# Preview does not accept or store medical histories and does not need D1.
