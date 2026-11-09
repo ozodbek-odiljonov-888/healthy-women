@@ -5,7 +5,7 @@ import {runInNewContext} from "node:vm";
 const code=readFileSync(new URL("../site/sw.js",import.meta.url),"utf8");
 function serviceWorker(scope="https://example.test/"){
  const listeners=new Map(),record={added:[],deleted:[],fetched:[],opened:[]};
- const store=new Map([["healthy-women-pwa-v11",new Map()],["some-other-site-cache",new Map()]]);
+ const store=new Map([["healthy-women-pwa-v12",new Map()],["some-other-site-cache",new Map()]]);
  const caches={
   open:async name=>{
    record.opened.push(name);if(!store.has(name))store.set(name,new Map());const items=store.get(name);
@@ -30,7 +30,7 @@ test("install caches only audited static app files",async()=>{
  const sw=serviceWorker();
  await new Promise((resolve,reject)=>sw.listeners.get("install")({waitUntil:promise=>promise.then(resolve,reject)}));
  assert(sw.record.added.includes("./index.html"));
- assert(sw.record.added.includes("./local-crypto.mjs"));
+ assert(sw.record.added.includes("./local-crypto.mjs"));assert(sw.record.added.includes("./app.mjs"));assert(sw.record.added.includes("./style.css"));assert(sw.record.added.includes("./privacy-page.mjs"));
  assert(!sw.record.added.some(x=>x.includes("/api/")));
 });
 test("non-static URLs, personal API calls, query strings and POST are never cached",async()=>{
@@ -58,6 +58,6 @@ test("GitHub Pages nested scope is supported and unrelated caches survive activa
  assert.equal((await perform(sw,"GET","https://example.test/index.html")).handled,false);
  assert.equal((await perform(sw,"GET","https://example.test/healthy-women/index.html")).handled,true);
  await new Promise((resolve,reject)=>sw.listeners.get("activate")({waitUntil:p=>p.then(resolve,reject)}));
- assert(sw.record.deleted.includes("healthy-women-pwa-v11"));
+ assert(sw.record.deleted.includes("healthy-women-pwa-v12"));
  assert(!sw.record.deleted.includes("some-other-site-cache"));
 });

@@ -88,6 +88,12 @@ Before any public release, configure a **private, stable release signing key** w
 - A separate future **release** workflow uses the `android-release` environment and a distinct signing key. Do not activate it as a clinical product until real-device and privacy/security review are complete. See [ANDROID_RELEASE.md](ANDROID_RELEASE.md).
 - Previous debug APK certificates are not compatible with new signed-test or release APKs. Back up any desired diary data as a verified `.hwbak` archive **before uninstalling** the previous test APK. App uninstallation can destroy its private storage.
 
+## Strict web script policy and static-only offline cache (v1.1)
+- The web app's JavaScript and CSS are in separate same-origin files. Both public pages include a Content Security Policy with `script-src 'self'`; Vercel also supplies this policy as an HTTP response header. Inline scripts and third-party script injection are blocked.
+- The offline service worker allows **only a fixed audited list of static resources**. API routes, URL query strings, health reports, private downloads and arbitrary GET resources are excluded.
+- Privacy statements distinguish the default plaintext journal from the **optional** local encrypted journal. Stronger web headers do not encrypt localStorage, downloads or old device backups.
+- The CSS currently uses `style-src 'unsafe-inline'` for inline style attributes and runtime styling. This reduces the strength of style injection defenses; independent security auditing remains necessary.
+
 ## Health and privacy limits
 - By default, legacy journal records are unencrypted in browser `localStorage`. When the user opts into v1.0 local encryption, new saved journal records are encrypted. Shared-device use remains risky; use fictitious test data until an independent security review.
 - Historical dates produce estimates, not guaranteed forecasts. Do not use them as contraception or a pregnancy test.

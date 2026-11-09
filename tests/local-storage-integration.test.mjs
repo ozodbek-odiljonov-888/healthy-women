@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 const read=p=>readFileSync(new URL(p,import.meta.url),"utf8");
 test("no unencrypted backup restore bypass in main application",()=>{
- const s=read("../site/index.html");
+ const s=read("../site/app.mjs");
  assert(!s.includes("localStorage.setItem(KEY,JSON.stringify(restored))"));
  assert(s.includes("writeEncryptedJournal(next,session)"));
  assert(s.includes("removeAllJournalData()"));
@@ -11,7 +11,7 @@ test("no unencrypted backup restore bypass in main application",()=>{
  assert(s.includes("savePhaseRecord"));
 });
 test("privacy delete erases encrypted and old journal keys",()=>{
- const s=read("../site/privacy.html");
+ const s=read("../site/privacy-page.mjs");
  assert(s.includes("healthywomen.encrypted-local.v1"));
  assert(s.includes("healthywomen.events.v1"));
 });
