@@ -9,6 +9,7 @@ test("start check-in is not repeated in same cycle",()=>{assert.equal(selectChec
 test("ending question starts on day 4 for ongoing period",()=>{assert.equal(selectCheckinPhase(p("2026-10-01"),[],"2026-10-04").phase,"end");});
 test("not yet ended can be checked on the next day",()=>{assert.equal(selectCheckinPhase(p("2026-10-01"),c("end-followup","2026-10-04"),"2026-10-04"),null);assert.equal(selectCheckinPhase(p("2026-10-01"),c("end-followup","2026-10-04"),"2026-10-05").phase,"end");});
 test("completed period gets midpoint check-in without ovulation claims",()=>{assert.equal(selectCheckinPhase(p("2026-10-01","2026-10-06"),[],"2026-10-14").phase,"middle");});
+test("recently completed period receives an ending questionnaire",()=>{assert.equal(selectCheckinPhase(p("2026-10-01","2026-10-05"),c("start","2026-10-01"),"2026-10-06").phase,"end");});
 test("completed midpoint is not repeated",()=>{assert.equal(selectCheckinPhase(p("2026-10-01","2026-10-06"),c("middle","2026-10-14"),"2026-10-14"),null);});
 test("new cycle prompts again",()=>{assert.equal(selectCheckinPhase([{start:"2026-10-01",end:"2026-10-05"},{start:"2026-11-01",end:null}],c("start","2026-10-02"),"2026-11-01").phase,"start");});
 test("future data excluded",()=>{assert.equal(selectCheckinPhase(p("2027-10-01"),[],"2026-10-01"),null);});

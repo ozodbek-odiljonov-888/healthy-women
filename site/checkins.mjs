@@ -28,9 +28,13 @@ export function selectCheckinPhase(periods,checkins,today,cycleLength=28) {
   const answered=(phase)=>checkins.some(x=>x&&x.phase===phase&&x.periodStart===latest.start);
   const result=(phase)=>({phase,period:latest,elapsed,...PHASES[phase]});
   if(elapsed<=2&&!answered("start"))return result("start");
-  if(!latest.end&&elapsed>=3&&elapsed<=30&&!answered("end")) {
-    const askedToday=checkins.some(x=>x&&x.phase==="end-followup"&&x.periodStart===latest.start&&x.date===today);
-    if(!askedToday)return result("end");
+  const sinceEnd=latest.end?daysBetween(latest.end,today):null;
+  if(!answered("end")){
+    if(latest.end&&sinceEnd!==null&&sinceEnd>=0&&sinceEnd<=3&&elapsed>=2)return result("end");
+    if(!latest.end&&elapsed>=3&&elapsed<=30){
+      const askedToday=checkins.some(x=>x&&x.phase==="end-followup"&&x.periodStart===latest.start&&x.date===today);
+      if(!askedToday)return result("end");
+    }
   }
   const length=Number.isFinite(cycleLength)?Math.max(21,Math.min(45,Math.round(cycleLength))):28;
   const midpoint=Math.floor(length/2);

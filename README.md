@@ -19,6 +19,8 @@ A short questionnaire appears while the app is **open** near menstruation onset,
 ## Website
 The static app is in `site/index.html`. Once Pages is enabled, run **Actions → Publish Healthy Women website**.
 
+To test without GitHub Pages, download the **Healthy-Women-PWA-preview** ZIP artifact from a successful **Verify Healthy Women preview** workflow and extract it. The real website still requires Pages publishing to be enabled.
+
 ## Android
 Choose **Actions → Build Healthy Women Android debug APK**, open the successful run, download **Healthy-Women-Android-debug**, unzip and install the APK. Android can warn that a sideloaded debug build is from an unknown source. Do not distribute it as a clinically validated product.
 

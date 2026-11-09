@@ -35,8 +35,8 @@ export function openCheckinDialog({periods,checkins,today,average,getLatest,save
  get("phaseTitle").textContent=phase.title;get("phaseDescription").textContent=phase.description;
  get("phaseError").textContent="";get("phasePainValue").textContent="0/10";
  get("phaseFlow").value=phase.phase==="start"?"normal":"none";
- get("phaseEndBox").hidden=phase.phase!=="end";get("phaseEnded").required=phase.phase==="end";get("phaseEnded").value="";
- get("phaseEndDateWrap").hidden=true;get("phaseEndDate").required=false;get("phaseEndDate").min=phase.period.start;get("phaseEndDate").max=today;get("phaseEndDate").value=today;
+ get("phaseEndBox").hidden=phase.phase!=="end";get("phaseEnded").required=phase.phase==="end";get("phaseEnded").value=phase.period.end?"yes":"";
+ get("phaseEndDateWrap").hidden=!phase.period.end;get("phaseEndDate").required=!!phase.period.end;get("phaseEndDate").min=phase.period.start;get("phaseEndDate").max=today;get("phaseEndDate").value=phase.period.end||today;
  get("phaseCancel").onclick=()=>dialog.close();
  get("phasePain").oninput=e=>{get("phasePainValue").textContent=e.target.value+"/10";};
  get("phaseEnded").onchange=e=>{const ended=e.target.value==="yes";get("phaseEndDateWrap").hidden=!ended;get("phaseEndDate").required=ended;};
@@ -45,6 +45,7 @@ export function openCheckinDialog({periods,checkins,today,average,getLatest,save
   const current=getLatest();
   if(!current||current.id!==phase.period.id){get("phaseError").textContent="Hayz qaydi yangilandi. Savolnomani qayta oching.";return;}
   const data=new FormData(form),ended=phase.phase==="end"&&data.get("ended")==="yes";
+  if(phase.phase==="end"&&phase.period.end&&!ended){get("phaseError").textContent="Avval saqlangan tugash sanasini o‘zgartirish uchun kalendarga o‘ting.";return;}
   if(phase.phase==="end"&&!["yes","no"].includes(data.get("ended"))){get("phaseError").textContent="Hayz tugaganmi, tanlang.";return;}
   const entry={date:today,periodStart:current.start,phase:phase.phase==="end"&&!ended?"end-followup":phase.phase,
    pain:Number(data.get("pain")),flow:String(data.get("flow")),mood:String(data.get("mood")),
