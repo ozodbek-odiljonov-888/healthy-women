@@ -1,0 +1,1 @@
+window.HEALTHY_WOMEN_API="";
