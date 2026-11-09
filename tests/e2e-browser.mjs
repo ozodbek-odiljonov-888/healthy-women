@@ -136,7 +136,7 @@ try{
  await second.locator('#mainNav [data-view="journal"]').click();
  assert.equal(await second.locator("#view-journal [data-edit-checkin]").count(),2);
  await page.locator('#mainNav [data-view="journal"]').click();
- await page.locator("#view-journal [data-edit-checkin]").click();
+ await page.locator("#view-journal [data-edit-checkin]").first().click();
  await page.locator('#checkinForm select[name="pain"]').selectOption("5");
  await page.locator('#checkinForm button[type="submit"]').click();
  await second.waitForFunction(()=>document.querySelector("#view-journal")?.textContent?.includes("Og‘riq: 5/10"));
