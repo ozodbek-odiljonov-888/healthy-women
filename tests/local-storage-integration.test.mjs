@@ -39,3 +39,13 @@ test("encrypted migration is also guarded by cross-tab Web Locks",()=>{
  const module=read("../site/local-crypto-ui.mjs");
  assert(module.includes("withJournalWriteLock(()=>migratePlainJournal(p,storage))"));
 });
+
+test("encrypted mode never deletes stale plaintext from a storage event",()=>{
+ const app=read("../site/app.mjs");
+ assert(!app.includes("if(e.key===KEY&&hasEncryptedJournal()){localStorage.removeItem(KEY)"));
+ assert(app.includes("localProtection.onExternalChange()"));
+ const protector=read("../site/local-crypto-ui.mjs");
+ assert(protector.includes("inspectLegacy(storage,restored.events)"));
+ assert(protector.includes("mergeLegacySafely"));
+ assert(protector.includes("legacyDownload"));
+});

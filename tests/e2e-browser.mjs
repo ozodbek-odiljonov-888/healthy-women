@@ -38,6 +38,7 @@ try{
  await page.locator('#checkinForm button[type="submit"]').click();
  await page.waitForFunction(()=>JSON.parse(localStorage.getItem("healthywomen.events.v1")||"[]").length===1);
  assert.equal(await page.locator("#view-journal [data-edit-checkin]").count(),1);
+ const originalLegacy=await page.evaluate(()=>localStorage.getItem("healthywomen.events.v1"));
  console.log("PASS: fictional daily diary entry saved.");
  await page.locator('#mainNav [data-view="settings"]').click();
  await page.locator("#secureEnable").click();
@@ -72,6 +73,36 @@ try{
  await page.locator("#secureUnlockButton").click();
  await page.locator("#secureWall").waitFor({state:"hidden"});
  console.log("PASS: reload requires a new password unlock.");
+
+ // Simulate an old tab restoring a plaintext key after this encrypted session.
+ // The new entry must be preserved and merged ONLY after a backup is downloaded.
+ await page.evaluate(raw=>{
+  const records=JSON.parse(raw);
+  records.push({id:"late-test-record",type:"checkin",payload:{date:"2026-11-08",pain:2,flow:"light",mood:"good",note:"FICTIONAL-OLD-TAB-NEW-ENTRY",between:false},updated_at:1794150000000,deleted:0});
+  localStorage.setItem("healthywomen.events.v1",JSON.stringify(records));
+ },originalLegacy);
+ await page.reload();
+ await page.locator("#secureWall").waitFor({state:"visible"});
+ await page.locator("#secureUnlockPassword").fill(PASS);
+ await page.locator("#secureUnlockButton").click();
+ await page.locator("#legacyConflictPanel").waitFor({state:"visible"});
+ assert((await page.evaluate(()=>localStorage.getItem("healthywomen.events.v1"))).includes("FICTIONAL-OLD-TAB-NEW-ENTRY"));
+ page.once("dialog",d=>d.accept());
+ const rescue=page.waitForEvent("download");
+ await page.locator("#legacyDownload").click();
+ const rescueFile=join(tmp,"legacy-rescue.json");
+ await (await rescue).saveAs(rescueFile);
+ assert((await readFile(rescueFile,"utf8")).includes("FICTIONAL-OLD-TAB-NEW-ENTRY"));
+ await page.locator("#legacyAcknowledged").check();
+ await page.locator("#legacyMerge").click();
+ await page.locator("#secureWall").waitFor({state:"hidden"});
+ assert.equal(await page.evaluate(()=>localStorage.getItem("healthywomen.events.v1")),null);
+ const reconciled=await page.evaluate(()=>localStorage.getItem("healthywomen.encrypted-local.v1"));
+ assert(!reconciled.includes("FICTIONAL-OLD-TAB-NEW-ENTRY"));
+ await page.locator('#mainNav [data-view="journal"]').click();
+ assert.equal(await page.locator("#view-journal [data-edit-checkin]").count(),2);
+ console.log("PASS: stale-tab plaintext record is preserved, downloaded and safely merged under encryption.");
+
  await page.locator('#mainNav [data-view="settings"]').click();
  await page.locator("#backupBtn").click();
  await page.locator("#vaultPassword").fill(PASS);
@@ -89,9 +120,9 @@ try{
  await page.locator("#vaultPassword").fill(PASS);
  page.once("dialog",d=>d.accept());
  await page.locator("#vaultSubmit").click();
- await page.waitForFunction(()=>JSON.parse(localStorage.getItem("healthywomen.events.v1")||"[]").length===1);
+ await page.waitForFunction(()=>JSON.parse(localStorage.getItem("healthywomen.events.v1")||"[]").length===2);
  await page.locator('#mainNav [data-view="journal"]').click();
- assert.equal(await page.locator("#view-journal [data-edit-checkin]").count(),1);
+ assert.equal(await page.locator("#view-journal [data-edit-checkin]").count(),2);
  console.log("PASS: encrypted backup restores deleted fictional records.");
  await page.setViewportSize({width:390,height:844});
  await page.locator('.mobile-nav [data-view="calendar"]').click();
@@ -103,7 +134,7 @@ try{
  await second.goto(base+"/index.html");
  await second.locator("#view-home .hero").waitFor();
  await second.locator('#mainNav [data-view="journal"]').click();
- assert.equal(await second.locator("#view-journal [data-edit-checkin]").count(),1);
+ assert.equal(await second.locator("#view-journal [data-edit-checkin]").count(),2);
  await page.locator('#mainNav [data-view="journal"]').click();
  await page.locator("#view-journal [data-edit-checkin]").click();
  await page.locator('#checkinForm select[name="pain"]').selectOption("5");

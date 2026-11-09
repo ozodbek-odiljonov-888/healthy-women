@@ -104,6 +104,13 @@ Before any public release, configure a **private, stable release signing key** w
 ### Backup export integrity and migration locking
 The v1.2 backup export checks the normalized journal contents after decrypting its newly generated encrypted archive. Browser tabs supporting Web Locks also serialize the critical plaintext-to-encrypted migration. This reduces data loss from conflicting local writes; it does **not** replace independent security testing or guarantee recovery from damaged device storage.
 
+## Old-tab plaintext recovery (v1.3)
+- If an older browser tab writes an **unencrypted** diary copy after at-rest encryption was enabled, the encrypted app now **stops instead of silently deleting that copy**. Users see a recovery panel on unlock and can first download the unencrypted original locally.
+- Nonconflicting new diary records can be added to the encrypted journal with an explicit checkbox and a deliberate merge action. Encryption and successful decryption are checked **before** the old plaintext key is removed.
+- If the same record ID differs across plaintext and ciphertext, automatic merging is blocked. After making an independent backup, the user may explicitly choose to keep only the encrypted version. No duplicate or corrupted legacy copy is silently discarded.
+- An unencrypted rescue JSON is sensitive; keep it out of shared folders and remove it securely when no longer required. Previously made exports or device backups are **not** cleaned up by this feature.
+- This is a local recovery aid, **not** device-wide encryption, an automatic conflict resolver, or independent security certification.
+
 ## Health and privacy limits
 - By default, legacy journal records are unencrypted in browser `localStorage`. When the user opts into v1.0 local encryption, new saved journal records are encrypted. Shared-device use remains risky; use fictitious test data until an independent security review.
 - Historical dates produce estimates, not guaranteed forecasts. Do not use them as contraception or a pregnancy test.
