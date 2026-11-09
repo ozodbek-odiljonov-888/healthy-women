@@ -1,32 +1,30 @@
 # 🌷 Healthy Women — Sog‘lom ayollar
 
-**Version 0.2 — web-first MVP prototype**. Free Uzbek menstrual-cycle calendar, symptom diary, estimated future cycle dates, summaries, and a small offline medical knowledge search. No diagnosis or contraception claims.
+Uzbek-language menstrual-cycle calendar, symptom diary, estimated future period dates, educational content, and an offline-capable PWA/Android prototype.
+
+## Brand and anonymity
+The public-facing app, documents, reports, and bot messages are branded **Healthy Women** only. Do not publish a personal name, surname, phone number, personal email, API key, or patient data in this repository. Repository hosting URLs and commit metadata may separately reveal the GitHub account identity; that is controlled by the account or by migrating to a dedicated brand organization.
+
+## Status
+- ✅ Responsive PWA prototype in `site/` with offline caching.
+- ✅ Android **debug/test** APK builds through GitHub Actions; download build artifacts from the Actions tab.
+- ⏳ GitHub Pages publishing requires **Settings → Pages → Source → GitHub Actions** to be enabled by the repository owner.
+- ⏳ Telegram bot and server-side synchronization are not live. Do not collect real medical records until privacy/security controls have been reviewed.
 
 ## Website
-`site/index.html` is the self-contained prototype. GitHub Actions publishes the `site/` directory via GitHub Pages:
+The static app is in `site/index.html`. Once Pages is enabled, run **Actions → Publish Healthy Women website**.
 
-https://ozodbek-odiljonov-888.github.io/healthy-women/
+## Android
+Choose **Actions → Build Healthy Women Android debug APK**, open the successful run, download **Healthy-Women-Android-debug**, unzip and install the APK. Android can warn that a sideloaded debug build is from an unknown source. Do not distribute it as a clinically validated product.
 
-If the Pages job is blocked, go to **Settings → Pages → Source → GitHub Actions** and rerun the workflow.
+## Health and privacy limits
+- Browser test data currently lives in unencrypted browser `localStorage`. Use fictitious data only on shared devices.
+- Historical dates produce estimates, not guaranteed forecasts. Do not use them as contraception or a pregnancy test.
+- The offline helper searches a fixed knowledge library: it is **not** a generative medical AI and must not diagnose.
+- Emergency symptoms require qualified medical care.
+- For future data processing, obtain informed consent, allow export/deletion, protect secrets and assess applicable law.
 
-## APK
-GitHub **Actions → Build Healthy Women Android debug APK**. After a successful build, download the `Healthy-Women-Android-debug` workflow artifact; extract `app-debug.apk`. This is a **debug/test build**, not yet security-audited or ready for public clinical use. Play Store is not required.
-
-## Telegram & backend
-Telegram bot, Cloudflare Worker, D1 and optional synchronization are *not deployed* in this repository version. The comprehensive offline MVP ZIP from our working session includes a separate preliminary Worker implementation; do not set up patient synchronization for public users until a security/privacy review is finished.
-
-## Important limitations
-- This browser edition stores dates and symptoms in **unencrypted device localStorage**. This is intended for testing with fictitious data, not production or shared devices. Clearing browser storage can delete all records.
-- Next-period predictions are uncertain and must not be used as contraception.
-- The "AI assistant" is **local keyword search**, not a generative medical model, and does not diagnose illnesses.
-- Urgent symptoms require qualified medical care, not an algorithmic prediction.
-- No tokens or private patient data may be committed to a public repository.
+See `PRIVACY.md` and `SECURITY.md` for operating rules.
 
 ## Cost
-Uses GitHub Pages (public repository) and GitHub Actions free-eligible standard runners, subject to provider conditions and quotas. We cannot guarantee unlimited permanent $0 infrastructure.
-
-## Planned next steps
-1. Verify Pages deployment and Android artifact.
-2. Deploy Telegram bot + Cloudflare Worker with server secrets (never in GitHub).
-3. Medical content review and informed opt-in for secure synchronization; privacy policy and legal review.
-4. Add a clinician-reviewed symptom questionnaire and reminder schedule.
+GitHub Pages and public-repository standard GitHub Actions runners can be free within provider terms and quotas. Ongoing unrestricted zero cost is not guaranteed.
