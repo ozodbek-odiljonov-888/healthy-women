@@ -37,3 +37,11 @@ BotFather tokeni, webhook siri va haqiqiy Cloudflare Worker URL ni o‘z kompyut
 GitHub Actions’da ixtiyoriy `Deploy Healthy Women bot preview` workflow mavjud. U **faqat qo‘lda ishga tushadi**, `CLOUDFLARE_API_TOKEN` va `CLOUDFLARE_ACCOUNT_ID` repository secrets bo‘lmaguncha ishlamaydi. Bot tokeni va webhook sozlashni bu workflow bajarmaydi.
 
 Bot salomatlik ma’lumotlarini o‘z bazasida saqlamaydi; sinxronlash va shaxsiy eslatmalar yoqilmagan.
+
+## Vercel’da alohida bot prototipi
+
+Yangi `bot-vercel/` papkasi Vercel Node.js webhook uchun tayyorlandi. Bot loyihasini faqat sinov maqsadida `healthy-women-bot` nomi bilan nashr qilish mumkin. Vercel project root: `bot-vercel`, Framework: Other. `/health` ochiq diagnostika; `/webhook` Telegramning maxfiy sarlavhasisiz `403` qaytaradi.
+
+Bot ishlashi uchun platformaning **Environment Variables** bo‘limida `BOT_TOKEN`, `WEBHOOK_SECRET` (faqat secret/encrypted) va `APP_URL=https://healthy-women.vercel.app/` sozlanadi. Tokenlar chat yoki GitHub’ga yozilmasin. Tokenlar kiritilmaguncha bot ulanmagan hisoblanadi. Tokenlar o‘zgargach loyiha qayta deploy qilinadi, keyin BotFather webhook ro‘yxatdan o‘tkaziladi.
+
+Bot Cloudflare’ga bog‘liq emas. Klinik tashxis va bemor kundaligi serverga saqlanmaydi. Hobby hosting **faqat notijorat shaxsiy prototip** uchun.

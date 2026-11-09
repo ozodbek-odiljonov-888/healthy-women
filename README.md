@@ -34,6 +34,9 @@ The FAQ bot now has inline topic buttons and sourced answers. Source is in `work
 
 Vercel Hobby is limited to **personal, non-commercial use**. Do not host a commercial startup on its free tier. See `DEPLOYMENT.md` for platform-specific steps.
 
+## Vercel bot endpoint
+The independent `bot-vercel/` folder provides `/health` (no secrets) and `/webhook` (requires configured Telegram webhook secret). The code can deploy without Telegram credentials but **cannot send or receive Telegram messages** until the account owner privately configures `BOT_TOKEN` and `WEBHOOK_SECRET`, redeploys and registers the Telegram webhook. It does not store patient information.
+
 ## Health and privacy limits
 - Browser test data currently lives in unencrypted browser `localStorage`. Use fictitious data only on shared devices.
 - Historical dates produce estimates, not guaranteed forecasts. Do not use them as contraception or a pregnancy test.
