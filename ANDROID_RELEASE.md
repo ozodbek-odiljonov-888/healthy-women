@@ -18,7 +18,7 @@ To copy the keystore into the clipboard as base64:
 [Convert]::ToBase64String([IO.File]::ReadAllBytes((Resolve-Path ".\healthy-women-release.jks"))) | Set-Clipboard
 ```
 
-GitHub repository → Settings → Secrets and variables → Actions → New repository secret. Add:
+Before setting these credentials, create GitHub repository → **Settings → Environments → New environment → `android-release`**. Add the following as **Environment secrets** (not source files or chat messages). The separate `android-signing` environment and signed-test workflow use a different **test-only** keystore. Add:
 
 | Secret | Value |
 |---|---|
@@ -32,3 +32,11 @@ To build, open Actions → **Build Healthy Women signed Android release** → Ru
 The workflow is manual-only: routine GitHub pushes do not run it. When secrets are missing it fails before creating an Android project. No store account or paid services are enabled.
 
 **Limitations:** The workflow and its Gradle signing configuration need a first real execution and device validation; they have not yet produced a release-signed APK. Never lose the signing key. Release signing does not establish clinical safety or privacy compliance.
+
+## Android privacy and test signing
+
+Normal Android debug builds now run `node scripts/harden-android.mjs` after Capacitor generates the project. This disables Android Auto Backup, adds exclusions for cloud/device-transfer backups, refuses cleartext traffic, and uses the native `FLAG_SECURE` window flag against screenshots/recent-app thumbnails. These are defense-in-depth mitigations, not guarantees against all device vendors or malware.
+
+There is also a distinct manual workflow **Build Healthy Women signed test APK (manual)** with GitHub Environment `android-signing` and four secret names: `HW_KEYSTORE_BASE64`, `HW_STORE_PASSWORD`, `HW_KEY_ALIAS`, `HW_KEY_PASSWORD`. Use a **separate test key** from any future production release key. It advances the Android versionCode automatically and verifies the signed APK. Neither signing workflow runs on normal commits. Do not enable signed production distribution until Android device tests, clinical review and privacy assessment are complete.
+
+**Compatibility:** Old debug APKs have ephemeral signing certificates, so neither test signing nor release signing can update them in place. Export and verify a `.hwbak` recovery file before uninstalling. Retain copies of keystores privately. Do not send passwords or keystore data into a chat.
