@@ -45,3 +45,14 @@ Yangi `bot-vercel/` papkasi Vercel Node.js webhook uchun tayyorlandi. Bot loyiha
 Bot ishlashi uchun platformaning **Environment Variables** bo‘limida `BOT_TOKEN`, `WEBHOOK_SECRET` (faqat secret/encrypted) va `APP_URL=https://healthy-women.vercel.app/` sozlanadi. Tokenlar chat yoki GitHub’ga yozilmasin. Tokenlar kiritilmaguncha bot ulanmagan hisoblanadi. Tokenlar o‘zgargach loyiha qayta deploy qilinadi, keyin BotFather webhook ro‘yxatdan o‘tkaziladi.
 
 Bot Cloudflare’ga bog‘liq emas. Klinik tashxis va bemor kundaligi serverga saqlanmaydi. Hobby hosting **faqat notijorat shaxsiy prototip** uchun.
+
+## Hozirgi Vercel nashri (2026-11-09)
+
+- Sayt: https://healthy-women.vercel.app/ — bosh sahifa va `/privacy.html` HTTP 200 bilan tekshirildi.
+- Telegram bot serveri: https://healthy-women-bot.vercel.app/health — HTTP 200; `/webhook` ga GET so‘rov HTTP 405 qaytaradi.
+- Bot loyihasida `APP_URL=https://healthy-women.vercel.app/` muhit sozlamasi yozilgan.
+- BotFather tokeni va webhook siri hozircha **sozlanmagan**. `/health` ishlashi Telegram bot ishga tushganini anglatmaydi.
+- Vercel himoyasi production uchun ochiq, preview nashrlariga login talab etiladi.
+- GitHub va Vercel o‘rtasidagi avtomatik bog‘lanish yoqilmagan. Yangi kodlar Vercel’ga alohida nashr qilinishi kerak.
+- Sog‘liq qaydlarining bulutli saqlanishi va shaxsiy bildirishnomalar o‘chirilgan.
+- Saytning brend domeni ishlatiladi, lekin Vercel tizimidagi avtomatik deployment va GitHub egalik identifikatorlari xususiy maydonlarda ko‘rinishi mumkin.

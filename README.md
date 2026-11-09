@@ -30,12 +30,12 @@ Settings now provides **encrypted backup export and restore**. The exported `.hw
 Choose **Actions → Build Healthy Women Android debug APK**, open the successful run, download **Healthy-Women-Android-debug**, unzip and install the APK. Android can warn that a sideloaded debug build is from an unknown source. Do not distribute it as a clinically validated product.
 
 ## Telegram preview and deployment
-The FAQ bot now has inline topic buttons and sourced answers. Source is in `worker/index.js`. The **manual-only** Cloudflare deployment workflow never deploys on ordinary commits and requires account-specific authorization. No BotFather token is in the repository; `scripts/register-telegram-webhook.mjs` registers a webhook only when run locally with private environment variables. This bot has **not** been deployed from this chat, and cloud synchronization is disabled.
+The FAQ bot now has inline topic buttons and sourced answers. Source is in `worker/index.js`. The **manual-only** Cloudflare deployment workflow never deploys on ordinary commits and requires account-specific authorization. No BotFather token is in the repository; `scripts/register-telegram-webhook.mjs` registers a webhook only when run locally with private environment variables. The Telegram bot source **has been deployed as a separate Vercel service**, but BotFather credentials and the webhook are not configured, so it is not yet live inside Telegram. Cloud synchronization is disabled. Vercel projects were created via direct deployments; automatic GitHub-to-Vercel deployment is not linked.
 
 Vercel Hobby is limited to **personal, non-commercial use**. Do not host a commercial startup on its free tier. See `DEPLOYMENT.md` for platform-specific steps.
 
 ## Vercel bot endpoint
-The independent `bot-vercel/` folder provides `/health` (no secrets) and `/webhook` (requires configured Telegram webhook secret). The code can deploy without Telegram credentials but **cannot send or receive Telegram messages** until the account owner privately configures `BOT_TOKEN` and `WEBHOOK_SECRET`, redeploys and registers the Telegram webhook. It does not store patient information.
+The independent `bot-vercel/` folder provides `/health` (no secrets) and `/webhook` (requires configured Telegram webhook secret). **The bot service is deployed on Vercel** at `https://healthy-women-bot.vercel.app/`. The `/health` endpoint returned HTTP 200 on 2026-11-09 and the webhook correctly rejected GET with 405. The deployment has `APP_URL=https://healthy-women.vercel.app/` configured. **Telegram message delivery is not yet enabled**: the account owner must configure `BOT_TOKEN` and `WEBHOOK_SECRET` privately, redeploy, and register Telegram's webhook. It does not store patient information.
 
 ## Health and privacy limits
 - Browser test data currently lives in unencrypted browser `localStorage`. Use fictitious data only on shared devices.
