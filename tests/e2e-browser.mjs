@@ -133,6 +133,7 @@ try{
  page.once("dialog",d=>d.accept());
  await page.locator("#clearBtn").click();
  await page.waitForFunction(()=>localStorage.getItem("healthywomen.encrypted-local.v1")===null&&localStorage.getItem("healthywomen.events.v1")===null);
+ await page.locator('#mainNav [data-view="settings"]').click();
  await page.locator("#restoreBtn").click();
  await page.locator("#vaultFile").setInputFiles(backup);
  await page.locator("#vaultPassword").fill(PASS);
