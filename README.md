@@ -63,6 +63,15 @@ The **Android APK** (Capacitor 7 with `@capacitor/local-notifications`) can show
 - The Google Fonts network import was removed. Fonts now render locally without third-party font requests.
 - **Screen hiding does not encrypt localStorage or reliably protect Android screenshot previews.** Real health data should not be used until security review and at-rest protection are complete.
 
+## Optional encrypted on-device diary (v1.0)
+- This version introduces **opt-in local at-rest encryption**. The default for existing unprotected installations is still unencrypted until the user explicitly chooses Settings → Mahalliy kundalikni shifrlash.
+- Before migration, users enter a passphrase of 12–256 characters and download a separately encrypted `.hwbak` recovery file. The app then waits for the user to confirm that file was saved. Only after verified encrypted storage is written and decrypted successfully is the legacy plaintext localStorage record deleted.
+- Uses native WebCrypto **PBKDF2-SHA256 (310,000 iterations) + AES-256-GCM**, with an independent salt and random IV. The session key remains in JavaScript memory only while unlocked; no password is written to localStorage or a remote server. On reload and when sent to the background, an encrypted journal must be unlocked with the passphrase again.
+- Newly entered, edited or restored journal records are persisted as authenticated ciphertext rather than readable JSON. Other tabs updating the ciphertext force a new unlock, and revision checks prevent old tabs from silently overwriting new encrypted records.
+- When encrypted local mode is enabled, remote Telegram/cloud synchronization is disabled. Users can still export a separately encrypted backup. CSV/plain-text report downloads remain **unencrypted** and should be handled carefully.
+- The erase controls clear both encrypted and legacy local journal storage. **No recovery or password reset is available**, beyond a user-held encrypted backup with its passphrase.
+- **Limitations:** this does not provide end-to-end encryption, hardware-backed keystores, protection from malicious browser extensions, snapshots, existing filesystem backups or prior unencrypted exports. Existing plaintext may persist in device backups and flash-memory remnants. This has not undergone independent security review. Use fictitious test data until reviewed.
+
 ## Health and privacy limits
 - Browser test data currently lives in unencrypted browser `localStorage`. Use fictitious data only on shared devices.
 - Historical dates produce estimates, not guaranteed forecasts. Do not use them as contraception or a pregnancy test.

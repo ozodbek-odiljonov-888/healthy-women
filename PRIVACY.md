@@ -14,3 +14,6 @@ Mustaqil xavfsizlik va tibbiy kontent tekshiruvi, shifrlash, xavfsiz autentifika
 
 ## Android mahalliy eslatmalari (v0.7)
 Android APK foydalanuvchi tanlagan vaqtda umumiy (shaxsiy salomatlik sanalarisiz) eslatmani qurilmaning o‘zida rejalashtirishi mumkin. Eslatma faqat foydalanuvchi yoqsa va tizim ruxsat bersa ishlaydi. Ma’lumotlar serverga yuborilmaydi. Oddiy brauzer veb-sayti push/bildirishnoma jo‘natmaydi. Qurilmadagi ma’lumotlarni o‘chirganda eslatma bekor qilinadi; bekor qilish muvaffaqiyatsiz bo‘lsa, foydalanuvchiga ogohlantirish ko‘rsatiladi.
+
+## Mahalliy shifrlash (v1.0)
+Mahalliy qaydlarni parol orqali AES-256-GCM bilan shifrlash **foydalanuvchi ixtiyoriga ko‘ra yoqiladi**. Eski qaydlar shifrlangan nusxa tekshirilgandan keyingina o‘chiriladi, lekin oldingi fayllar yoki telefonning zaxira nusxalari tozalanmaydi. Parol unutilsa, serverda tiklash yo‘q. Shifrlangan xotira yoqilganda bulut sinxronlash o‘chiriladi. Ma’lumotlarni eksport qilish (CSV va matn) shifrlanmagan fayl yaratadi. Xavfsizlik auditi hali tugallanmagan.
