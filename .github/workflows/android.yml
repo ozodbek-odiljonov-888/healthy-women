@@ -6,6 +6,7 @@ on:
       - 'site/**'
       - 'capacitor.config.json'
       - 'package.json'
+      - 'scripts/harden-android.mjs'
       - '.github/workflows/android.yml'
   workflow_dispatch:
 permissions:
@@ -33,6 +34,8 @@ jobs:
         run: |
           npx cap add android
           npx cap sync android
+      - name: Harden Android backup and screenshot privacy
+        run: node scripts/harden-android.mjs
       - name: Build Android debug APK
         working-directory: android
         run: chmod +x gradlew && ./gradlew assembleDebug --no-daemon
