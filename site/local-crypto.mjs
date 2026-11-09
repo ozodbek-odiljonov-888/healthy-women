@@ -124,6 +124,36 @@ export async function migratePlainJournal(password,storage=globalThis.localStora
  }
  return {session:{key,salt,lastRecord:record},events:plain};
 }
+// Rotate the on-device encryption key, never storing either passphrase.
+// Caller must take and verify an independent old-password backup before invoking.
+export async function rotateEncryptedJournalPassword(oldPassword,newPassword,expectedSource,storage=globalThis.localStorage){
+ if(!passwordValid(newPassword)||!passwordValid(oldPassword))
+  throw Error("Yangi va eski parollar 12–256 belgidan iborat bo‘lsin.");
+ if(oldPassword===newPassword)throw Error("Yangi parol eskisidan farq qilishi kerak.");
+ const source=storage.getItem(LOCAL_VAULT_KEY);
+ if(!source)throw Error("Shifrlangan kundalik topilmadi.");
+ if(typeof expectedSource!=="string"||source!==expectedSource)
+  throw Error("Kundalik zaxira olinganidan keyin o‘zgargan. Zaxirani yangidan yarating.");
+ if(storage.getItem(LEGACY_EVENTS_KEY)!==null)
+  throw Error("Eski ochiq nusxa topildi. Avval uni saqlang va ziddiyatni hal qiling.");
+ const old=await unlockEncryptedJournal(oldPassword,storage);
+ const salt=cryptoApi()&&crypto.getRandomValues(new Uint8Array(16));
+ const key=await derive(newPassword,salt);
+ const next=await encryptedRecord(encodeEvents(old.events),key,salt);
+ const verified=await decryptedRecord(next,key);
+ if(JSON.stringify(verified)!==JSON.stringify(old.events))
+  throw Error("Yangi shifrlangan nusxani tekshirib bo‘lmadi. Eski nusxa saqlandi.");
+ if(storage.getItem(LOCAL_VAULT_KEY)!==source)
+  throw Error("Kundalik boshqa oynada o‘zgardi. Eski parol bilan qayta oching.");
+ storage.setItem(LOCAL_VAULT_KEY,next);
+ if(storage.getItem(LOCAL_VAULT_KEY)!==next)
+  throw Error("Shifrlangan nusxani saqlash tasdiqlanmadi.");
+ const fresh=await unlockEncryptedJournal(newPassword,storage);
+ if(JSON.stringify(fresh.events)!==JSON.stringify(old.events))
+  throw Error("Yangi parolni tekshirishda xatolik. Zaxira nusxasini saqlang.");
+ return fresh;
+}
+
 export function removeAllJournalData(storage=globalThis.localStorage){
  storage.removeItem(LOCAL_VAULT_KEY);
  storage.removeItem(LEGACY_EVENTS_KEY);
