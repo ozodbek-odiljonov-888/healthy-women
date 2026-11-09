@@ -233,7 +233,7 @@ if('serviceWorker'in navigator&&location.protocol.startsWith('http')&&!location.
 localProtection=createLocalProtection({
  getLiveEvents:()=>events,
  onUnlocked:async restored=>{events=restored;editingDiaryId=null;screenPrivacy.unmask();render();},
- onLocked:()=>{events=[];editingDiaryId=null;},
+ onLocked:()=>{events=[];editingDiaryId=null;document.querySelectorAll('.view').forEach(el=>el.replaceChildren());document.querySelectorAll('dialog form').forEach(form=>{if(form.id!=='secureUnlockForm')form.reset();});},
  onMigrated:async restored=>{events=restored;editingDiaryId=null;render();},
  waitForWrites:finishWrites,download,notify
 });
