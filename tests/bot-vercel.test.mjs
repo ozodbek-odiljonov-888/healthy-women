@@ -23,3 +23,21 @@ test("static configuration contains safe endpoint rewrites",()=>{
  assert(config.rewrites.some(x=>x.source==="/webhook"&&x.destination==="/api/webhook"));
  assert(config.rewrites.some(x=>x.source==="/health"&&x.destination==="/api/health"));
 });
+
+test("valid webhook header is forwarded to the Telegram bot as POST",async t=>{
+  const previousToken=process.env.BOT_TOKEN,previousSecret=process.env.WEBHOOK_SECRET;
+  process.env.BOT_TOKEN="TEST_BOT_TOKEN";process.env.WEBHOOK_SECRET="TEST_SECRET";
+  const calls=[];
+  t.mock.method(globalThis,"fetch",async (_url,opts)=>{
+    calls.push({method:opts.method,body:JSON.parse(opts.body)});
+    return Response.json({ok:true,result:{message_id:1}});
+  });
+  try{
+    const update={message:{chat:{id:101,type:"private"},text:"/start"}};
+    const response=await webhook.fetch(new Request("https://example.test/api/webhook",{method:"POST",headers:{"X-Telegram-Bot-Api-Secret-Token":"TEST_SECRET","Content-Type":"application/json"},body:JSON.stringify(update)}));
+    assert.equal(response.status,200);assert.equal(calls.length,1);assert.equal(calls[0].method,"POST");
+  }finally{
+    if(previousToken===undefined)delete process.env.BOT_TOKEN;else process.env.BOT_TOKEN=previousToken;
+    if(previousSecret===undefined)delete process.env.WEBHOOK_SECRET;else process.env.WEBHOOK_SECRET=previousSecret;
+  }
+});
