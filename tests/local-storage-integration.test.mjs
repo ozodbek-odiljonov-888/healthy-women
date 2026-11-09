@@ -6,7 +6,7 @@ test("no unencrypted backup restore bypass in main application",()=>{
  const s=read("../site/app.mjs");
  assert(!s.includes("localStorage.setItem(KEY,JSON.stringify(restored))"));
  assert(s.includes("writeEncryptedJournal(next,session)"));
- assert(s.includes("removeAllJournalData()"));
+ assert(s.includes("await eraseLocalJournal()"));
  assert(s.includes("hasEncryptedJournal()||syncBusy"));
  assert(s.includes("savePhaseRecord"));
 });
