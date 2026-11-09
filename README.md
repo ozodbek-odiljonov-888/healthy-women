@@ -56,6 +56,13 @@ The **Android APK** (Capacitor 7 with `@capacitor/local-notifications`) can show
 - Validates dates, pain (0–10), flow, mood and note length before saving. Ordinary journal entries with notable symptoms also show a source-linked medical warning; this does not diagnose.
 - The change is local-first and introduces no new cloud transfer. Existing records remain in localStorage, which is **not encrypted**.
 
+## Screen privacy mode (v0.9)
+- A **quick-hide screen button** covers the whole app interface with a branded neutral overlay.
+- When leaving the app, the interface is masked by default; returning requires an explicit button press to reveal. The option can be disabled in Settings. There is **no password and no authentication**: it is a screen-privacy convenience feature only.
+- The app listens for localStorage changes in other tabs and refreshes diary entries, including deletions, rather than continuing to show stale records.
+- The Google Fonts network import was removed. Fonts now render locally without third-party font requests.
+- **Screen hiding does not encrypt localStorage or reliably protect Android screenshot previews.** Real health data should not be used until security review and at-rest protection are complete.
+
 ## Health and privacy limits
 - Browser test data currently lives in unencrypted browser `localStorage`. Use fictitious data only on shared devices.
 - Historical dates produce estimates, not guaranteed forecasts. Do not use them as contraception or a pregnancy test.
