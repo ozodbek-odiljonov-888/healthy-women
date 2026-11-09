@@ -78,16 +78,17 @@ export async function unlockEncryptedJournal(password,storage=globalThis.localSt
  const parsed=parseRecord(source);
  const key=await derive(password,parsed.salt);
  const events=await decryptedRecord(source,key);
- return {session:{key,salt:parsed.salt},events};
+ return {session:{key,salt:parsed.salt,lastRecord:source},events};
 }
 export async function writeEncryptedJournal(events,session,storage=globalThis.localStorage){
  if(!session?.key||!(session.salt instanceof Uint8Array)||session.salt.length!==16)throw Error("Qulf ochilmagan.");
  const source=storage.getItem(LOCAL_VAULT_KEY);
  if(!source)throw Error("Shifrlangan kundalik topilmadi.");
  const saved=parseRecord(source);
- if(bytes64(saved.salt)!==bytes64(session.salt))throw Error("Kundalik boshqa oynada o‘zgartirilgan. Qaytadan qulfni oching.");
+ if(bytes64(saved.salt)!==bytes64(session.salt)||source!==session.lastRecord)throw Error("Kundalik boshqa oynada o‘zgartirilgan. Qaytadan qulfni oching.");
  const bytes=encodeEvents(events),next=await encryptedRecord(bytes,session.key,session.salt);
  storage.setItem(LOCAL_VAULT_KEY,next);
+ session.lastRecord=next;
  return true;
 }
 export async function migratePlainJournal(password,storage=globalThis.localStorage){
@@ -113,7 +114,7 @@ export async function migratePlainJournal(password,storage=globalThis.localStora
   // Leave ciphertext (verified) and legacy records; do not claim cleanup.
   throw Error("Shifrlangan nusxa yaratildi, lekin eski ochiq qaydlar ham qolgan. Qayta tekshirish kerak.");
  }
- return {session:{key,salt},events:plain};
+ return {session:{key,salt,lastRecord:record},events:plain};
 }
 export function removeAllJournalData(storage=globalThis.localStorage){
  storage.removeItem(LOCAL_VAULT_KEY);

@@ -55,3 +55,11 @@ test("all local data keys can be cleared without passphrase",async()=>{
  await migratePlainJournal(PASSWORD,s);
  assert(removeAllJournalData(s));assert.equal(s.getItem(LOCAL_VAULT_KEY),null);
 });
+
+test("a stale tab cannot overwrite encrypted journal changes",async()=>{
+ const s=store();s.setItem(LEGACY_EVENTS_KEY,JSON.stringify(records));
+ const first=await migratePlainJournal(PASSWORD,s);
+ const second=await unlockEncryptedJournal(PASSWORD,s);
+ await writeEncryptedJournal(records,first.session,s);
+ await assert.rejects(writeEncryptedJournal(records,second.session,s),/boshqa oynada/);
+});
