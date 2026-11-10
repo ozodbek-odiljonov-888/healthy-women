@@ -10,7 +10,15 @@ export default {
     return worker.fetch(forwarded, {
       BOT_TOKEN: process.env.BOT_TOKEN,
       WEBHOOK_SECRET: process.env.WEBHOOK_SECRET,
-      APP_URL: process.env.APP_URL
+      APP_URL: process.env.APP_URL,
+      AI_MODE: process.env.AI_MODE,
+      AI_FREE_TIER_NO_BILLING: process.env.AI_FREE_TIER_NO_BILLING,
+      GEMINI_API_KEY: process.env.GEMINI_API_KEY,
+      AI_DATABASE_URL: process.env.AI_DATABASE_URL,
+      AI_IP_PEPPER: process.env.AI_IP_PEPPER,
+      AI_ALLOWED_ORIGIN: process.env.AI_ALLOWED_ORIGIN,
+      AI_ALLOWED_HOSTNAME: process.env.AI_ALLOWED_HOSTNAME,
+      AI_ANDROID_ORIGIN: process.env.AI_ANDROID_ORIGIN
     });
   }
 };

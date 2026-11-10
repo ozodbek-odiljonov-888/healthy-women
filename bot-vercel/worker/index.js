@@ -1,5 +1,7 @@
 // Healthy Women — source-backed Telegram FAQ bot. Preview: no patient records stored.
 import {MEDICAL_TOPICS,findMedicalTopics,assessMedicalRisk,answerMedicalQuestion} from "./medical-qa.js";
+import {AI_TOPICS} from "./ai-topics.js";
+import {runTelegramTopicAi} from "../api/ai.js";
 const SOURCES=MEDICAL_TOPICS;
 const matches=(q)=>findMedicalTopics(q,1);
 const json=(obj,status=200,extra={})=>new Response(JSON.stringify(obj),{status,headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store","x-content-type-options":"nosniff",...extra}});
@@ -31,24 +33,40 @@ function menu(env){
  const rows=[
   [{text:"📅 Hayz sikli",callback_data:"faq:sikl"},{text:"🩸 Qon ketishi",callback_data:"faq:qon"}],
   [{text:"🌸 Hayz og‘rig‘i",callback_data:"faq:ogriq"},{text:"⏳ Hayz kechikishi",callback_data:"faq:kechikish"}],
-  [{text:"📚 Manbalar",callback_data:"info:sources"},{text:"🔒 Maxfiylik",callback_data:"info:privacy"}]
+  [{text:"🤖 Cheklangan AI",callback_data:"info:ai"},{text:"📚 Manbalar",callback_data:"info:sources"}],
+  [{text:"🔒 Maxfiylik",callback_data:"info:privacy"}]
  ];
  const app=appButton(env);if(app)rows.push([app]);
  return {inline_keyboard:rows};
 }
-const HELP="🌷 Healthy Women — Sog‘lom ayollar\n\nAyollar salomatligi bo‘yicha 50 mavzuda manbali savol-javob. Bu generativ AI emas, tekshirilgan bilimlar bazasi.\n\n/start — bosh menyu\n/topics — mavzular\n/ask savol — bepul tibbiy savol-javob\nSavolni oddiy matn sifatida ham yozishingiz mumkin\n/sources — manbalar\n/privacy — maxfiylik\n/delete — ma’lumotlarni o‘chirish\n/remind — eslatmalar holati\n\n⚠️ Bot chatiga shaxsiy tibbiy tarix yoki boshqa maxfiy ma’lumotlarni yubormang.";
+const aiTopicLabels={cycle:"Sikl",duration:"Hayz davomiyligi",pain:"Og‘riq",heavy:"Ko‘p qon ketishi",irregular:"Nomuntazam hayz",pregnancy:"Hayz kechikishi",between:"Hayzlararo qon",pcos:"PCOS",endo:"Endometrioz",selfcare:"Parvarish"};
+const AI_CONSENT="🤖 Healthy Women — cheklangan bepul AI\n\nFaqat umumiy tibbiy ma’rifiy mavzu tanlanadi. Shaxsiy savol matni, ism, hayz sanalari, kundalik va Telegram ID Gemini’ga yuborilmaydi.\n\n⚠️ Bepul Gemini xizmatida umumiy mavzu matnlari Google mahsulotlarini yaxshilash uchun ishlatilishi mumkin. Tugmani bosish bilan shu mavzu uchun bitta AI so‘roviga rozilik bildirasiz. Javob tashxis emas, og‘ir alomatlarda shoshilinch tibbiy yordam kerak.\n\nLimit: har foydalanuvchi uchun 3/kun, loyiha uchun 30/kun, 300/oy, jami 1000. AI o‘chiq bo‘lsa /ask orqali offline javobni oling.";
+function aiTopicMenu(){
+ const entries=Object.keys(AI_TOPICS).map(topic=>({text:aiTopicLabels[topic]||topic,callback_data:"ai:"+topic}));
+ const rows=[];for(let i=0;i<entries.length;i+=2)rows.push(entries.slice(i,i+2));
+ return {inline_keyboard:rows};
+}
+const HELP="🌷 Healthy Women — Sog‘lom ayollar\n\nAyollar salomatligi bo‘yicha 50 mavzuda manbali savol-javob. 50 mavzu bo‘yicha offline bilimlar bazasi va ixtiyoriy umumiy AI.\n\n/start — bosh menyu\n/topics — mavzular\n/ask savol — bepul offline tibbiy savol-javob\n/ai — 10 ta umumiy mavzu bo‘yicha cheklangan AI (rozilik bilan)\nSavolni oddiy matn sifatida ham yozishingiz mumkin\n/sources — manbalar\n/privacy — maxfiylik\n/delete — ma’lumotlarni o‘chirish\n/remind — eslatmalar holati\n\n⚠️ Bot chatiga shaxsiy tibbiy tarix yoki boshqa maxfiy ma’lumotlarni yubormang.";
 const PRIVACY="🔒 Healthy Women botining sinov versiyasi hayz tarixi va savollarni o‘z serveri bazasida saqlamaydi. Telegram orqali yozilgan xabarlar Telegram tizimidan o‘tadi. Saytdagi qaydlar qurilma xotirasida saqlanadi; himoyalanish holati sozlamalarga bog‘liq.";
 const SOURCES_TEXT="📚 Tibbiy manbalar:\nACOG — https://www.acog.org/womens-health/\nNHS — https://www.nhs.uk/conditions/periods/\n\nBot tashxis qo‘ymaydi.";
 function articleText(article){return article.title+"\n"+article.answer+"\nManba: "+article.url+"\n\nTibbiy tashxis emas.";}
-async function handleUpdate(update,env){
+export async function handleUpdate(update,env,{runAi=runTelegramTopicAi}={}){
  const cb=update?.callback_query;
  if(cb){
   const chat=cb.message?.chat;
   if(chat?.type!=="private"||!Number.isSafeInteger(chat.id)||typeof cb.id!=="string")return;
   const choice=String(cb.data||"").slice(0,70);
-  if(!/^(faq:(sikl|qon|ogriq|kechikish|davomiylik|nomuntazam)|info:(privacy|sources))$/.test(choice))return;
+  if(!/^(faq:(sikl|qon|ogriq|kechikish|davomiylik|nomuntazam)|info:(privacy|sources|ai)|ai:(cycle|duration|pain|heavy|irregular|pregnancy|between|pcos|endo|selfcare))$/.test(choice))return;
   await telegramAPI(env,"answerCallbackQuery",{callback_query_id:cb.id});
   if(choice==="info:privacy")return say(env,chat.id,PRIVACY,menu(env));
+  if(choice==="info:ai")return say(env,chat.id,AI_CONSENT,aiTopicMenu());
+  if(choice.startsWith("ai:")){
+   const topic=choice.slice(3);
+   const result=await runAi({topic,chatId:chat.id,env});
+   return say(env,chat.id,result.ok
+    ?"🤖 AI ma’rifiy javobi (tashxis emas):\n\n"+result.answer+"\n\nManba: "+result.source+" — "+result.url+"\nBugun qolgan limit: "+result.remainingToday
+    :"⚠️ "+result.error+"\n/ask orqali mavjud offline bilimlardan foydalaning.",menu(env));
+  }
   if(choice==="info:sources")return say(env,chat.id,SOURCES_TEXT,menu(env));
   const article=SOURCES.find(s=>s.key===choice.slice(4));
   return article?say(env,chat.id,articleText(article),menu(env)):undefined;
@@ -58,6 +76,8 @@ async function handleUpdate(update,env){
  const chat=msg.chat.id,cmd=String(msg.text||"").trim().slice(0,700);
  if(cmd==="/start"||cmd==="/help"||cmd==="/topics")return say(env,chat,HELP,menu(env));
  if(cmd==="/privacy")return say(env,chat,PRIVACY);
+ if(cmd==="/ai")return say(env,chat,AI_CONSENT,aiTopicMenu());
+ if(cmd.startsWith("/ai "))return say(env,chat,"AI uchun faqat /ai menyusidagi umumiy mavzu tugmasini bosing. Shaxsiy savollar AI xizmatiga yuborilmaydi.",aiTopicMenu());
  if(cmd==="/sources")return say(env,chat,SOURCES_TEXT);
  if(cmd==="/delete")return say(env,chat,"🔒 Bot serverida shaxsiy tibbiy qaydlar saqlanmaydi. Telegram chatini Telegram ilovasidan, mahalliy qaydlarni esa sayt Sozlamalaridan o‘chiring.");
  if(cmd==="/remind"||cmd==="/stop")return say(env,chat,"🔕 Shaxsiy eslatmalar hozir yoqilmagan. Maxfiylik va rozilik tekshiruvlaridan keyin qo‘shiladi.");

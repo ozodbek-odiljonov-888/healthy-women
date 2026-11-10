@@ -23,7 +23,7 @@ Barcha limitlar **Neon Postgres funksiyasida atomik** tekshiriladi va rezerv qil
 
 ## Operator uchun yoqish (faqat tasdiqlangan test muhiti)
 1. [Google AI Studio](https://aistudio.google.com/app/apikey) hisobida yangi, **hech qanday to‘lov hisobi ulanmagan Free Tier loyihasi** ochilsin. Free Tier ni tekshirib, pullik tarifga *o‘tmaslik* kerak. **Bepul tarifda Google umumiy yuborilgan matnlarni mahsulotlarini yaxshilash uchun ishlatishi mumkin**. Shuning uchun faqat umumiy mavzularni yuboramiz.
-2. `gemini-3.5-flash-lite` modelining o‘sha hudud/loyiha uchun **hozirgi bepul mavjudligi va kvotalari** AI Studio orqali tasdiqlansin. Model/o‘sha bepul rejim mavjud bo‘lmasa, `AI_MODE=off` qolsin.
+2. `gemini-3.1-flash-lite` modelining o‘sha hudud/loyiha uchun **hozirgi bepul mavjudligi va kvotalari** AI Studio orqali tasdiqlansin. Model/o‘sha bepul rejim mavjud bo‘lmasa, `AI_MODE=off` qolsin.
 3. Neon **Free** ma'lumotlar bazasini ko‘zdan kechirib, mavjud kvotalar va tarifni tasdiqlang. `db/migrations/003_ai_free_limits.sql` migratsiyasini test DBda *qo‘lda* ishlating; production yoki mavjud klinik bazaga avtomatik kiritmang.
 4. Serveringizdagi Vercel preview loyihasi bepul rejimdaligini tekshiring. `bot-vercel/api/ai.js` funksiyasiga **maxfiy environment variables** kiriting: `AI_MODE=free_preview`, `AI_FREE_TIER_NO_BILLING=CONFIRMED`, `GEMINI_API_KEY=<secret>`, `AI_DATABASE_URL=<Neon Postgres url>`, `AI_IP_PEPPER=<tasodifiy 32+ belgi>`, `AI_ALLOWED_ORIGIN=https://healthy-women.vercel.app`, `AI_ALLOWED_HOSTNAME=healthy-women-bot.vercel.app` (host haqiqiy deploy qilingan serverga teng bo‘lsin). Hech qachon kalitni GitHub, PWA, JavaScript yoki chatga yubormang.
 5. **Faqat alohida sinov deploy bilan** PWA `site/config.js` ichidagi `window.HEALTHY_WOMEN_AI_API` ni `https://healthy-women-bot.vercel.app/api/ai` ga sozlang. Ushbu konfiguratsiya productiondagi maxfiylik va reliz-gate preflightini `BLOCKED` qiladi, bu kutilgan.
@@ -33,3 +33,5 @@ Barcha limitlar **Neon Postgres funksiyasida atomik** tekshiriladi va rezerv qil
 
 ## Sinov va xavfsizlik
 `npm test` uchun Node.js 22; Playwright bilan `node tests/e2e-ai-v127.mjs` (mock javob, haqiqiy Gemini chaqirilmaydi). `node scripts/release-preflight.mjs --strict` mustaqil klinik va maxfiylik ko‘rigigacha BLOCKED bo‘lib qolishi kerak. Tarixiy tibbiy ma'lumot yoki haqiqiy bemorlarni sinovga kiritmang.
+
+> v1.29: All three clients and Telegram share a quota; see UNIFIED_AI_V129.md.

@@ -11,5 +11,5 @@ export const AI_TOPICS=Object.freeze({
  endo:{question:"Endometrioz va kuchli hayz og‘rig‘i haqida umumiy ta'limiy ma'lumot bering.",source:"NHS",url:"https://www.nhs.uk/conditions/endometriosis/"},
  selfcare:{question:"Hayz og‘rig‘ini yengillashtirishning umumiy xavfsiz turmush tarzi usullari haqida ayting.",source:"NHS",url:"https://www.nhs.uk/symptoms/period-pain/"}
 });
-export const AI_MODEL="gemini-3.5-flash-lite";
+export const AI_MODEL="gemini-3.1-flash-lite";
 export const AI_LIMITS=Object.freeze({perClientDay:3,perClientMinute:1,globalDay:30,globalMonth:300,globalLifetime:1000,maxOutputTokens:220});
