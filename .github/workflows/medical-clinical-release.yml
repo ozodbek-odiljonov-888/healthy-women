@@ -1,0 +1,27 @@
+# Healthy Women: a medical-content PR directed at production must carry
+# human clinician review. This job intentionally FAILS while approvals are absent.
+# It does not deploy anything and uses free GitHub Actions minutes only.
+name: Clinical medical release gate
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'bot-vercel/worker/medical-*.js'
+      - 'bot-vercel/worker/medical-topics-*.js'
+      - 'bot-vercel/worker/index.js'
+      - 'scripts/check-medical-release.mjs'
+      - 'scripts/lib/clinical-review.mjs'
+      - 'medical-clinical-review.json'
+      - '.github/workflows/medical-clinical-release.yml'
+permissions:
+  contents: read
+jobs:
+  medical-review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Require clinical signoff for every changed sourced topic
+        run: node scripts/check-medical-release.mjs medical-clinical-review.json
