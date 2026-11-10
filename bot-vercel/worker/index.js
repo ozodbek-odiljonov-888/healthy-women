@@ -80,8 +80,17 @@ export default {
         if (req.method!=="GET") return json({error:"Method not allowed"},405);
         if (req.headers.get("origin")&&!originHeaders(req,env)["access-control-allow-origin"]) return json({error:"Forbidden"},403);
         const q=String(url.searchParams.get("q")||"").slice(0,180);
-        const safety=assessMedicalRisk(q);
-        return json({articles:safety.level!=="none"?[]:matches(q),urgent:safety.level!=="none",warning:safety.level!=="none"?safety.text:null,disclaimer:"Tashxis emas"},200,originHeaders(req,env));
+        // Reuse EXACTLY the Telegram Q&A safety gate: an API caller must not
+        // bypass unclear-person or contradictory-question protections.
+        const outcome=answerMedicalQuestion(q);
+        return json({
+         articles:outcome.kind==="answer"?outcome.articles:[],
+         urgent:outcome.urgent,
+         warning:outcome.kind==="safety"?outcome.text:null,
+         clarification:outcome.kind==="clarify"?outcome.text:null,
+         message:outcome.kind==="unknown"?outcome.text:null,
+         disclaimer:"Tashxis emas"
+        },200,originHeaders(req,env));
       }
       if (url.pathname==="/webhook") {
         if (req.method!=="POST") return json({error:"Method not allowed"},405);
