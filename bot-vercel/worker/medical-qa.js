@@ -1,5 +1,6 @@
 // Healthy Women: $0 rule-based medical knowledge assistant (Uzbek).
-import {ADDITIONAL_MEDICAL_TOPICS,TRAINING_UTTERANCES,UNSUPPORTED_TRAINING_UTTERANCES} from "./medical-curriculum.js";
+import {ADDITIONAL_MEDICAL_TOPICS,UNSUPPORTED_TRAINING_UTTERANCES} from "./medical-curriculum.js";
+import {NEW_MEDICAL_TOPICS,buildTrainingCorpus500} from "./medical-training-v115.js";
 // No paid models, API calls, patient database, request logs or model claims.
 // Editorial sources: NHS and ACOG. This is NOT a diagnosis or emergency service.
 const DISCLAIMER="\n\nℹ️ Bu umumiy ma’lumot, tashxis emas. Botga shaxsiy tibbiy tarix yoki maxfiy ma’lumot yubormang.";
@@ -41,8 +42,10 @@ export const MEDICAL_TOPICS=Object.freeze([
  {key:"endometrioz",title:"Endometrioz haqida",words:["endometrioz","endometriosis","endometriozis"],
   answer:"Endometrioz bachadon ichki qavatiga o‘xshash to‘qimaning boshqa joylarda uchrashidir. Belgilariga kuchli hayz og‘rig‘i, chanoq og‘rig‘i yoki ko‘p qon ketishi kirishi mumkin. Faqat chatdan tashxis qo‘yilmaydi; ginekolog tekshiruvi zarur.",
   url:"https://www.nhs.uk/conditions/endometriosis/"}
-,...ADDITIONAL_MEDICAL_TOPICS
+,...ADDITIONAL_MEDICAL_TOPICS,...NEW_MEDICAL_TOPICS
 ]);
+
+export const TRAINING_UTTERANCES_500=buildTrainingCorpus500(MEDICAL_TOPICS.slice(0,20));
 
 const CYR={"а":"a","б":"b","в":"v","г":"g","д":"d","е":"e","ё":"yo","ж":"j","з":"z","и":"i","й":"y","к":"k","л":"l","м":"m","н":"n","о":"o","п":"p","р":"r","с":"s","т":"t","у":"u","ф":"f","х":"x","ц":"ts","ч":"ch","ш":"sh","щ":"sh","ъ":"","ы":"i","ь":"","э":"e","ю":"yu","я":"ya","ў":"o","қ":"q","ғ":"g","ҳ":"h"};
 export function normalizeMedicalQuery(raw){
@@ -74,6 +77,24 @@ const padHour=/(har (bir )?soat.{0,30}(prokladka|tampon)|(?:prokladka|tampon).{0
 export function assessMedicalRisk(raw){
  const n=normalizeMedicalQuery(raw);
  if(!n)return {level:"none"};
+ // Independent safety checks run before the knowledge matcher, even when
+ // an exact synthetic training phrase happens to match another topic.
+ if(any(n,["ozimga zarar yetkaz","ozimni oldir","ozimni o ldir",
+    "jonimga qasd","bolamga zarar yetkaz","chaqalogimga zarar yetkaz"])){
+  return {level:"emergency",
+    text:"⚠️ O‘zingizga yoki bolaga zarar yetkazish fikri bo‘lsa, yolg‘iz qolmang: yaqin inson va shoshilinch tibbiy yordamga darhol murojaat qiling. Bu holat chat orqali baholanmaydi.",
+    url:"https://www.nhs.uk/mental-health/conditions/postnatal-depression/"};
+ }
+ const expecting=any(n,pregnancy)&&!any(n,["homilador emas","test manfiy","test negativ"]);
+ if(expecting&&any(n,["qattiq bosh ogri","kuchli bosh ogri","koz xiralash","korish xiralash","koz oldida chaq","yuzim shish","qovurga ostida ogri"])){
+  return {level:"urgent",text:"⚠️ Homiladorlikdagi kuchli bosh og‘rig‘i, ko‘rish buzilishi yoki to‘satdan shish preeklampsiya kabi jiddiy holat bilan bog‘liq bo‘lishi mumkin. Darhol tug‘ruq bo‘limi yoki shifokorga murojaat qiling.",url:"https://www.nhs.uk/conditions/pre-eclampsia/"};
+ }
+ if(any(n,["homila harakati kamay","bola kam qimirl","bola qimirlam","bolam qimirlam","homila qimirlama","qornimdagi bola harakat","tepishi kamay"])){
+  return {level:"urgent",text:"⚠️ Homila harakati odatdagidan kamaygan yoki to‘xtagan bo‘lsa, darhol tug‘ruq bo‘limiga murojaat qiling; ertangi kungacha kutmang. Telefon yoki uy doppleri bunday holatni istisno qila olmaydi.",url:"https://www.nhs.uk/pregnancy/keeping-well/your-babys-movements/"};
+ }
+ if(expecting&&any(n,["suvim ket","homila suvi ket","qindan suv kel","suv ketib qoldi"])){
+  return {level:"urgent",text:"⚠️ Homila suvi ketgan bo‘lishi mumkin. Darhol tug‘ruq bo‘limiga murojaat qiling, hatto muntazam to‘lg‘oq bo‘lmasa ham.",url:"https://www.nhs.uk/pregnancy/labour-and-birth/signs-that-labour-has-begun/"};
+ }
  const bleedingMention=any(n,bleeding);
  const faintMention=any(n,faint);
  const breathMention=any(n,breath);
@@ -127,7 +148,7 @@ function scoreTopic(query,topic){
  }
  return points;
 }
-const TRAINED_EXACT=new Map(Object.entries(TRAINING_UTTERANCES)
+const TRAINED_EXACT=new Map(Object.entries(TRAINING_UTTERANCES_500)
  .flatMap(([key,questions])=>questions.map(q=>[normalizeMedicalQuery(q),key])));
 const UNSUPPORTED_EXACT=new Set(UNSUPPORTED_TRAINING_UTTERANCES.map(normalizeMedicalQuery));
 const PERSONAL_MEDICATION=/(qaysi (dori|antibiotik|gormon|ukol)|necha (mg|milligram|tomchi|tabletka)|doza|dozasi|retsept yoz|qanday dori ich)/;
