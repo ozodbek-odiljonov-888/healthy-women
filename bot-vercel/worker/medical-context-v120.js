@@ -9,7 +9,7 @@ const SELF=[
  "nafasim","homiladorman","homiladorligim"
 ];
 const OTHER=[
- "onam","onamda","onamning","opam","opamda","opamning",
+ "onam","onamda","onamning","onamga","opam","opamda","opamning","opamga",
  "singlim","singlimda","dugonam","dugonamda","qizim","qizimda","xolam","xolamda","ammam",
  "rafiqam","ayolim","turmush ortogim","xotinim","kelinim",
  "bemorda","bemorga","bemorim","onasi","opasi",
@@ -64,7 +64,9 @@ export function assessMedicalSpeaker(raw,normalized){
  const uncertain=any(n,UNCERTAIN_MARKERS);
  const symptom=any(n,SYMPTOM_MARKERS);
  const general=any(n,EDUCATION_MARKERS);
- const scope=uncertain||self&&other?"mixed":other?"other":self?"self":"unspecified";
+ const contrastingPeople=any(n,["esa","ikkimiz","ikkalamiz","boshqamiz","boshqa odamda"]);
+ const scope=uncertain||(self&&other)?"mixed":other?"other":self?"self":"unspecified";
  const multipleSentences=(raw.match(/[.!?]+/gu)||[]).length>=2;
- return {scope,multipleSentences,personalSymptoms:symptom,generalQuestion:general&&!symptom};
+ return {scope,multipleSentences,personalSymptoms:symptom,
+  generalQuestion:general&&!symptom&&!contrastingPeople};
 }
