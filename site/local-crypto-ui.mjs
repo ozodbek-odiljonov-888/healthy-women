@@ -112,10 +112,20 @@ export function createLocalProtection({getLiveEvents,onUnlocked,onLocked,onMigra
   }catch(error){session=null;legacyMessage.textContent=String(error?.message||"Eski nusxani o‘chirib bo‘lmadi.");}
   finally{setBusy(false);}
  };
+ function openSetup(){
+  if(locked||busy||hasEncryptedJournal(storage))return false;
+  if(dialog.open)return true;
+  enableForm.reset();backedUp=false;ack.disabled=true;migrateButton.disabled=true;
+  status.textContent=storage.getItem(LEGACY_EVENTS_KEY)===null
+   ?"Yangi qayd saqlashdan oldin shifrlashni yoqing. Parolingizni yo‘qotmang; zaxira faylini tekshiring."
+   :"Avval mavjud qaydlarning shifrlangan zaxirasini xavfsiz saqlang.";
+  dialog.showModal();
+  return true;
+ }
  function bindSettings(){
   const enable=get("secureEnable"),lockButton=get("secureLock");
   if(lockButton)lockButton.onclick=()=>{void lock();};
-  if(enable)enable.onclick=()=>{if(locked)return;enableForm.reset();backedUp=false;ack.disabled=true;migrateButton.disabled=true;status.textContent="";dialog.showModal();};
+  if(enable)enable.onclick=()=>{openSetup();};
  }
  const safePassword=()=>{
   if(password.value.length<12||password.value.length>256)throw Error("Parol kamida 12 belgidan iborat bo‘lsin.");
@@ -154,7 +164,7 @@ export function createLocalProtection({getLiveEvents,onUnlocked,onLocked,onMigra
  doc.addEventListener("visibilitychange",()=>{if(!doc.hidden)return;if(dialog.open)dialog.close();password.value="";repeat.value="";unlockPassword.value="";resetStage();if(session)void lock();});
  dialog.addEventListener("close",()=>{enableForm.reset();resetStage();});
  if(locked)showWall();
- return {bindSettings,lock,isLocked:()=>locked,getSession:()=>session,isEnabled:()=>hasEncryptedJournal(storage),
+ return {bindSettings,openSetup,lock,isLocked:()=>locked,getSession:()=>session,isEnabled:()=>hasEncryptedJournal(storage),
   onDeleted:()=>{session=null;hideWall();},
   onExternalChange:()=>{showWall();session=null;onLocked()}};
 }
