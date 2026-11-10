@@ -13,21 +13,34 @@ const SELECT_SQL = `
  LIMIT 1
 `;
 
-// One SQL statement, atomic under concurrent writes even across Vercel instances.
-// Expected revision=NULL permits creating a NEW row only.
+// One atomic SQL statement (conditional UPDATE + INSERT), safe across Vercel instances.
+// A new row is inserted ONLY with expected revision=NULL; non-null revisions
+// can update only an already existing, matching row.
 // Existing deleted rows are never updated, even with the latest revision.
 const CAS_SQL = `
- INSERT INTO hw_private.opaque_snapshots AS existing
-   (telegram_user_id, revision, deleted, envelope)
- VALUES ($1::bigint, $2::uuid, $3::boolean, $4::jsonb)
- ON CONFLICT (telegram_user_id) DO UPDATE
- SET revision = EXCLUDED.revision,
-     deleted = EXCLUDED.deleted,
-     envelope = EXCLUDED.envelope,
-     updated_at = CURRENT_TIMESTAMP
- WHERE existing.revision IS NOT DISTINCT FROM $5::uuid
-   AND existing.deleted = false
- RETURNING revision::text AS revision
+ WITH changed AS (
+  UPDATE hw_private.opaque_snapshots AS existing
+  SET revision = $2::uuid,
+      deleted = $3::boolean,
+      envelope = $4::jsonb,
+      updated_at = CURRENT_TIMESTAMP
+  WHERE existing.telegram_user_id = $1::bigint
+    AND existing.revision = $5::uuid
+    AND existing.deleted = false
+  RETURNING revision::text AS revision
+ ),
+ created AS (
+  INSERT INTO hw_private.opaque_snapshots
+    (telegram_user_id, revision, deleted, envelope)
+  SELECT $1::bigint, $2::uuid, $3::boolean, $4::jsonb
+  WHERE $5::uuid IS NULL
+    AND NOT EXISTS (SELECT 1 FROM changed)
+  ON CONFLICT (telegram_user_id) DO NOTHING
+  RETURNING revision::text AS revision
+ )
+ SELECT revision FROM changed
+ UNION ALL
+ SELECT revision FROM created
 `;
 
 const invalid=()=>new Error("Invalid encrypted storage operation");
