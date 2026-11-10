@@ -7,7 +7,8 @@ test("no unencrypted backup restore bypass in main application",()=>{
  assert(!s.includes("localStorage.setItem(KEY,JSON.stringify(restored))"));
  assert(s.includes("writeEncryptedJournal(next,session)"));
  assert(s.includes("await eraseLocalJournal()"));
- assert(s.includes("hasEncryptedJournal()||syncBusy"));
+ assert(s.includes("async function syncData(){ /* fail closed: no plaintext health-data network sync */ return; }"));
+ assert(!s.includes("api(\'/api/sync\'"));
  assert(s.includes("savePhaseRecord"));
 });
 test("privacy-page uses the same coordinated erasure as the main app",()=>{
