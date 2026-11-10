@@ -43,7 +43,7 @@ export function buildReleasePreflight({root=rootDefault,signoffPath=join(root,"m
  let staticSafe=false;
  try{
   const config=read(configFile),app=read(appFile),api=read(apiFile);
-  staticSafe=config.trim()==='window.HEALTHY_WOMEN_API="";'
+  staticSafe=config.trim()==='window.HEALTHY_WOMEN_API="";\nwindow.HEALTHY_WOMEN_AI_API="";'
    &&app.includes("async function syncData(){ /* fail closed: no plaintext health-data network sync */ return; }")
    &&api.includes('env?.SYNC_API_MODE!=="staging"')
    &&api.includes('host!=="healthy-women-bot.vercel.app"');
