@@ -261,7 +261,7 @@ try{
  await privacyTab.goto(base+"/privacy.html");
  privacyTab.once("dialog",d=>d.accept());
  await privacyTab.locator("#erase").click();
- await privacyTab.waitForFunction(()=>localStorage.getItem("healthywomen.events.v1")===null&&localStorage.getItem("healthywomen.erase-epoch.v1")!==null);
+ await privacyTab.waitForFunction(before=>localStorage.getItem('healthywomen.erase-epoch.v1')!==before,erasedEpochBefore);
  const erasedEpochAfter=await privacyTab.evaluate(()=>localStorage.getItem("healthywomen.erase-epoch.v1"));
  assert.notEqual(erasedEpochAfter,erasedEpochBefore);
  await page.waitForFunction(()=>localStorage.getItem("healthywomen.events.v1")===null);
