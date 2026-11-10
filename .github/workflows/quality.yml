@@ -14,7 +14,7 @@ on:
       - '.github/workflows/android-release.yml'
       - '.github/workflows/quality.yml'
   pull_request:
-    branches: [main, feature/v1-8-telegram-auth-foundation, feature/v1-9-encrypted-sync-contract, feature/v1-10-neon-atomic-storage, feature/v1-11-staging-sync-api, feature/v1-12-free-quota-guards, feature/v1-13-free-medical-qa, feature/v1-14-medical-training-corpus, feature/v1-15-500-medical-questions, feature/v1-16-medical-safety-audit]
+    branches: [main, feature/v1-8-telegram-auth-foundation, feature/v1-9-encrypted-sync-contract, feature/v1-10-neon-atomic-storage, feature/v1-11-staging-sync-api, feature/v1-12-free-quota-guards, feature/v1-13-free-medical-qa, feature/v1-14-medical-training-corpus, feature/v1-15-500-medical-questions, feature/v1-16-medical-safety-audit, feature/v1-17-source-and-triage-audit]
     paths:
       - 'site/**'
       - 'tests/**'
