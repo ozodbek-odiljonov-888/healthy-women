@@ -23,6 +23,7 @@
       <button class="nav-button active" data-view="home"><span>⌂</span> Bosh sahifa</button>
       <button class="nav-button" data-view="calendar"><span>▦</span> Sikl kalendari</button>
       <button class="nav-button" data-view="journal"><span>✎</span> Kundalik</button>
+      <button class="nav-button" data-view="insights"><span>▥</span> Tahlillar</button>
       <button class="nav-button" data-view="learn"><span>♧</span> Bilimlar</button>
       <button class="nav-button" data-view="assistant"><span>✧</span> AI yordamchi</button>
       <button class="nav-button" data-view="settings"><span>⚙</span> Sozlamalar</button>
@@ -35,12 +36,13 @@
     <section id="view-home" class="view active"></section>
     <section id="view-calendar" class="view"></section>
     <section id="view-journal" class="view"></section>
+    <section id="view-insights" class="view"></section>
     <section id="view-learn" class="view"></section>
     <section id="view-assistant" class="view"></section>
     <section id="view-settings" class="view"></section>
     <footer class="footer">Healthy Women • Bepul sinov versiyasi • Tibbiy tashxis yoki kontrasepsiya vositasi emas • <a href="./privacy.html">Maxfiylik siyosati</a></footer>
   </main>
-  <nav class="mobile-nav" aria-label="Pastki menyu"><button data-view="home"><span>⌂</span>Asosiy</button><button data-view="calendar"><span>▦</span>Kalendar</button><button data-view="journal"><span>✎</span>Kundalik</button><button data-view="learn"><span>♧</span>Bilimlar</button><button data-view="assistant"><span>✧</span>Yordamchi</button><button data-view="settings"><span>⚙</span>Sozlamalar</button></nav>
+  <nav class="mobile-nav" aria-label="Pastki menyu"><button data-view="home"><span>⌂</span>Asosiy</button><button data-view="calendar"><span>▦</span>Kalendar</button><button data-view="journal"><span>✎</span>Kundalik</button><button data-view="insights"><span>▥</span>Tahlil</button><button data-view="settings"><span>⚙</span>Sozlamalar</button></nav>
 </div>
 <dialog id="periodDialog"><form method="dialog" id="periodForm" class="modal-form"><header><div><p class="eyebrow">KALENDAR</p><h2>Hayz kunlarini qayd etish</h2></div><button class="icon-button" type="button" id="closePeriod" aria-label="Yopish">×</button></header><p class="muted">Hayz boshlangan birinchi kunni kiriting. Tugagan sanani keyinroq to‘ldirish mumkin.</p><label>Hayz boshlangan sana<input type="date" name="start" id="periodStart" required /></label><label>Hayz tugagan sana (ixtiyoriy)<input type="date" name="end" id="periodEnd" /></label><div id="periodError" class="error" role="alert"></div><div class="modal-actions"><button type="button" id="cancelPeriod" class="button ghost">Bekor qilish</button><button type="submit" class="button primary">Saqlash</button></div></form></dialog>
 <script src="./config.js" defer></script>
