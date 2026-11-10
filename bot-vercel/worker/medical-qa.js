@@ -1,5 +1,6 @@
 // Healthy Women: $0 rule-based medical knowledge assistant (Uzbek).
-import {ADDITIONAL_MEDICAL_TOPICS,TRAINING_UTTERANCES,UNSUPPORTED_TRAINING_UTTERANCES} from "./medical-curriculum.js";
+import {ADDITIONAL_MEDICAL_TOPICS,UNSUPPORTED_TRAINING_UTTERANCES} from "./medical-curriculum.js";
+import {NEW_MEDICAL_TOPICS,buildTrainingCorpus500} from "./medical-training-v115.js";
 // No paid models, API calls, patient database, request logs or model claims.
 // Editorial sources: NHS and ACOG. This is NOT a diagnosis or emergency service.
 const DISCLAIMER="\n\nℹ️ Bu umumiy ma’lumot, tashxis emas. Botga shaxsiy tibbiy tarix yoki maxfiy ma’lumot yubormang.";
@@ -41,8 +42,10 @@ export const MEDICAL_TOPICS=Object.freeze([
  {key:"endometrioz",title:"Endometrioz haqida",words:["endometrioz","endometriosis","endometriozis"],
   answer:"Endometrioz bachadon ichki qavatiga o‘xshash to‘qimaning boshqa joylarda uchrashidir. Belgilariga kuchli hayz og‘rig‘i, chanoq og‘rig‘i yoki ko‘p qon ketishi kirishi mumkin. Faqat chatdan tashxis qo‘yilmaydi; ginekolog tekshiruvi zarur.",
   url:"https://www.nhs.uk/conditions/endometriosis/"}
-,...ADDITIONAL_MEDICAL_TOPICS
+,...ADDITIONAL_MEDICAL_TOPICS,...NEW_MEDICAL_TOPICS
 ]);
+
+export const TRAINING_UTTERANCES_500=buildTrainingCorpus500(MEDICAL_TOPICS.slice(0,20));
 
 const CYR={"а":"a","б":"b","в":"v","г":"g","д":"d","е":"e","ё":"yo","ж":"j","з":"z","и":"i","й":"y","к":"k","л":"l","м":"m","н":"n","о":"o","п":"p","р":"r","с":"s","т":"t","у":"u","ф":"f","х":"x","ц":"ts","ч":"ch","ш":"sh","щ":"sh","ъ":"","ы":"i","ь":"","э":"e","ю":"yu","я":"ya","ў":"o","қ":"q","ғ":"g","ҳ":"h"};
 export function normalizeMedicalQuery(raw){
@@ -127,7 +130,7 @@ function scoreTopic(query,topic){
  }
  return points;
 }
-const TRAINED_EXACT=new Map(Object.entries(TRAINING_UTTERANCES)
+const TRAINED_EXACT=new Map(Object.entries(TRAINING_UTTERANCES_500)
  .flatMap(([key,questions])=>questions.map(q=>[normalizeMedicalQuery(q),key])));
 const UNSUPPORTED_EXACT=new Set(UNSUPPORTED_TRAINING_UTTERANCES.map(normalizeMedicalQuery));
 const PERSONAL_MEDICATION=/(qaysi (dori|antibiotik|gormon|ukol)|necha (mg|milligram|tomchi|tabletka)|doza|dozasi|retsept yoz|qanday dori ich)/;
