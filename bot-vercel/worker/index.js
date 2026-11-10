@@ -3,12 +3,6 @@ import {MEDICAL_TOPICS,findMedicalTopics,assessMedicalRisk,answerMedicalQuestion
 const SOURCES=MEDICAL_TOPICS;
 const matches=(q)=>findMedicalTopics(q,1);
 const json=(obj,status=200,extra={})=>new Response(JSON.stringify(obj),{status,headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store","x-content-type-options":"nosniff",...extra}});
-function matches(q) {
-  const query=String(q||"").toLocaleLowerCase("uz").trim().slice(0,180);
-  if (!query) return [];
-  return SOURCES.map(item=>({item,score:item.words.reduce((score,w)=>score+(query.includes(w)?1:0),0)}))
-    .filter(x=>x.score>0).sort((a,b)=>b.score-a.score).slice(0,3).map(x=>x.item);
-}
 function originHeaders(req,env) {
   const origin=req.headers.get("origin");
   const allowed=String(env.ALLOWED_ORIGINS||"").split(",").map(x=>x.trim());
