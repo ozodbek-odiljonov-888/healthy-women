@@ -60,7 +60,11 @@ export function assessComplexMedicalQuestion(normalized){
   c.negative.test(normalized)&&c.positive.test(normalized)).map(c=>c.topic);
  if(contradictions.length)
   return {type:"contradiction",topics:contradictions};
- const mentions=CONDITION_ANCHORS.filter(item=>hasAny(normalized,item.phrases));
+ let mentions=CONDITION_ANCHORS.filter(item=>hasAny(normalized,item.phrases));
+ // "Shoshilinch kontratsepsiya" is a narrower form of contraception,
+ // not two unrelated problems. Do not turn existing FAQs into ambiguity.
+ if(mentions.some(x=>x.key==="tezkor_himoya"))
+  mentions=mentions.filter(x=>x.key!=="kontratseptsiya");
  // Requiring two separately, distinctly named topics minimizes false
  // positives for normal FAQ questions like "PCOS hayzga ta'sir qiladimi?".
  if(mentions.length>=2)
