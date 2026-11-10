@@ -67,7 +67,7 @@ export async function handleAiRequest(request,{env=process.env,reserve=defaultRe
   return response({error:"JSON required"},415,origin,env);
  let payload;try{payload=await parseSmallJson(request);}catch{return response({error:"Invalid body"},400,origin,env);}
  if(!payload||Array.isArray(payload)||typeof payload!=="object"||Object.keys(payload).sort().join(",")!=="consent,topic"
-   ||payload.consent!==true||!Object.hasOwn(AI_TOPICS,payload.topic))
+   ||payload.consent!==true||typeof payload.topic!=="string"||!Object.hasOwn(AI_TOPICS,payload.topic))
   return response({error:"General educational topic and consent required"},400,origin,env);
  // No raw IP is persisted. Missing edge-derived IP: refuse, never unlimited fallback.
  const ip=(request.headers.get("x-vercel-forwarded-for")||"").split(",")[0].trim();
