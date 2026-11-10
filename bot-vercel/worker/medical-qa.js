@@ -75,11 +75,11 @@ export function assessMedicalRisk(raw){
  const bleedingMention=any(n,bleeding);
  const faintMention=any(n,faint);
  const breathMention=any(n,breath);
- const pregnant=any(n,pregnancy);
+ const pregnant=any(n,pregnancy)&&!any(n,["homilador emas","test manfiy","test negativ"]);
  const pelvic=any(n,pelvicPain)||any(n,["ogri","sanch"]);
  const intense=any(n,severe);
  // Clear emergency markers take precedence over ordinary FAQ matches.
- if((bleedingMention&&(faintMention||breathMention||padHour.test(n)))
+ if((bleedingMention&&(faintMention||breathMention))
    ||(pregnant&&(intense||faintMention||breathMention))
    ||(pelvic&&(intense||faintMention||breathMention))
    ||(faintMention&&breathMention)){
