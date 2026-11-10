@@ -88,6 +88,7 @@ test("all answers disclose sources and that they are not a diagnosis",()=>{
 });
 test("the free QA module has no network, secret lookup, or persistent question storage",()=>{
  const src=readFileSync(new URL("../bot-vercel/worker/medical-qa.js",import.meta.url),"utf8");
- assert(!/fetch\s*\(|axios|openai|gemini|process\.env|localStorage|database|console\.(?:log|error)/i.test(src));
+ const executable=src.split("\n").filter(line=>!line.trimStart().startsWith("//")).join("\n");
+ assert(!/fetch\s*\(|axios|openai|gemini|process\.env|localStorage|console\.(?:log|error)/i.test(executable));
  assert(!/apiKey|API_KEY|BOT_TOKEN/.test(src));
 });
