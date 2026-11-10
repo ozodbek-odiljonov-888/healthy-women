@@ -149,3 +149,9 @@ See `PRIVACY.md` and `SECURITY.md` for operating rules.
 
 ## Cost
 GitHub Pages and public-repository standard GitHub Actions runners can be free within provider terms and quotas. Ongoing unrestricted zero cost is not guaranteed.
+
+## Unified optional AI on all three surfaces (v1.29 DRAFT)
+- HTTPS PWA and Android Capacitor app point to the same public endpoint; no secret in config.js. Browser CSP restricts external calls to this host.
+- Vercel Telegram worker exposes an explicit /ai topic/consent menu. All clients share fail-closed server quotas and send only a fixed public educational topic to Gemini.
+- Android WebView origin https://localhost requires explicit AI_ANDROID_ORIGIN server setting, never wildcard CORS.
+- Model updated to Google free-tier-listed gemini-3.1-flash-lite. This is a **draft**: production Gemini not active without billing-unlinked key, DB migration and independent medical/privacy review. See UNIFIED_AI_V129.md.
