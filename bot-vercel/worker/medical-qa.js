@@ -3,6 +3,7 @@ import {ADDITIONAL_MEDICAL_TOPICS,UNSUPPORTED_TRAINING_UTTERANCES} from "./medic
 import {NEW_MEDICAL_TOPICS,buildTrainingCorpus500} from "./medical-training-v115.js";
 import {fixConservativeMedicalTypos,removeExplicitNegatedSymptoms} from "./medical-language-v116.js";
 import {priorityMedicalSafety} from "./medical-triage-v117.js";
+import {assessComplexMedicalQuestion,COMPLEX_REPLY} from "./medical-complex-v119.js";
 // No paid models, API calls, patient database, request logs or model claims.
 // Editorial sources: NHS and ACOG. This is NOT a diagnosis or emergency service.
 const DISCLAIMER="\n\nℹ️ Bu umumiy ma’lumot, tashxis emas. Botga shaxsiy tibbiy tarix yoki maxfiy ma’lumot yubormang.";
@@ -94,7 +95,7 @@ export function assessMedicalRisk(raw){
     url:"https://www.nhs.uk/mental-health/conditions/postnatal-depression/"};
  }
  const expecting=any(n,pregnancy)&&!any(n,["homilador emas","test manfiy","test negativ"]);
- if(expecting&&any(n,["qattiq bosh ogri","kuchli bosh ogri","koz xiralash","korish xiralash","koz oldida chaq","yuzim shish","qovurga ostida ogri"])){
+ if(expecting&&any(n,["qattiq bosh ogri","kuchli bosh ogri","koz xiralash","korish xiralash","korishim xiralash","kozim xiralash","koz oldida chaq","yuzim shish","qovurga ostida ogri"])){
   return {level:"urgent",text:"⚠️ Homiladorlikdagi kuchli bosh og‘rig‘i, ko‘rish buzilishi yoki to‘satdan shish preeklampsiya kabi jiddiy holat bilan bog‘liq bo‘lishi mumkin. Darhol tug‘ruq bo‘limi yoki shifokorga murojaat qiling.",url:"https://www.nhs.uk/conditions/pre-eclampsia/"};
  }
  if(any(n,["homila harakati kamay","bola kam qimirl","bola qimirlam","bolam qimirlam","homila qimirlama","qornimdagi bola harakat","tepishi kamay"])){
@@ -175,6 +176,8 @@ export function answerMedicalQuestion(raw){
  const risk=assessMedicalRisk(raw);
  if(risk.level!=="none")return {kind:"safety",articles:[],text:risk.text+"\nManba: "+risk.url+DISCLAIMER,urgent:true};
  const normalized=normalizeMedicalQuery(raw);
+ const complex=assessComplexMedicalQuestion(normalized);
+ if(complex)return {kind:"clarify",articles:[],text:COMPLEX_REPLY+DISCLAIMER,urgent:false,reason:complex.type};
  if(UNSUPPORTED_EXACT.has(normalized)||PERSONAL_MEDICATION.test(normalized))
   return {kind:"unknown",articles:[],text:UNKNOWN+DISCLAIMER,urgent:false};
  const found=findMedicalTopics(raw,1);
