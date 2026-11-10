@@ -56,8 +56,10 @@ function acceptedRows(result){
  */
 export function createStagingRequestLimiter(sql,{limits=STAGING_QUOTAS}={}){
  if(!sql||typeof sql.query!=="function")throw Error("Staging quota DB unavailable");
- if(!limits||!Number.isSafeInteger(limits.globalPerDay)||!Number.isSafeInteger(limits.userPerDay))
-  throw Error("Unsafe staging quota");
+ if(!limits||!Number.isSafeInteger(limits.globalPerDay)||limits.globalPerDay<1
+   ||limits.globalPerDay>1000||!Number.isSafeInteger(limits.userPerDay)
+   ||limits.userPerDay<1||limits.userPerDay>100
+   ||limits.userPerDay>limits.globalPerDay)throw Error("Unsafe staging quota");
  return {
   async consume({userId,botToken,nowMs=Date.now()}={}){
    const day=assertDayAndLimits(nowMs,limits);
