@@ -35,6 +35,14 @@ jobs:
         with:
           node-version: '22'
       - run: npm test
+      - name: Prepare UNAPPROVED medical editorial review CSV (draft only)
+        run: node scripts/export-medical-editorial-v118.mjs medical-editorial-v118.csv
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Healthy-Women-50-Topic-Clinical-Review-DRAFT
+          path: medical-editorial-v118.csv
+          retention-days: 7
+          if-no-files-found: error
       - uses: actions/upload-artifact@v4
         with:
           name: Healthy-Women-PWA-preview
