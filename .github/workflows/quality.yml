@@ -14,7 +14,7 @@ on:
       - '.github/workflows/android-release.yml'
       - '.github/workflows/quality.yml'
   pull_request:
-    branches: [main, feature/v1-8-telegram-auth-foundation, feature/v1-9-encrypted-sync-contract, feature/v1-10-neon-atomic-storage, feature/v1-11-staging-sync-api, feature/v1-12-free-quota-guards, feature/v1-13-free-medical-qa, feature/v1-14-medical-training-corpus, feature/v1-15-500-medical-questions, feature/v1-16-medical-safety-audit, feature/v1-17-source-and-triage-audit, feature/v1-18-clinical-editorial-matrix, feature/v1-19-complex-medical-questions, feature/v1-20-speaker-context-safety, feature/v1-21-private-first-journal, feature/v1-22-empty-legacy-guard]
+    branches: [main, feature/v1-8-telegram-auth-foundation, feature/v1-9-encrypted-sync-contract, feature/v1-10-neon-atomic-storage, feature/v1-11-staging-sync-api, feature/v1-12-free-quota-guards, feature/v1-13-free-medical-qa, feature/v1-14-medical-training-corpus, feature/v1-15-500-medical-questions, feature/v1-16-medical-safety-audit, feature/v1-17-source-and-triage-audit, feature/v1-18-clinical-editorial-matrix, feature/v1-19-complex-medical-questions, feature/v1-20-speaker-context-safety, feature/v1-21-private-first-journal, feature/v1-22-empty-legacy-guard, feature/v1-23-offline-clinical-review-kit]
     paths:
       - 'site/**'
       - 'tests/**'
@@ -52,6 +52,41 @@ jobs:
           retention-days: 7
           if-no-files-found: error
 
+      - name: Generate read-only draft release readiness report
+        if: github.event_name == 'pull_request' && github.head_ref == 'feature/v1-24-release-preflight'
+        run: node scripts/release-preflight.mjs --json > "$RUNNER_TEMP/healthy-women-release-readiness.json"
+      - name: Upload non-sensitive blocked release status
+        if: github.event_name == 'pull_request' && github.head_ref == 'feature/v1-24-release-preflight'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Healthy-Women-Release-Preflight-BLOCKED
+          path: ${{ runner.temp }}/healthy-women-release-readiness.json
+          retention-days: 7
+          if-no-files-found: error
+
+      - name: Package vetted v1.24 source code for export
+        if: github.event_name == 'pull_request' && github.head_ref == 'feature/v1-24-release-preflight'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Healthy-Women-v1.24-Full-Source-DRAFT
+          path: |
+            .github/workflows/
+            .github/scripts/
+            .gitignore
+            *.md
+            bot-vercel/
+            capacitor.config.json
+            db/
+            package.json
+            scripts/
+            site/
+            tests/
+            worker/
+            wrangler.toml
+          include-hidden-files: true
+          retention-days: 7
+          if-no-files-found: error
+
   browser-private-first:
     if: github.event_name == 'pull_request' && (github.head_ref == 'feature/v1-21-private-first-journal' || github.head_ref == 'feature/v1-22-empty-legacy-guard')
     runs-on: ubuntu-latest
@@ -67,3 +102,39 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Verify first-launch encryption, legacy recovery and device flows
         run: node tests/e2e-browser.mjs && node tests/e2e-empty-legacy.mjs
+
+
+  android-v124-debug:
+    if: github.event_name == 'pull_request' && github.head_ref == 'feature/v1-24-release-preflight'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Verify runner Android SDK
+        run: test -d "$ANDROID_HOME"
+      - name: Install Capacitor without paid add-ons
+        run: npm install --no-audit --no-fund
+      - name: Generate Android project from reviewed web assets
+        run: |
+          npx cap add android
+          npx cap sync android
+          node scripts/harden-android.mjs
+      - name: Build unsigned-for-release debug APK
+        working-directory: android
+        run: chmod +x gradlew && ./gradlew assembleDebug --no-daemon
+      - name: Upload preview APK (NOT clinical release)
+        uses: actions/upload-artifact@v4
+        with:
+          name: Healthy-Women-v1.24-Android-Debug-Preview
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 7
+          if-no-files-found: error
