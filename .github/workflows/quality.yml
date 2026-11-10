@@ -71,6 +71,7 @@ jobs:
           name: Healthy-Women-v1.24-Full-Source-DRAFT
           path: |
             .github/workflows/
+            .github/scripts/
             .gitignore
             *.md
             bot-vercel/
