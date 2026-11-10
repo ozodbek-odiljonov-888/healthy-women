@@ -98,10 +98,13 @@ export function assessMedicalRisk(raw){
     ||(pregnant&&any(n,["yelka uchi","yelka uchim"]))){
   return {level:"urgent",text:"⚠️ Hayz kechikishi yoki homiladorlik ehtimoli fonida qon ketishi, chanoq yoki yelka uchida og‘riq bo‘lsa, tez tibbiy ko‘rik zarur. Bu ayrim hollarda bachadondan tashqari homiladorlik belgisi bo‘lishi mumkin.",url:"https://www.nhs.uk/conditions/ectopic-pregnancy/symptoms/"};
  }
- if((any(n,["tampon","menstrual cup","menstrual kubok"])&&any(n,["isitma","toshma","qusish","holsizlik"]))
-   ||(any(n,["siydik achish","siyganda achish","siydik yoli infeks"])&&
-      (any(n,["isitma","belim ogri","bel ogri"])||pregnant))){
-  return {level:"urgent",text:"⚠️ Bu alomatlarda jiddiy infeksiya ehtimolini istisno qilish kerak. Tez tibbiy ko‘rikdan o‘ting. Hush buzilishi, nafas qisilishi yoki keskin yomonlashish bo‘lsa, shoshilinch yordam chaqiring.",url:"https://www.nhs.uk/conditions/urinary-tract-infections-utis/"};
+ if(any(n,["tampon","menstrual cup","menstrual kubok"])
+   &&any(n,["isitma","toshma","qusish","holsizlik"])){
+  return {level:"urgent",text:"⚠️ Tampon yoki menstrual kubokdan foydalanish fonida isitma, toshma yoki qusish kabi alomatlar jiddiy infeksiya belgisi bo‘lishi mumkin. Vosita ishlatilayotgan bo‘lsa olib tashlang va zudlik bilan shoshilinch tibbiy yordamga murojaat qiling.",url:"https://www.nhs.uk/conditions/toxic-shock-syndrome/"};
+ }
+ if(any(n,["siydik achish","siyganda achish","siydik yoli infeks"])
+   &&(any(n,["isitma","belim ogri","bel ogri"])||pregnant)){
+  return {level:"urgent",text:"⚠️ Siydik yo‘li belgilariga isitma, bel og‘rig‘i yoki homiladorlik qo‘shilsa, bugunoq tibbiy ko‘rikdan o‘tish kerak. Kuchli holsizlik yoki umumiy ahvolning keskin yomonlashishi bo‘lsa, shoshilinch yordamga murojaat qiling.",url:"https://www.nhs.uk/conditions/urinary-tract-infections-utis/"};
  }
  if((any(n,["menopauza","menopoz","klimaks"])&&bleedingMention)
     ||any(n,["12 oydan keyin qon","hayz toxtagandan keyin qon"])){
