@@ -1,7 +1,7 @@
 name: Browser E2E Healthy Women (fictional data)
 on:
   push:
-    branches: [main]
+    branches: [main, feature/v1-20-speaker-context-safety]
     paths:
       - 'site/**'
       - 'tests/e2e-browser.mjs'
