@@ -6,14 +6,14 @@ import {encryptSyncSnapshot} from "../site/sync-crypto.mjs";
 
 globalThis.crypto ||= webcrypto;
 const HOST="healthy-women-sync-staging.example";
-const CLIENT="https://healthy-women.vercel.app";
+const CLIENT="https://healthy-women-sync-client-staging.example";
 const URL="https://"+HOST+"/api/sync";
 const TOKEN="123456789:FICTIONAL_TEST_BOT_TOKEN_abcdefghijklmnop";
 const NOW=1794301200;
 const ID_A=902101,ID_B=902102;
 const PASSPHRASE="FICTIONAL-long-recovery-secret-2026";
 const ENV={SYNC_API_MODE:"staging",SYNC_ALLOWED_HOSTNAME:HOST,
- SYNC_CLIENT_ORIGIN:CLIENT,BOT_TOKEN:TOKEN,DATABASE_URL:"postgresql://fake:fake@ep-fixture.neon.tech/staging?sslmode=require"};
+ SYNC_CLIENT_ORIGIN:CLIENT,SYNC_STAGING_USER_IDS:String(ID_A)+","+String(ID_B),BOT_TOKEN:TOKEN,DATABASE_URL:"postgresql://fake:fake@ep-fixture.neon.tech/staging?sslmode=require"};
 const events=[{id:"fictional",type:"period",payload:{start:"2026-09-01",end:"2026-09-05"},updated_at:1790000000000,deleted:0}];
 
 function sign(id,authDate=NOW){
@@ -47,7 +47,8 @@ function req(method,{data,origin=CLIENT,raw=sign(ID_A),path=URL,headers={},body}
  return new Request(path,opts);
 }
 function api(store,env=ENV,nowMs=()=>NOW*1000){
- return (request)=>handleSyncRequest(request,{env,loadStorage:async()=>store,nowMs});
+ return (request)=>handleSyncRequest(request,{env,loadStorage:async()=>store,
+  loadLimiter:async()=>({consume:async()=>({allowed:true})}),nowMs});
 }
 
 test("all cloud operations are disabled by default and never load storage",async()=>{
@@ -111,7 +112,8 @@ test("encrypted PUT + GET are isolated by signed Telegram identity and use revis
 test("malformed and plaintext payloads are rejected before storage is loaded",async()=>{
  let loads=0;
  const call=(request)=>handleSyncRequest(request,{env:ENV,nowMs:()=>NOW*1000,
-  loadStorage:async()=>{loads++;return fixtureStore();}});
+  loadStorage:async()=>{loads++;return fixtureStore();},
+  loadLimiter:async()=>({consume:async()=>({allowed:true})})});
  for(const data of [
   {envelope:{...await encryptSyncSnapshot(events,PASSPHRASE,ID_A),events},expectedRevision:null},
   {envelope:{format:"not-encrypted"},expectedRevision:null},
@@ -150,11 +152,59 @@ test("remote deletion requires explicit user confirmation and recent Telegram la
 });
 test("backend errors return generic messages without exposing SQL, initData or passphrase",async()=>{
  const call=(request)=>handleSyncRequest(request,{env:ENV,nowMs:()=>NOW*1000,
-  loadStorage:async()=>{throw Error("SQL database password: never-echo");}});
+  loadStorage:async()=>{throw Error("SQL database password: never-echo");},
+  loadLimiter:async()=>({consume:async()=>({allowed:true})})});
  const response=await call(req("GET"));
  assert.equal(response.status,503);
  const result=JSON.stringify(await response.json());
  assert.equal(result.includes("SQL"),false);
  assert.equal(result.includes("never-echo"),false);
  assert.equal(result.includes(String(ID_A)),false);
+});
+
+test("staging tester allowlist refuses signed outsiders before quota or storage",async()=>{
+ const store=fixtureStore();let quotaLoads=0;
+ const call=(request)=>handleSyncRequest(request,{
+  env:ENV,nowMs:()=>NOW*1000,loadStorage:async()=>store,
+  loadLimiter:async()=>{quotaLoads++;return {consume:async()=>({allowed:true})}}
+ });
+ const forbidden=await call(req("GET",{raw:sign(902103)}));
+ assert.equal(forbidden.status,403);
+ assert.equal(quotaLoads,0);
+ assert.equal(store.reads+store.writes,0);
+});
+test("missing allowlist, too many testers or production browser origin disables staging API",async()=>{
+ const store=fixtureStore();
+ for(const env of [
+  {...ENV,SYNC_STAGING_USER_IDS:""},
+  {...ENV,SYNC_STAGING_USER_IDS:"1,2,3,4,5,6"},
+  {...ENV,SYNC_STAGING_USER_IDS:"not-an-id"},
+  {...ENV,SYNC_CLIENT_ORIGIN:"https://healthy-women.vercel.app"}
+ ]){
+  assert.equal((await api(store,env)(req("GET"))).status,503);
+ }
+ assert.equal(store.reads+store.writes,0);
+});
+test("daily staging quota returns 429 and a bounded retry-after without accessing diary storage",async()=>{
+ const store=fixtureStore();let attempted=0;
+ const call=(request)=>handleSyncRequest(request,{
+  env:ENV,nowMs:()=>NOW*1000,loadStorage:async()=>store,
+  loadLimiter:async()=>({consume:async()=>{attempted++;return {allowed:false,retryAfterSeconds:60}}})
+ });
+ const res=await call(req("GET"));
+ assert.equal(res.status,429);
+ assert.equal(res.headers.get("Retry-After"),"60");
+ assert.equal(store.reads,0);
+ assert.equal(attempted,1);
+});
+test("unavailable quota database fails closed instead of reading or writing records",async()=>{
+ const store=fixtureStore();
+ const call=(request)=>handleSyncRequest(request,{
+  env:ENV,nowMs:()=>NOW*1000,loadStorage:async()=>store,
+  loadLimiter:async()=>{throw Error("DB CONNECTION PASSWORD");}
+ });
+ const res=await call(req("GET"));
+ assert.equal(res.status,503);
+ assert(!JSON.stringify(await res.json()).includes("PASSWORD"));
+ assert.equal(store.reads+store.writes,0);
 });
