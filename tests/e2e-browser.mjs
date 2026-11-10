@@ -25,10 +25,43 @@ await new Promise(done=>server.listen(0,"127.0.0.1",done));
 const base="http://127.0.0.1:"+server.address().port;
 let browser,page;
 const errors=[];
+async function configureNewEncryptedJournal(p,name){
+ await p.locator("#secureEnableDialog").waitFor({state:"visible"});
+ assert.equal(await p.evaluate(()=>localStorage.getItem("healthywomen.events.v1")),null);
+ await p.locator("#secureNewPassword").fill(PASS);
+ await p.locator("#secureNewRepeat").fill(PASS);
+ const saved=p.waitForEvent("download");
+ await p.locator("#secureDownload").click();
+ await (await saved).saveAs(join(tmp,name));
+ await p.locator("#secureBackupAcknowledged").check();
+ await p.locator("#secureMigrate").click();
+ await p.locator("#secureEnableDialog").waitFor({state:"hidden"});
+ await p.waitForFunction(()=>localStorage.getItem("healthywomen.encrypted-local.v1")!==null&&localStorage.getItem("healthywomen.events.v1")===null);
+}
 try{
  browser=await chromium.launch({headless:true});
+ // A genuinely new user must encrypt BEFORE the first health note is stored.
+ const freshContext=await browser.newContext({acceptDownloads:true,viewport:{width:1280,height:900}});
+ const fresh=await freshContext.newPage();fresh.on("pageerror",e=>errors.push(String(e)));
+ await fresh.goto(base+"/index.html");
+ await configureNewEncryptedJournal(fresh,"first-launch-empty-vault.hwbak");
+ await fresh.locator('#mainNav [data-view="journal"]').click();
+ await fresh.locator('#checkinForm textarea[name="note"]').fill("FICTIONAL-NEW-ENCRYPTED-FIRST-NOTE");
+ await fresh.locator('#checkinForm button[type="submit"]').click();
+ await fresh.waitForFunction(()=>document.querySelectorAll("#view-journal [data-edit-checkin]").length===1);
+ assert.equal(await fresh.evaluate(()=>localStorage.getItem("healthywomen.events.v1")),null);
+ assert(!(await fresh.evaluate(()=>localStorage.getItem("healthywomen.encrypted-local.v1"))).includes("FICTIONAL-NEW-ENCRYPTED-FIRST-NOTE"));
+ await freshContext.close();
+ console.log("PASS: first installation encrypts before storing any medical records.");
+ // An existing legacy installation still follows the original migration path.
  const context=await browser.newContext({acceptDownloads:true,viewport:{width:1280,height:900}});
  page=await context.newPage();page.on("pageerror",e=>errors.push(String(e)));
+ await page.addInitScript(()=>{
+  if(sessionStorage.getItem("hw-legacy-fixture-seeded")!=="yes"){
+   localStorage.setItem("healthywomen.events.v1","[]");
+   sessionStorage.setItem("hw-legacy-fixture-seeded","yes");
+  }
+ });
  await page.goto(base+"/index.html");
  await page.locator("#view-home .hero").waitFor();
  assert.equal(errors.length,0,"Startup errors: "+errors.join("; "));
