@@ -41,9 +41,12 @@ require a separately reviewed release containing the complete
 Do not disclose or place BOT_TOKEN / WEBHOOK_SECRET in source, GitHub,
 chat messages, scripts, browser assets, screenshots, CI logs or test fixtures.
 
-Do not turn on the PWA's dormant legacy plaintext sync path:
-`site/config.js` currently points to an empty API URL, and the existing
-bot handler correctly rejects `/api/sync`. A safe future sync protocol
+The PWA's old plaintext synchronization path is now **fail-closed**:
+`site/app.mjs` contains no `/api/sync` call, the sync toggle is disabled,
+and `site/config.js` still points to an empty API URL. The existing bot
+handler rejects `/api/sync`. `site/telegram-launch.mjs` can read raw
+Telegram launch data from the SDK or a URL fragment, but does not send
+it or store it. A safe future sync protocol
 must send **only client-encrypted blobs** with an independent passphrase
 or recovery secret, support per-account deletion, prevent cross-user access,
 handle replay and conflicting edits, and require explicit consent.
