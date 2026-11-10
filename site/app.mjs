@@ -14,7 +14,7 @@ import {renderSymptomInsights,INSIGHT_CSS} from "./insights.mjs";
 import {buildAnalytics,renderAnalyticsHTML} from "./analytics.mjs";
 import {confirmedPeriodDates,getCalendarDayDetails,renderCalendarDayDetails} from "./calendar-day.mjs";
 import {formatUzDate,formatUzMonth} from "./date-uz.mjs";
-import {askPublicAi,remoteAiReady} from "./ai-client.mjs";
+import {askPublicAi,remoteAiReady,pickAiTopic} from "./ai-client.mjs";
 import {validateDiaryEntry,editableDiaryForDate,diaryById} from "./diary.mjs";
 import {reminderSettingsMarkup,attachReminderControls,cancelDailyReminder,REMINDER_CSS} from "./reminders.mjs";
 const featureStyle=document.createElement("style");featureStyle.textContent=INSIGHT_CSS+REMINDER_CSS+PRIVACY_SHIELD_CSS+".quick-hide{flex:0 0 auto;border:1px solid #ebd6e0;background:#fff7fa;color:#985775;padding:10px 14px;border-radius:13px;font-size:12px;font-weight:700;min-height:41px}.quick-hide:hover{background:#f9e9f0}@media(max-width:550px){.quick-hide{padding:10px;font-size:11px}}"+".diary-edit-banner{grid-column:1/-1;background:#fff0f6;color:#945276;padding:12px;border-radius:10px;font-size:12px}.diary-validation{grid-column:1/-1;color:#b03055;font-size:12px;min-height:4px}.diary-actions{display:flex;align-items:center;gap:6px}.diary-actions small{color:#9a8091;font-size:10px}";document.head.appendChild(featureStyle);
@@ -222,10 +222,10 @@ function renderAssistant(){const a=analyze(events);const ready=remoteAiReady(Str
 async function askGenerative(){
  if(aiBusy||!aiConsentChecked||!remoteAiReady(String(window.HEALTHY_WOMEN_AI_API||'')))return;
  const q=$('#chatInput')?.value?.trim()||'';
- const found=searchArticles(q).find(a=>['cycle','duration','pain','heavy','irregular','pregnancy','between','pcos','endo','selfcare'].includes(a.id));
- if(!found){chatMessages.push({who:'bot',text:'Bu savolni umumiy mavzuga xavfsiz bog‘lab bo‘lmadi. Faqat offline javob mavjud.'});chatMessages=chatMessages.slice(-15);renderAssistant();return;}
+ const topic=pickAiTopic(q);
+ if(!topic){chatMessages.push({who:'bot',text:'Bu savolni umumiy mavzuga xavfsiz bog‘lab bo‘lmadi. Faqat offline javob mavjud.'});chatMessages=chatMessages.slice(-15);renderAssistant();return;}
  aiBusy=true;chatMessages.push({who:'user',text:q});chatMessages.push({who:'bot',text:'Umumiy ma’rifiy mavzu uchun AI javobi olinmoqda…'});chatMessages=chatMessages.slice(-15);renderAssistant();
- try{const answer=await askPublicAi(found.id,{endpoint:String(window.HEALTHY_WOMEN_AI_API||'')});chatMessages[chatMessages.length-1]={who:'bot',text:'AI — umumiy ma’lumot (tashxis emas):\n\n'+answer.text,source:answer.source,url:answer.url};aiRemaining=answer.remaining;}
+ try{const answer=await askPublicAi(topic,{endpoint:String(window.HEALTHY_WOMEN_AI_API||'')});chatMessages[chatMessages.length-1]={who:'bot',text:'AI — umumiy ma’lumot (tashxis emas):\n\n'+answer.text,source:answer.source,url:answer.url};aiRemaining=answer.remaining;}
  catch(err){chatMessages[chatMessages.length-1]={who:'bot',text:String(err?.message||'AI xatoligi')+' Offline bilimlar bo‘limidan foydalaning.'};}
  finally{aiBusy=false;renderAssistant();}
 }
