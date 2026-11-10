@@ -31,7 +31,11 @@ export function priorityMedicalSafety(n){
  if(expecting&&shoulderTip(n)){
   return {level:"urgent",text:"⚠️ Homiladorlik ehtimoli va yelka uchidagi og‘riq bachadondan tashqari homiladorlikda uchrashi mumkin. Zudlik bilan tibbiy baholashga murojaat qiling.",url:ECTOPIC};
  }
- if(afterMenopause(n)&&postmenopausalSpotting(n)){
+ // Do not interpret a clearly educational (non-personal) reading request
+ // as an asserted symptom. Never suppress a real first-person complaint.
+ const educationOnly=includesAny(n,["nima ekanini oqimoqchiman","haqida umumiy malumot ber"])
+   &&!includesAny(n,["menda","menga","mendan","keldi","kelmoqda","chiqdi","paydo boldi"]);
+ if(afterMenopause(n)&&postmenopausalSpotting(n)&&!educationOnly){
   return {level:"urgent",text:"⚠️ Menopauzadan keyin qonli, pushti yoki jigarrang ajralma oz bo‘lsa ham shifokor ko‘rigini talab qiladi. Sababini chat orqali aniqlab bo‘lmaydi.",url:POSTMENOPAUSE};
  }
  if(hasBlood&&padEachHour(n)&&saturated(n)){
