@@ -12,6 +12,15 @@ on:
       - '.github/workflows/android-signed.yml'
       - '.github/workflows/android-release.yml'
       - '.github/workflows/quality.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'site/**'
+      - 'tests/**'
+      - 'worker/**'
+      - 'bot-vercel/**'
+      - 'scripts/**'
+      - '.github/workflows/quality.yml'
   workflow_dispatch:
 permissions:
   contents: read
