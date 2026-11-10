@@ -1,13 +1,7 @@
 // Healthy Women — source-backed Telegram FAQ bot. Preview: no patient records stored.
-const SOURCES = [
-  {key:"sikl", words:["sikl","muntazam","muddat","hayz"], title:"Hayz sikli", answer:"Kattalarda sikl ko‘pincha 21–35 kun davom etadi. U hayzning birinchi kunidan keyingi hayzning birinchi kunigacha hisoblanadi. O‘zgarishlar davom etsa, shifokorga murojaat qiling.", url:"https://www.acog.org/womens-health/faqs/abnormal-uterine-bleeding"},
-  {key:"davomiylik", words:["davom","necha kun","7 kun","uzoq"], title:"Hayz davomiyligi", answer:"Hayz odatda 2–7 kun davom etadi. 7 kundan ortiq qon ketishi tibbiy baholashni talab qilishi mumkin.", url:"https://www.acog.org/womens-health/faqs/amenorrhea-absence-of-periods"},
-  {key:"ogriq", words:["og‘riq","ogriq","qorin","sanchish"], title:"Hayz og‘rig‘i", answer:"Juda kuchli, odatdagidan farqli yoki kundalik hayotga xalaqit qiluvchi og‘riq bo‘lsa, shifokorga murojaat qiling.", url:"https://www.nhs.uk/symptoms/period-pain/"},
-  {key:"qon", words:["qon","prokladka","laxta","kuchli"], title:"Ko‘p qon ketishi", answer:"Har soatda gigiyenik vositani almashtirishga to‘g‘ri kelishi, qon ketishi 7 kundan oshishi yoki bosh aylanishi baholashni talab qiladi. Holsizlik va nafas qisishi bilan kechadigan kuchli qon ketishda shoshilinch yordam oling.", url:"https://www.acog.org/womens-health/faqs/abnormal-uterine-bleeding"},
-  {key:"kechikish", words:["kechik","kelmadi","homilador","test"], title:"Hayz kechikishi", answer:"Homiladorlik ehtimoli mavjud bo‘lsa, mos vaqtda homiladorlik testidan foydalaning. Kalendar natijasi homiladorlikni tasdiqlamaydi va kontratsepsiya usuli emas.", url:"https://www.acog.org/womens-health/faqs/your-first-period"},
-  {key:"nomuntazam", words:["notekis","nomuntazam","o‘zgardi","o‘zgarish"], title:"Nomuntazam sikl", answer:"Siklning takroriy o‘zgarishi, hayzlar orasida qon kelishi yoki hayz bir necha oy bo‘lmasligi shifokor ko‘rigini talab qilishi mumkin.", url:"https://www.acog.org/womens-health/faqs/abnormal-uterine-bleeding"}
-];
-const urgent=/hushdan|hushsiz|nafas qis|juda kuchli og‘riq|qattiq og‘riq|qon.*bosh aylan|bosh aylan.*qon/i;
+import {MEDICAL_TOPICS,findMedicalTopics,assessMedicalRisk,answerMedicalQuestion} from "./medical-qa.js";
+const SOURCES=MEDICAL_TOPICS;
+const matches=(q)=>findMedicalTopics(q,1);
 const json=(obj,status=200,extra={})=>new Response(JSON.stringify(obj),{status,headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store","x-content-type-options":"nosniff",...extra}});
 function matches(q) {
   const query=String(q||"").toLocaleLowerCase("uz").trim().slice(0,180);
@@ -48,8 +42,8 @@ function menu(env){
  const app=appButton(env);if(app)rows.push([app]);
  return {inline_keyboard:rows};
 }
-const HELP="🌷 Healthy Women — Sog‘lom ayollar\n\nHayz sikli haqida manbali qisqa ma’lumotlar.\n\n/start — bosh menyu\n/topics — mavzular\n/ask savol — bilimlar bazasidan qidirish\n/sources — manbalar\n/privacy — maxfiylik\n/delete — ma’lumotlarni o‘chirish\n/remind — eslatmalar holati\n\n⚠️ Bot chatiga shaxsiy tibbiy tarix yoki boshqa maxfiy ma’lumotlarni yubormang.";
-const PRIVACY="🔒 Healthy Women botining sinov versiyasi hayz tarixi va savollarni o‘z serveri bazasida saqlamaydi. Telegram orqali yozilgan xabarlar Telegram tizimidan o‘tadi. Saytdagi qaydlar qurilmadagi shifrlanmagan mahalliy xotirada turadi.";
+const HELP="🌷 Healthy Women — Sog‘lom ayollar\n\nHayz sikli haqida 11 mavzuda manbali savol-javob. Bu generativ AI emas, tekshirilgan bilimlar bazasi.\n\n/start — bosh menyu\n/topics — mavzular\n/ask savol — bepul tibbiy savol-javob\nSavolni oddiy matn sifatida ham yozishingiz mumkin\n/sources — manbalar\n/privacy — maxfiylik\n/delete — ma’lumotlarni o‘chirish\n/remind — eslatmalar holati\n\n⚠️ Bot chatiga shaxsiy tibbiy tarix yoki boshqa maxfiy ma’lumotlarni yubormang.";
+const PRIVACY="🔒 Healthy Women botining sinov versiyasi hayz tarixi va savollarni o‘z serveri bazasida saqlamaydi. Telegram orqali yozilgan xabarlar Telegram tizimidan o‘tadi. Saytdagi qaydlar qurilma xotirasida saqlanadi; himoyalanish holati sozlamalarga bog‘liq.";
 const SOURCES_TEXT="📚 Tibbiy manbalar:\nACOG — https://www.acog.org/womens-health/\nNHS — https://www.nhs.uk/conditions/periods/\n\nBot tashxis qo‘ymaydi.";
 function articleText(article){return article.title+"\n"+article.answer+"\nManba: "+article.url+"\n\nTibbiy tashxis emas.";}
 async function handleUpdate(update,env){
@@ -67,7 +61,7 @@ async function handleUpdate(update,env){
  }
  const msg=update?.message;
  if(msg?.chat?.type!=="private"||!Number.isSafeInteger(msg.chat.id))return;
- const chat=msg.chat.id,cmd=String(msg.text||"").trim().slice(0,250);
+ const chat=msg.chat.id,cmd=String(msg.text||"").trim().slice(0,700);
  if(cmd==="/start"||cmd==="/help"||cmd==="/topics")return say(env,chat,HELP,menu(env));
  if(cmd==="/privacy")return say(env,chat,PRIVACY);
  if(cmd==="/sources")return say(env,chat,SOURCES_TEXT);
@@ -76,11 +70,10 @@ async function handleUpdate(update,env){
  if(cmd==="/ask"||cmd.startsWith("/ask ")){
   const question=cmd.slice(4).trim();
   if(!question)return say(env,chat,"Namuna: /ask hayz og‘rig‘i");
-  if(urgent.test(question)||/prokladka.*har soat|tampon.*har soat/i.test(question))
-   return say(env,chat,"⚠️ Kuchli qon ketishi, hushdan ketish, nafas qisishi yoki keskin og‘riq holatida tez tibbiy yordamga murojaat qiling. Chat orqali tashxis qo‘yib bo‘lmaydi.");
-  const articles=matches(question);
-  return say(env,chat,articles.length?articles.slice(0,2).map(articleText).join("\n\n").slice(0,3400):"Bu savol uchun tekshirilgan manba asosida aniq javob topilmadi. Shifokor bilan maslahatlashishingiz mumkin.");
+  return say(env,chat,answerMedicalQuestion(question).text);
  }
+ if(cmd && !cmd.startsWith("/"))
+  return say(env,chat,answerMedicalQuestion(cmd).text);
  return say(env,chat,"Healthy Women menyusini ochish: /start. Savol: /ask savolingiz.",menu(env));
 }
 export default {
@@ -93,7 +86,8 @@ export default {
         if (req.method!=="GET") return json({error:"Method not allowed"},405);
         if (req.headers.get("origin")&&!originHeaders(req,env)["access-control-allow-origin"]) return json({error:"Forbidden"},403);
         const q=String(url.searchParams.get("q")||"").slice(0,180);
-        return json({articles:urgent.test(q)?[]:matches(q),urgent:urgent.test(q),disclaimer:"Tashxis emas"},200,originHeaders(req,env));
+        const safety=assessMedicalRisk(q);
+        return json({articles:safety.level!=="none"?[]:matches(q),urgent:safety.level!=="none",disclaimer:"Tashxis emas"},200,originHeaders(req,env));
       }
       if (url.pathname==="/webhook") {
         if (req.method!=="POST") return json({error:"Method not allowed"},405);
