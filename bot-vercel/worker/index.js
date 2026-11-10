@@ -36,7 +36,7 @@ function menu(env){
  const app=appButton(env);if(app)rows.push([app]);
  return {inline_keyboard:rows};
 }
-const HELP="🌷 Healthy Women — Sog‘lom ayollar\n\nAyollar salomatligi bo‘yicha 20 mavzuda manbali savol-javob. Bu generativ AI emas, tekshirilgan bilimlar bazasi.\n\n/start — bosh menyu\n/topics — mavzular\n/ask savol — bepul tibbiy savol-javob\nSavolni oddiy matn sifatida ham yozishingiz mumkin\n/sources — manbalar\n/privacy — maxfiylik\n/delete — ma’lumotlarni o‘chirish\n/remind — eslatmalar holati\n\n⚠️ Bot chatiga shaxsiy tibbiy tarix yoki boshqa maxfiy ma’lumotlarni yubormang.";
+const HELP="🌷 Healthy Women — Sog‘lom ayollar\n\nAyollar salomatligi bo‘yicha 50 mavzuda manbali savol-javob. Bu generativ AI emas, tekshirilgan bilimlar bazasi.\n\n/start — bosh menyu\n/topics — mavzular\n/ask savol — bepul tibbiy savol-javob\nSavolni oddiy matn sifatida ham yozishingiz mumkin\n/sources — manbalar\n/privacy — maxfiylik\n/delete — ma’lumotlarni o‘chirish\n/remind — eslatmalar holati\n\n⚠️ Bot chatiga shaxsiy tibbiy tarix yoki boshqa maxfiy ma’lumotlarni yubormang.";
 const PRIVACY="🔒 Healthy Women botining sinov versiyasi hayz tarixi va savollarni o‘z serveri bazasida saqlamaydi. Telegram orqali yozilgan xabarlar Telegram tizimidan o‘tadi. Saytdagi qaydlar qurilma xotirasida saqlanadi; himoyalanish holati sozlamalarga bog‘liq.";
 const SOURCES_TEXT="📚 Tibbiy manbalar:\nACOG — https://www.acog.org/womens-health/\nNHS — https://www.nhs.uk/conditions/periods/\n\nBot tashxis qo‘ymaydi.";
 function articleText(article){return article.title+"\n"+article.answer+"\nManba: "+article.url+"\n\nTibbiy tashxis emas.";}
