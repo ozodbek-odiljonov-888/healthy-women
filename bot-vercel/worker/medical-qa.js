@@ -2,6 +2,7 @@
 import {ADDITIONAL_MEDICAL_TOPICS,UNSUPPORTED_TRAINING_UTTERANCES} from "./medical-curriculum.js";
 import {NEW_MEDICAL_TOPICS,buildTrainingCorpus500} from "./medical-training-v115.js";
 import {fixConservativeMedicalTypos,removeExplicitNegatedSymptoms} from "./medical-language-v116.js";
+import {priorityMedicalSafety} from "./medical-triage-v117.js";
 // No paid models, API calls, patient database, request logs or model claims.
 // Editorial sources: NHS and ACOG. This is NOT a diagnosis or emergency service.
 const DISCLAIMER="\n\nℹ️ Bu umumiy ma’lumot, tashxis emas. Botga shaxsiy tibbiy tarix yoki maxfiy ma’lumot yubormang.";
@@ -79,6 +80,8 @@ const padHour=/(har (bir )?soat.{0,30}(prokladka|tampon)|(?:prokladka|tampon).{0
 export function assessMedicalRisk(raw){
  const n=removeExplicitNegatedSymptoms(normalizeMedicalQuery(raw));
  if(!n)return {level:"none"};
+ const priority=priorityMedicalSafety(n);
+ if(priority)return priority;
  if(any(n,["hushim ket","hushdan ket","ozimdan ket"])&&!any(n,["hushdan ketish nima","hushdan ketish sababi"])){
   return {level:"emergency",text:"⚠️ Hushdan ketish yoki hushning yo‘qolishi shoshilinch tibbiy baholashni talab qilishi mumkin. Hozirning o‘zida tibbiy yordamga murojaat qiling.",url:EMERGENCY_SOURCE};
  }

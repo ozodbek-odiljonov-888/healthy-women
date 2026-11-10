@@ -159,7 +159,7 @@ export const SAFETY_TRAINING_UTTERANCES=Object.freeze([
  {question:"Siydik achishadi, isitmam baland va belim og‘riyapti",level:"urgent"},
  {question:"Homiladorman, siyganda achishadi",level:"urgent"},
  {question:"Hayzda og‘riq juda kuchli, nafasim qisilyapti",level:"emergency"},
- {question:"Homiladorlik ehtimoli, yelka uchim og‘riyapti va qon kelmoqda",level:"urgent"}
+ {question:"Homiladorlik ehtimoli, yelka uchim og‘riyapti va qon kelmoqda",level:"emergency"}
 ]);
 
 export const UNSUPPORTED_TRAINING_UTTERANCES=Object.freeze([
