@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {handleAiRequest,anonymousKey} from "../bot-vercel/api/ai.js";
 import {AI_TOPICS,AI_MODEL,AI_LIMITS} from "../bot-vercel/worker/ai-topics.js";
-import {askPublicAi,remoteAiReady} from "../site/ai-client.mjs";
+import {askPublicAi,remoteAiReady,pickAiTopic} from "../site/ai-client.mjs";
 const origin="https://healthy-women.vercel.app",endpoint="https://healthy-women-bot.vercel.app/api/ai";
 const env={AI_MODE:"free_preview",AI_FREE_TIER_NO_BILLING:"CONFIRMED",GEMINI_API_KEY:"fictional-api-key-for-tests-123",AI_DATABASE_URL:"postgresql://example.invalid/db",AI_IP_PEPPER:"fictitious-secret-longer-than-thirty-two-characters",AI_ALLOWED_ORIGIN:origin,AI_ALLOWED_HOSTNAME:"healthy-women-bot.vercel.app"};
 const request=(body={topic:"pain",consent:true},headers={})=>new Request(endpoint,{method:"POST",headers:{Origin:origin,"Content-Type":"application/json","x-vercel-forwarded-for":"192.0.2.42",...headers},body:typeof body==="string"?body:JSON.stringify(body)});
@@ -15,7 +15,7 @@ test("AI is fail-closed unless manually enabled, no billing project confirmed an
  }
 });
 test("server accepts ONLY predefined topic and explicit opt-in; no diary or arbitrary text",async()=>{
- for(const body of [{topic:"pain",consent:false},{topic:"pain",consent:true,diary:"private"},{topic:"my private notes",consent:true},{topic:"pain"},"{}",{topic:null,consent:true}]){
+ for(const body of [{topic:"pain",consent:false},{topic:"pain",consent:true,diary:"private"},{topic:"my private notes",consent:true},{topic:"pain"},"{}",{topic:null,consent:true},{topic:["pain"],consent:true}]){
   let called=0;const r=await handleAiRequest(request(body),{env,reserve:async()=>{called++;return quota();},generate:async()=>"BAD"});
   assert.equal(r.status,400);assert.equal(called,0);
  }
@@ -68,9 +68,18 @@ test("offline and sync fail-closed behavior preserved; CSP and cache account for
  const base=new URL("../site/",import.meta.url);const app=readFileSync(new URL("app.mjs",base),"utf8");
  const sw=readFileSync(new URL("sw.js",base),"utf8");
  assert(app.includes("async function syncData(){ /* fail closed: no plaintext health-data network sync */ return; }"));
- assert(app.includes("askPublicAi(found.id"));assert(app.includes("aiConsentChecked"));
+ assert(app.includes("askPublicAi(topic"));assert(app.includes("aiConsentChecked"));
  assert(sw.includes('"./ai-client.mjs"'));assert(sw.includes("!STATIC_PATHS.has(url.pathname)"));
  assert(!sw.includes("cache.put("));
  const config=readFileSync(new URL("config.js",base),"utf8");
  assert.equal(config.trim(),'window.HEALTHY_WOMEN_API="";\nwindow.HEALTHY_WOMEN_AI_API="";');
+});
+
+test("client resolves symptom intent before generic hayz keywords",()=>{
+ assert.equal(pickAiTopic("Hayz og‘rig‘i haqida"),"pain");
+ assert.equal(pickAiTopic("Qon juda ko‘p ketmoqda"),"heavy");
+ assert.equal(pickAiTopic("PCOS nima?"),"pcos");
+ assert.equal(pickAiTopic("Hayz kechiksa"),"pregnancy");
+ assert.equal(pickAiTopic("Hayz sikli nima?"),"cycle");
+ assert.equal(pickAiTopic("Shaxsiy parolim 123456"),null);
 });
