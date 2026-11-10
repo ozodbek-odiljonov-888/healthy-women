@@ -3,9 +3,9 @@ import assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {MEDICAL_TOPICS,normalizeMedicalQuery,findMedicalTopics,assessMedicalRisk,answerMedicalQuestion} from "../bot-vercel/worker/medical-qa.js";
 
-test("eleven health topics have a source-backed concise educational answer",()=>{
- assert.equal(MEDICAL_TOPICS.length,11);
- assert.equal(new Set(MEDICAL_TOPICS.map(x=>x.key)).size,11);
+test("twenty health topics have a source-backed concise educational answer",()=>{
+ assert.equal(MEDICAL_TOPICS.length,20);
+ assert.equal(new Set(MEDICAL_TOPICS.map(x=>x.key)).size,20);
  for(const item of MEDICAL_TOPICS){
   assert(item.answer.length>60&&item.answer.length<750);
   assert(item.words.length>=2);

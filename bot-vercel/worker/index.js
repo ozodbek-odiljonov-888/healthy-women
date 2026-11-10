@@ -36,7 +36,7 @@ function menu(env){
  const app=appButton(env);if(app)rows.push([app]);
  return {inline_keyboard:rows};
 }
-const HELP="🌷 Healthy Women — Sog‘lom ayollar\n\nHayz sikli haqida 11 mavzuda manbali savol-javob. Bu generativ AI emas, tekshirilgan bilimlar bazasi.\n\n/start — bosh menyu\n/topics — mavzular\n/ask savol — bepul tibbiy savol-javob\nSavolni oddiy matn sifatida ham yozishingiz mumkin\n/sources — manbalar\n/privacy — maxfiylik\n/delete — ma’lumotlarni o‘chirish\n/remind — eslatmalar holati\n\n⚠️ Bot chatiga shaxsiy tibbiy tarix yoki boshqa maxfiy ma’lumotlarni yubormang.";
+const HELP="🌷 Healthy Women — Sog‘lom ayollar\n\nAyollar salomatligi bo‘yicha 20 mavzuda manbali savol-javob. Bu generativ AI emas, tekshirilgan bilimlar bazasi.\n\n/start — bosh menyu\n/topics — mavzular\n/ask savol — bepul tibbiy savol-javob\nSavolni oddiy matn sifatida ham yozishingiz mumkin\n/sources — manbalar\n/privacy — maxfiylik\n/delete — ma’lumotlarni o‘chirish\n/remind — eslatmalar holati\n\n⚠️ Bot chatiga shaxsiy tibbiy tarix yoki boshqa maxfiy ma’lumotlarni yubormang.";
 const PRIVACY="🔒 Healthy Women botining sinov versiyasi hayz tarixi va savollarni o‘z serveri bazasida saqlamaydi. Telegram orqali yozilgan xabarlar Telegram tizimidan o‘tadi. Saytdagi qaydlar qurilma xotirasida saqlanadi; himoyalanish holati sozlamalarga bog‘liq.";
 const SOURCES_TEXT="📚 Tibbiy manbalar:\nACOG — https://www.acog.org/womens-health/\nNHS — https://www.nhs.uk/conditions/periods/\n\nBot tashxis qo‘ymaydi.";
 function articleText(article){return article.title+"\n"+article.answer+"\nManba: "+article.url+"\n\nTibbiy tashxis emas.";}
@@ -81,7 +81,7 @@ export default {
         if (req.headers.get("origin")&&!originHeaders(req,env)["access-control-allow-origin"]) return json({error:"Forbidden"},403);
         const q=String(url.searchParams.get("q")||"").slice(0,180);
         const safety=assessMedicalRisk(q);
-        return json({articles:safety.level!=="none"?[]:matches(q),urgent:safety.level!=="none",disclaimer:"Tashxis emas"},200,originHeaders(req,env));
+        return json({articles:safety.level!=="none"?[]:matches(q),urgent:safety.level!=="none",warning:safety.level!=="none"?safety.text:null,disclaimer:"Tashxis emas"},200,originHeaders(req,env));
       }
       if (url.pathname==="/webhook") {
         if (req.method!=="POST") return json({error:"Method not allowed"},405);
