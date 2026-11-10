@@ -1,7 +1,7 @@
 // Healthy Women v1.18 — a conservative boundary for multi-topic and
 // individual diagnosis requests. No ML, network, logging or patient storage.
 // This does not understand every dialect or guarantee medical safety.
-const COMPARISON=/\b(?:farqi|farqini|farqlari|solishtir|taqqosla|qaysi biri|ikkalasi|ikkalasining)\b/;
+const COMPARISON=/\b(?:farq\w*|solishtir\w*|taqqosla\w*|qaysi biri|ikkalasi\w*)\b/;
 const CONDITION_PATTERNS=[
  ["pcos",/\b(?:pcos|polikistoz|pmos)\b/],
  ["endometrioz",/\b(?:endometrioz|endometriosis)\b/],
@@ -17,7 +17,7 @@ const CONDITION_PATTERNS=[
  ["hpv",/\b(?:hpv|papillomavirus)\b/],
  ["xlamidiya",/\b(?:xlamidiya|chlamydia)\b/]
 ];
-const PERSONAL_RESULT=/(?:\b(?:mening|meni|menda|natijam|analizim|tahlilim|tekshiruvim|uttim|uzi natijam)\b.{0,65}\b(?:tashxis|davolash|operatsiya|retsept|davolansam|natija|chiqdi|chiqqan|talqin))|(?:\b(?:utt|uzi|analiz|tahlil)\b.{0,50}\b(?:\d+(?:\.\d+)?\s*(?:sm|mm|mg|g\/l)|natijam|operatsiya kerak))/;
+const PERSONAL_RESULT=/(?:\b(?:mening|meni|menda|natijam|analizim|tahlilim|tekshiruvim|uttim|uzi natijam)\b.{0,65}\b(?:tashxis|davolash|operatsiya|retsept|davolansam|natija|chiqdi|chiqqan|talqin))|(?:\b(?:uttda|utt|uzida|uzi|analiz|tahlil)\b.{0,50}\b(?:\d+(?:\.\d+)?\s*(?:sm|mm|mg|g\/l)|natijam|operatsiya kerak))/;
 const INDIVIDUAL_DIAGNOSIS=/\b(?:menga tashxis|menda nima kasallik|aniq tashxis qoy|menga operatsiya kerakmi|dori yozib ber|retsept ber|necha mg)\b/;
 
 export function checkMedicalQuestionBoundaries(normalized){
