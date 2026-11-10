@@ -7,18 +7,20 @@ on:
       - 'tests/**'
       - 'worker/**'
       - 'bot-vercel/**'
+      - 'db/**'
       - 'scripts/**'
       - '.github/workflows/android.yml'
       - '.github/workflows/android-signed.yml'
       - '.github/workflows/android-release.yml'
       - '.github/workflows/quality.yml'
   pull_request:
-    branches: [main, feature/v1-8-telegram-auth-foundation]
+    branches: [main, feature/v1-8-telegram-auth-foundation, feature/v1-9-encrypted-sync-contract]
     paths:
       - 'site/**'
       - 'tests/**'
       - 'worker/**'
       - 'bot-vercel/**'
+      - 'db/**'
       - 'scripts/**'
       - '.github/workflows/quality.yml'
   workflow_dispatch:
