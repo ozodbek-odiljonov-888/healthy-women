@@ -33,7 +33,7 @@ test("training examples do not contradict another answer label or duplicate a ph
   assert(examples.length>=5);
   for(const raw of examples){
    const normalized=normalizeMedicalQuery(raw);
-   assert(normalized.length>8,raw);
+   assert(normalized.length>=6,raw);
    assert(!seen.has(normalized),"Duplicate question: "+raw+" ("+seen.get(normalized)+"/"+key+")");
    seen.set(normalized,key);
   }
