@@ -72,7 +72,7 @@ test("offline and sync fail-closed behavior preserved; CSP and cache account for
  assert(sw.includes('"./ai-client.mjs"'));assert(sw.includes("!STATIC_PATHS.has(url.pathname)"));
  assert(!sw.includes("cache.put("));
  const config=readFileSync(new URL("config.js",base),"utf8");
- assert.equal(config.trim(),'window.HEALTHY_WOMEN_API="";\nwindow.HEALTHY_WOMEN_AI_API="";');
+ assert(config.includes('window.HEALTHY_WOMEN_AI_API="https://healthy-women-bot.vercel.app/api/ai"'));
 });
 
 test("client resolves symptom intent before generic hayz keywords",()=>{
