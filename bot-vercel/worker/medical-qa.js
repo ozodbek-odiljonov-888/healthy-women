@@ -77,6 +77,24 @@ const padHour=/(har (bir )?soat.{0,30}(prokladka|tampon)|(?:prokladka|tampon).{0
 export function assessMedicalRisk(raw){
  const n=normalizeMedicalQuery(raw);
  if(!n)return {level:"none"};
+ // Independent safety checks run before the knowledge matcher, even when
+ // an exact synthetic training phrase happens to match another topic.
+ if(any(n,["ozimga zarar yetkaz","ozimni oldir","ozimni o ldir",
+    "jonimga qasd","bolamga zarar yetkaz","chaqalogimga zarar yetkaz"])){
+  return {level:"emergency",
+    text:"⚠️ O‘zingizga yoki bolaga zarar yetkazish fikri bo‘lsa, yolg‘iz qolmang: yaqin inson va shoshilinch tibbiy yordamga darhol murojaat qiling. Bu holat chat orqali baholanmaydi.",
+    url:"https://www.nhs.uk/mental-health/conditions/postnatal-depression/"};
+ }
+ const expecting=any(n,pregnancy)&&!any(n,["homilador emas","test manfiy","test negativ"]);
+ if(expecting&&any(n,["qattiq bosh ogri","kuchli bosh ogri","koz xiralash","korish xiralash","koz oldida chaq","yuzim shish","qovurga ostida ogri"])){
+  return {level:"urgent",text:"⚠️ Homiladorlikdagi kuchli bosh og‘rig‘i, ko‘rish buzilishi yoki to‘satdan shish preeklampsiya kabi jiddiy holat bilan bog‘liq bo‘lishi mumkin. Darhol tug‘ruq bo‘limi yoki shifokorga murojaat qiling.",url:"https://www.nhs.uk/conditions/pre-eclampsia/"};
+ }
+ if(any(n,["homila harakati kamay","bola kam qimirl","bola qimirlam","homila qimirlama","qornimdagi bola harakat","tepishi kamay"])){
+  return {level:"urgent",text:"⚠️ Homila harakati odatdagidan kamaygan yoki to‘xtagan bo‘lsa, darhol tug‘ruq bo‘limiga murojaat qiling; ertangi kungacha kutmang. Telefon yoki uy doppleri bunday holatni istisno qila olmaydi.",url:"https://www.nhs.uk/pregnancy/keeping-well/your-babys-movements/"};
+ }
+ if(expecting&&any(n,["suvim ket","homila suvi ket","qindan suv kel","suv ketib qoldi"])){
+  return {level:"urgent",text:"⚠️ Homila suvi ketgan bo‘lishi mumkin. Darhol tug‘ruq bo‘limiga murojaat qiling, hatto muntazam to‘lg‘oq bo‘lmasa ham.",url:"https://www.nhs.uk/pregnancy/labour-and-birth/signs-that-labour-has-begun/"};
+ }
  const bleedingMention=any(n,bleeding);
  const faintMention=any(n,faint);
  const breathMention=any(n,breath);
