@@ -14,7 +14,7 @@ on:
       - '.github/workflows/android-release.yml'
       - '.github/workflows/quality.yml'
   pull_request:
-    branches: [main, feature/v1-8-telegram-auth-foundation, feature/v1-9-encrypted-sync-contract, feature/v1-10-neon-atomic-storage, feature/v1-11-staging-sync-api, feature/v1-12-free-quota-guards, feature/v1-13-free-medical-qa, feature/v1-14-medical-training-corpus, feature/v1-15-500-medical-questions, feature/v1-16-medical-safety-audit, feature/v1-17-source-and-triage-audit, feature/v1-18-clinical-editorial-matrix, feature/v1-19-complex-medical-questions, feature/v1-20-speaker-context-safety, feature/v1-21-private-first-journal]
+    branches: [main, feature/v1-8-telegram-auth-foundation, feature/v1-9-encrypted-sync-contract, feature/v1-10-neon-atomic-storage, feature/v1-11-staging-sync-api, feature/v1-12-free-quota-guards, feature/v1-13-free-medical-qa, feature/v1-14-medical-training-corpus, feature/v1-15-500-medical-questions, feature/v1-16-medical-safety-audit, feature/v1-17-source-and-triage-audit, feature/v1-18-clinical-editorial-matrix, feature/v1-19-complex-medical-questions, feature/v1-20-speaker-context-safety, feature/v1-21-private-first-journal, feature/v1-22-empty-legacy-guard]
     paths:
       - 'site/**'
       - 'tests/**'
@@ -39,6 +39,17 @@ jobs:
         with:
           name: Healthy-Women-PWA-preview
           path: site/
+          if-no-files-found: error
+      - name: Build review-only medical packet (no automated approvals)
+        if: github.event_name == 'pull_request' && github.head_ref == 'feature/v1-23-offline-clinical-review-kit'
+        run: node scripts/build-clinical-review-package.mjs "$RUNNER_TEMP/healthy-women-clinical-review"
+      - name: Make draft reviewer packet available for download
+        if: github.event_name == 'pull_request' && github.head_ref == 'feature/v1-23-offline-clinical-review-kit'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Healthy-Women-50-Medical-Review-DRAFT
+          path: ${{ runner.temp }}/healthy-women-clinical-review/
+          retention-days: 7
           if-no-files-found: error
 
   browser-private-first:
