@@ -40,3 +40,19 @@ jobs:
           name: Healthy-Women-PWA-preview
           path: site/
           if-no-files-found: error
+
+  browser-private-first:
+    if: github.event_name == 'pull_request' && github.head_ref == 'feature/v1-21-private-first-journal'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install temporary Chromium testing dependencies
+        run: npm install --no-audit --no-fund --no-save playwright@1.56.1
+      - name: Install Chromium for isolated test runner
+        run: npx playwright install --with-deps chromium
+      - name: Verify first-launch encryption, legacy recovery and device flows
+        run: node tests/e2e-browser.mjs
