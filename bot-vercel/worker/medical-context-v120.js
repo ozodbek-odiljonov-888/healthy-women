@@ -6,10 +6,11 @@
 const SELF=[
  "men","menda","mening","mendan","ozim","ozimda","ozimni",
  "hayzim","hayzlarim","qornim","qorinim","boshim","kozim","korishim",
- "nafasim","homiladorman","homiladorm an","homiladorligim"
+ "nafasim","homiladorman","homiladorligim"
 ];
 const OTHER=[
- "onam","opam","singlim","dugonam","qizim","xolam","ammam",
+ "onam","onamda","onamning","opam","opamda","opamning",
+ "singlim","singlimda","dugonam","dugonamda","qizim","qizimda","xolam","xolamda","ammam",
  "rafiqam","ayolim","turmush ortogim","xotinim","kelinim",
  "bemorda","bemorga","bemorim","onasi","opasi",
  "boshqa odam","bir ayol","bir qiz"
@@ -25,7 +26,8 @@ const SYMPTOM_MARKERS=[
 ];
 const EDUCATION_MARKERS=[
  "haqida umumiy","umumiy malumot","tushuntirib ber",
- "nima degani","nima ekan","nima uchun","ta rifi",
+ "nima","haqida",
+ "nima degani","nima ekan","nima uchun","tarifi",
  "nimani anglatadi","haqida oqimoqchiman"
 ];
 const UNCERTAIN_MARKERS=[
