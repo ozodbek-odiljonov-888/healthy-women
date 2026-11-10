@@ -97,6 +97,7 @@ export const CURRICULUM_V115_A=Object.freeze([
     "key": "hpv",
     "title": "Inson papilloma virusi (HPV)",
     "words": [
+      "hpv",
       "hpv virus",
       "inson papilloma virusi",
       "papillomavirus",
