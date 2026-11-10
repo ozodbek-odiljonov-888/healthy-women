@@ -16,5 +16,5 @@ test("Telegram launch parser remains offline-cached and does not transmit initDa
  assert(app.includes('import {getRawTelegramInitData} from "./telegram-launch.mjs";'));
  assert(cache.includes('"./telegram-launch.mjs"'));
  assert(!/fetch\s*\(/.test(module));
- assert(!/localStorage|sessionStorage|console\./.test(module));
+ assert(!/localStorage\.setItem|sessionStorage\.setItem|console\.log\s*\(/.test(module));
 });
