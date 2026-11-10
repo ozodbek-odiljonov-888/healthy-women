@@ -1,7 +1,7 @@
 import {renderCheckinCard,openCheckinDialog,PROMPT_PREF_KEY} from "./checkin-ui.mjs";
 import {getRawTelegramInitData} from "./telegram-launch.mjs";
 import {riskAdvice} from "./checkins.mjs";
-import {hasEncryptedJournal,writeEncryptedJournal,removeAllJournalData,LOCAL_VAULT_KEY} from "./local-crypto.mjs";
+import {hasEncryptedJournal,needsEncryptedJournalSetup,writeEncryptedJournal,removeAllJournalData,LOCAL_VAULT_KEY} from "./local-crypto.mjs";
 import {readJournalSnapshot,assertJournalRevision,withJournalWriteLock} from "./journal-guard.mjs";
 import {assertCurrentJournal} from "./restore-safety.mjs";
 import {createLocalProtection,protectionSettingsHtml} from "./local-crypto-ui.mjs";
@@ -81,6 +81,12 @@ async function persist(next=events){
   const session=localProtection?.getSession();
   if(!session)throw Error('Kundalik qulflangan. Parolni kiriting.');
   return writeEncryptedJournal(next,session);
+ }
+ // A fresh installation MUST set up local encryption before its first
+ // medical note. Existing legacy journals remain readable to avoid data loss.
+ if(needsEncryptedJournalSetup(localStorage)){
+  localProtection?.openSetup();
+  throw Error('Yangi kundalik xavfsizligi uchun avval parol bilan shifrlashni yoqing. Keyin qaydni qayta saqlang.');
  }
  if(plainCorrupt)throw Error('Kundalikdagi eski ma’lumotni o‘qib bo‘lmadi. Asl nusxa saqlangan, yangi qayd yozilmadi.');
  assertJournalRevision(localStorage,KEY,plainRevision);
@@ -212,5 +218,10 @@ passwordRotation=createPasswordRotationUI({
  getEvents:()=>events,waitForWrites:finishWrites,
  lock:()=>localProtection.lock(),download,notify
 });
-if(!localProtection.isLocked())render();
+if(!localProtection.isLocked()){
+ render();
+ // Explain the privacy setup before users enter any sensitive information.
+ // Closing the dialog allows browsing only; the first write remains blocked.
+ if(needsEncryptedJournalSetup(localStorage))localProtection.openSetup();
+}
 if(!hasEncryptedJournal()&&initData()&&server()&&localStorage.getItem(SYNC_KEY)==='yes')void syncData();
