@@ -1,8 +1,9 @@
 // Healthy Women: $0 rule-based medical knowledge assistant (Uzbek).
+import {ADDITIONAL_MEDICAL_TOPICS,TRAINING_UTTERANCES,UNSUPPORTED_TRAINING_UTTERANCES} from "./medical-curriculum.js";
 // No paid models, API calls, patient database, request logs or model claims.
 // Editorial sources: NHS and ACOG. This is NOT a diagnosis or emergency service.
 const DISCLAIMER="\n\nℹ️ Bu umumiy ma’lumot, tashxis emas. Botga shaxsiy tibbiy tarix yoki maxfiy ma’lumot yubormang.";
-const UNKNOWN="Bu savol bo‘yicha ishonchli qisqa javob topilmadi. Mavzuni umumiy tarzda qayta so‘rang: hayz sikli, og‘riq, qon ketishi, kechikish, homiladorlik testi, ovulyatsiya yoki PMS. Shaxsiy tashxis uchun shifokorga murojaat qiling.";
+const UNKNOWN="Bu savol bo‘yicha tekshirilgan bilimlar bazasida aniq javob topilmadi. Savolni umumiy tarzda qayta yozing yoki tibbiy mutaxassisga murojaat qiling. Dori dozasini, retseptni yoki shaxsiy tashxisni bot belgilamaydi.";
 const EMERGENCY_SOURCE="https://www.nhs.uk/symptoms/pelvic-pain/";
 const PREGNANCY_SOURCE="https://www.nhs.uk/pregnancy/common-symptoms/vaginal-bleeding/";
 
@@ -40,6 +41,7 @@ export const MEDICAL_TOPICS=Object.freeze([
  {key:"endometrioz",title:"Endometrioz haqida",words:["endometrioz","endometriosis","endometriozis"],
   answer:"Endometrioz bachadon ichki qavatiga o‘xshash to‘qimaning boshqa joylarda uchrashidir. Belgilariga kuchli hayz og‘rig‘i, chanoq og‘rig‘i yoki ko‘p qon ketishi kirishi mumkin. Faqat chatdan tashxis qo‘yilmaydi; ginekolog tekshiruvi zarur.",
   url:"https://www.nhs.uk/conditions/endometriosis/"}
+,...ADDITIONAL_MEDICAL_TOPICS
 ]);
 
 const CYR={"а":"a","б":"b","в":"v","г":"g","д":"d","е":"e","ё":"yo","ж":"j","з":"z","и":"i","й":"y","к":"k","л":"l","м":"m","н":"n","о":"o","п":"p","р":"r","с":"s","т":"t","у":"u","ф":"f","х":"x","ц":"ts","ч":"ch","ш":"sh","щ":"sh","ъ":"","ы":"i","ь":"","э":"e","ю":"yu","я":"ya","ў":"o","қ":"q","ғ":"g","ҳ":"h"};
@@ -61,12 +63,12 @@ function contains(n,term){
  return false;
 }
 const any=(n,patterns)=>patterns.some(p=>contains(n,p));
-const faint=["hushdan ket","hushsiz","bosh aylan","boshim aylan","koz oldi qorong","ozimdan ket"];
-const breath=["nafas qis","nafas ololma","nafas yetishma"];
-const severe=["chidab bolmas","juda kuchli ogri","qattiq ogri","tosatdan kuchli ogri","keskin ogri","toxtovsiz kuchli ogri"];
-const bleeding=["qon ket","qon kop","kop qon","qon oq","qon juda kop","qoni","qonim","hayz qoni","prokladka","tampon"];
-const pregnancy=["homilador","test ijobiy","test musbat","test pozitiv","homiladorlik ehtimol"];
-const pelvicPain=["qorin ogri","tos ogri","chanoq ogri","bir tomonlama ogri","pastki qorin","yelka uchida ogri"];
+const faint=["hushdan ket","hushim ket","hushsiz","bosh aylan","boshim aylan","boshim juda aylan","koz oldi qorong","ozimdan ket","ozimdan ketyap"];
+const breath=["nafas qis","nafasim qis","nafas ololma","nafas yetishma"];
+const severe=["chidab bolmas","juda kuchli ogri","ogri juda kuchli","qattiq ogri","tosatdan kuchli ogri","keskin ogri","toxtovsiz kuchli ogri"];
+const bleeding=["qon ket","qon kel","qon kop","kop qon","qon oq","qon juda kop","qoni","qonim","hayz qoni","prokladka","tampon"];
+const pregnancy=["homilador","homilador bolishim mumkin","test ijobiy","test musbat","test pozitiv","homiladorlik ehtimol"];
+const pelvicPain=["qorin ogri","qorinim","qornim","tos ogri","chanoq ogri","bir tomonlama ogri","bir tomondan","pastki qorin","yelka uchi","yelka uchim"];
 const padHour=/(har (bir )?soat.{0,30}(prokladka|tampon)|(?:prokladka|tampon).{0,30}har (bir )?soat|1 soat.{0,30}(prokladka|tampon))/;
 
 export function assessMedicalRisk(raw){
@@ -80,7 +82,8 @@ export function assessMedicalRisk(raw){
  const intense=any(n,severe);
  // Clear emergency markers take precedence over ordinary FAQ matches.
  if((bleedingMention&&(faintMention||breathMention))
-   ||(pregnant&&(intense||faintMention||breathMention))
+   ||(pregnant&&(intense||faintMention||breathMention
+     ||(pelvic&&any(n,["kuchli","qattiq"]))))
    ||(pelvic&&(intense||faintMention||breathMention))
    ||(faintMention&&breathMention)){
   return {level:"emergency",text:"⚠️ Bu alomatlar shoshilinch tibbiy baholashni talab qilishi mumkin. Hozirning o‘zida shoshilinch tibbiy yordamga murojaat qiling. Chat orqali tashxis qo‘yib bo‘lmaydi.",url:pregnant?PREGNANCY_SOURCE:EMERGENCY_SOURCE};
@@ -90,6 +93,15 @@ export function assessMedicalRisk(raw){
  }
  if(pregnant&&(pelvic||bleedingMention)){
   return {level:"urgent",text:"⚠️ Homiladorlik ehtimoli bilan birga qorin/chanoq og‘rig‘i yoki qon ketishi bo‘lsa, tezda tibbiy ko‘rikdan o‘ting. Og‘riq kuchli bo‘lsa, hushdan ketsangiz yoki ko‘p qon ketsa, shoshilinch yordamga murojaat qiling.",url:PREGNANCY_SOURCE};
+ }
+ if((any(n,["hayz kechik","hayzim kechik","hayz kelmad"])&&bleedingMention&&pelvic)
+    ||(pregnant&&any(n,["yelka uchi","yelka uchim"]))){
+  return {level:"urgent",text:"⚠️ Hayz kechikishi yoki homiladorlik ehtimoli fonida qon ketishi, chanoq yoki yelka uchida og‘riq bo‘lsa, tez tibbiy ko‘rik zarur. Bu ayrim hollarda bachadondan tashqari homiladorlik belgisi bo‘lishi mumkin.",url:"https://www.nhs.uk/conditions/ectopic-pregnancy/symptoms/"};
+ }
+ if((any(n,["tampon","menstrual cup","menstrual kubok"])&&any(n,["isitma","toshma","qusish","holsizlik"]))
+   ||(any(n,["siydik achish","siyganda achish","siydik yoli infeks"])&&
+      (any(n,["isitma","belim ogri","bel ogri"])||pregnant))){
+  return {level:"urgent",text:"⚠️ Bu alomatlarda jiddiy infeksiya ehtimolini istisno qilish kerak. Tez tibbiy ko‘rikdan o‘ting. Hush buzilishi, nafas qisilishi yoki keskin yomonlashish bo‘lsa, shoshilinch yordam chaqiring.",url:"https://www.nhs.uk/conditions/urinary-tract-infections-utis/"};
  }
  if((any(n,["menopauza","menopoz","klimaks"])&&bleedingMention)
     ||any(n,["12 oydan keyin qon","hayz toxtagandan keyin qon"])){
@@ -104,14 +116,21 @@ function scoreTopic(query,topic){
  for(const word of topic.words){
   if(contains(query,word)){
    const tokens=normalizeMedicalQuery(word).split(" ");
-   points+=tokens.length>=2?5:3;
+   points+=tokens.length>=2?2*tokens.length+1:3;
   }
  }
  return points;
 }
+const TRAINED_EXACT=new Map(Object.entries(TRAINING_UTTERANCES)
+ .flatMap(([key,questions])=>questions.map(q=>[normalizeMedicalQuery(q),key])));
+const UNSUPPORTED_EXACT=new Set(UNSUPPORTED_TRAINING_UTTERANCES.map(normalizeMedicalQuery));
+const PERSONAL_MEDICATION=/(qaysi (dori|antibiotik|gormon|ukol)|necha (mg|milligram|tomchi|tabletka)|doza|dozasi|retsept yoz|qanday dori ich)/;
+
 export function findMedicalTopics(raw,max=2){
  const query=normalizeMedicalQuery(raw);
  if(!query)return [];
+ const exact=TRAINED_EXACT.get(query);
+ if(exact){const topic=MEDICAL_TOPICS.find(x=>x.key===exact);return topic&&max>0?[topic]:[];}
  const found=MEDICAL_TOPICS.map(topic=>({topic,score:scoreTopic(query,topic)}))
    .filter(x=>x.score>=3).sort((a,b)=>b.score-a.score||a.topic.key.localeCompare(b.topic.key));
  // Only one strongest topic avoids confident-looking but unrelated answers.
@@ -120,6 +139,9 @@ export function findMedicalTopics(raw,max=2){
 export function answerMedicalQuestion(raw){
  const risk=assessMedicalRisk(raw);
  if(risk.level!=="none")return {kind:"safety",articles:[],text:risk.text+"\nManba: "+risk.url+DISCLAIMER,urgent:true};
+ const normalized=normalizeMedicalQuery(raw);
+ if(UNSUPPORTED_EXACT.has(normalized)||PERSONAL_MEDICATION.test(normalized))
+  return {kind:"unknown",articles:[],text:UNKNOWN+DISCLAIMER,urgent:false};
  const found=findMedicalTopics(raw,1);
  if(!found.length)return {kind:"unknown",articles:[],text:UNKNOWN+DISCLAIMER,urgent:false};
  const article=found[0];
