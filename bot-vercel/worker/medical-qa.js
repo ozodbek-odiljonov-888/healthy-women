@@ -1,6 +1,7 @@
 // Healthy Women: $0 rule-based medical knowledge assistant (Uzbek).
 import {ADDITIONAL_MEDICAL_TOPICS,UNSUPPORTED_TRAINING_UTTERANCES} from "./medical-curriculum.js";
 import {NEW_MEDICAL_TOPICS,buildTrainingCorpus500} from "./medical-training-v115.js";
+import {fixConservativeMedicalTypos,removeExplicitNegatedSymptoms} from "./medical-language-v116.js";
 // No paid models, API calls, patient database, request logs or model claims.
 // Editorial sources: NHS and ACOG. This is NOT a diagnosis or emergency service.
 const DISCLAIMER="\n\nℹ️ Bu umumiy ma’lumot, tashxis emas. Botga shaxsiy tibbiy tarix yoki maxfiy ma’lumot yubormang.";
@@ -49,11 +50,12 @@ export const TRAINING_UTTERANCES_500=buildTrainingCorpus500(MEDICAL_TOPICS.slice
 
 const CYR={"а":"a","б":"b","в":"v","г":"g","д":"d","е":"e","ё":"yo","ж":"j","з":"z","и":"i","й":"y","к":"k","л":"l","м":"m","н":"n","о":"o","п":"p","р":"r","с":"s","т":"t","у":"u","ф":"f","х":"x","ц":"ts","ч":"ch","ш":"sh","щ":"sh","ъ":"","ы":"i","ь":"","э":"e","ю":"yu","я":"ya","ў":"o","қ":"q","ғ":"g","ҳ":"h"};
 export function normalizeMedicalQuery(raw){
- return String(raw??"").slice(0,700).toLocaleLowerCase("uz").normalize("NFKC")
+ const cleaned=String(raw??"").slice(0,700).toLocaleLowerCase("uz").normalize("NFKC")
   .replace(/[ʼʻ‘’`´']/g,"")
   .replace(/[а-яёўқғҳъь]/g,c=>CYR[c]??c)
   .replace(/[^a-z0-9\s]/g," ")
   .replace(/\s+/g," ").trim();
+ return fixConservativeMedicalTypos(cleaned);
 }
 function contains(n,term){
  const t=normalizeMedicalQuery(term);
@@ -75,8 +77,11 @@ const pelvicPain=["qorin ogri","qorinim","qornim","tos ogri","chanoq ogri","bir 
 const padHour=/(har (bir )?soat.{0,30}(prokladka|tampon)|(?:prokladka|tampon).{0,30}har (bir )?soat|1 soat.{0,30}(prokladka|tampon))/;
 
 export function assessMedicalRisk(raw){
- const n=normalizeMedicalQuery(raw);
+ const n=removeExplicitNegatedSymptoms(normalizeMedicalQuery(raw));
  if(!n)return {level:"none"};
+ if(any(n,["hushim ket","hushdan ket","ozimdan ket"])&&!any(n,["hushdan ketish nima","hushdan ketish sababi"])){
+  return {level:"emergency",text:"⚠️ Hushdan ketish yoki hushning yo‘qolishi shoshilinch tibbiy baholashni talab qilishi mumkin. Hozirning o‘zida tibbiy yordamga murojaat qiling.",url:EMERGENCY_SOURCE};
+ }
  // Independent safety checks run before the knowledge matcher, even when
  // an exact synthetic training phrase happens to match another topic.
  if(any(n,["ozimga zarar yetkaz","ozimni oldir","ozimni o ldir",
