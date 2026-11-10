@@ -1,10 +1,11 @@
 // Healthy Women v1.26: read-only selected-day summary. No remote data or writes.
 import {validDay} from "./cycle-safety.mjs";
+import {formatUzDate} from "./date-uz.mjs";
 
 const esc=value=>String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const flows={none:"Qon ketishi yo‘q",light:"Kam",normal:"O‘rtacha",heavy:"Ko‘p","very-heavy":"Juda ko‘p"};
 const moods={good:"Yaxshi",neutral:"O‘rtacha",low:"Past",anxious:"Bezovta"};
-const formatDay=iso=>new Intl.DateTimeFormat("uz-UZ",{day:"numeric",month:"long",year:"numeric",timeZone:"UTC"}).format(new Date(iso+"T12:00:00Z"));
+const formatDay=iso=>formatUzDate(iso,{day:"numeric",month:"long",year:"numeric"});
 
 // Only an explicitly confirmed end date can establish a recorded date range.
 // If a period is missing its end, do not invent additional bleeding days.
