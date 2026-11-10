@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {confirmedPeriodDates,getCalendarDayDetails,renderCalendarDayDetails} from "../site/calendar-day.mjs";
+import {formatUzDate,formatUzMonth,formatUzChartMonth} from "../site/date-uz.mjs";
 
 const today="2026-11-11";
 test("unknown end never fabricates confirmed bleeding days",()=>{
@@ -52,4 +53,17 @@ test("app wiring and offline assets both include calendar interaction",()=>{
  assert(app.includes("selected=b.dataset.date;renderCalendar()"));
  assert(sw.includes('"./calendar-day.mjs"'));
  assert(sw.includes('healthy-women-pwa-v26'));
+});
+
+test("Uzbek dates never display Chromium ICU placeholders such as M11",()=>{
+ assert.equal(formatUzDate("2026-11-11"),"11-noyabr");
+ assert.equal(formatUzDate("2026-11-11",{day:"numeric",month:"long",year:"numeric"}),"11-noyabr 2026");
+ assert.equal(formatUzMonth(new Date(2026,10,1)),"Noyabr 2026");
+ assert.equal(formatUzChartMonth("2026-11"),"noy '26");
+ assert.equal(formatUzDate("2026-11-31"),"—");
+ const html=renderCalendarDayDetails(getCalendarDayDetails({date:today,today}));
+ assert(html.includes("11-noyabr 2026"));
+ assert(!html.includes("M11"));
+ const sw=readFileSync(new URL("../site/sw.js",import.meta.url),"utf8");
+ assert(sw.includes('"./date-uz.mjs"'));
 });
