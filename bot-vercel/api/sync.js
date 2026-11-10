@@ -5,6 +5,7 @@
 import {verifyTelegramInitData} from "../worker/telegram-auth.js";
 import {createOpaqueSyncProtocol,validateOpaqueEnvelope} from "../worker/opaque-sync-contract.js";
 import {createNeonStorageFromEnv} from "../worker/neon-provider.js";
+import {createNeonStagingLimiterFromEnv} from "../worker/neon-quota-provider.js";
 
 const BODY_LIMIT=1_500_000;
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -66,6 +67,17 @@ function configIsSafe(request,env){
    &&host!=="healthy-women-bot.vercel.app"
    &&host!=="healthy-women.vercel.app";
 }
+// Never permit an unbounded public rollout. Require 1-5 explicit signed
+// Telegram tester IDs in a protected staging env variable.
+function stagingUsers(env){
+ const raw=env?.SYNC_STAGING_USER_IDS;
+ if(typeof raw!=="string"||raw.length>90)return null;
+ const ids=raw.split(",").map(s=>s.trim());
+ if(!ids.length||ids.length>5||ids.some(s=>!/^([1-9][0-9]{0,15})$/.test(s)
+   ||!Number.isSafeInteger(Number(s))))return null;
+ const set=new Set(ids);
+ return set.size===ids.length?set:null;
+}
 function trustedOrigin(env){
  // A staging rollout must name its client origin explicitly; no wildcard.
  const value=env?.SYNC_CLIENT_ORIGIN;
@@ -73,21 +85,29 @@ function trustedOrigin(env){
  try{
   const url=new URL(value);
   return url.protocol==="https:"&&!url.username&&!url.password&&!url.search&&!url.hash
-    &&url.origin===value&&url.hostname!=="localhost"?value:"";
+    &&url.origin===value
+    &&url.hostname!=="localhost"
+    &&url.hostname!=="healthy-women.vercel.app"
+    &&url.hostname!=="healthy-women-bot.vercel.app"?value:"";
  }catch{return "";}
 }
 const loadDefaultStorage=env=>createNeonStorageFromEnv(env);
+const loadDefaultLimiter=env=>createNeonStagingLimiterFromEnv(env);
 
 /**
  * Dependency injection is for tests only. Never provide a browser-selected
  * database, Telegram identity, or arbitrary Origin.
  */
-export async function handleSyncRequest(request,{env={},loadStorage=loadDefaultStorage,nowMs=()=>Date.now()}={}){
+export async function handleSyncRequest(request,{
+ env={},loadStorage=loadDefaultStorage,loadLimiter=loadDefaultLimiter,
+ nowMs=()=>Date.now()
+}={}){
  const origin=request.headers.get("Origin");
  const allowedOrigin=trustedOrigin(env);
+ const allowlisted=stagingUsers(env);
  const path=new URL(request.url);
  if(path.pathname!=="/api/sync"||path.search||path.hash)return error(404,"Not found",origin,allowedOrigin);
- if(!configIsSafe(request,env)||!allowedOrigin)return error(503,"Synchronization unavailable",origin,allowedOrigin);
+ if(!configIsSafe(request,env)||!allowedOrigin||!allowlisted)return error(503,"Synchronization unavailable",origin,allowedOrigin);
  if(origin && origin!==allowedOrigin)return error(403,"Forbidden",origin,allowedOrigin);
  if(request.method==="OPTIONS"){
   if(origin!==allowedOrigin)return error(403,"Forbidden",origin,allowedOrigin);
@@ -105,6 +125,8 @@ export async function handleSyncRequest(request,{env={},loadStorage=loadDefaultS
  let verified;
  try{verified=await verifyTelegramInitData(raw,env.BOT_TOKEN,{nowMs:nowMs()});}
  catch{return error(401,"Unauthorized",origin,allowedOrigin);}
+ if(!allowlisted.has(String(verified.userId)))
+  return error(403,"Staging access denied",origin,allowedOrigin);
  if(request.method==="DELETE" && (Math.floor(nowMs()/1000)-verified.authDate)>300){
   return error(401,"Reopen Telegram Mini App to erase remote data",origin,allowedOrigin);
  }
@@ -128,6 +150,16 @@ export async function handleSyncRequest(request,{env={},loadStorage=loadDefaultS
     ||request.headers.get("X-Sync-Erase-Intent")!=="erase-remote")
    return error(400,"Deletion confirmation required",origin,allowedOrigin);
  }
+ // A single global daily allowance caps the number of paid-compute-like
+ // operations; no per-request Redis/cache subscription is required.
+ let quota;
+ try{
+  const limiter=await loadLimiter(env);
+  quota=await limiter.consume({userId:verified.userId,botToken:env.BOT_TOKEN,nowMs:nowMs()});
+ }catch{return error(503,"Synchronization unavailable",origin,allowedOrigin);}
+ if(!quota?.allowed)return error(429,"Daily staging limit reached",origin,allowedOrigin,{
+  "Retry-After":String(Math.max(1,Math.min(86400,Math.ceil(quota?.retryAfterSeconds||86400))))
+ });
  let protocol;
  try{
   const storage=await loadStorage(env);
