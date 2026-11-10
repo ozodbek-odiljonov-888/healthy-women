@@ -71,3 +71,43 @@ Manbalar:
 - Ikkita deployment yaratilmadi, jonli botga yangi `DATABASE_URL` ulanmagan.
 - GitHub CI o‘tgan bo‘lsa ham **hosting darajasidagi billing rejasi aniq ko‘rinmadi**. Vercel billing xizmatidan xarajat ma'lumotini olish so‘rovi natija bermadi; uni $0 xarajatning qat’iy isboti deb qabul qilmang.
 - Bazadagi simulyatsiyalangan parallel sinov haqiqiy yuqori yuklama yoki DDoS sinovi emas; limitlar faqat avtorizatsiyalangan staging so‘rovlari uchun.
+
+## 2026-11-10: Provider hard quota confirmations (verified through connected accounts)
+
+The authorized Vercel team `odiljonnorkulov0-9690` was confirmed by the
+Vercel deployment-context API to be on **Hobby**. This is the free tier,
+not Pro. On Hobby, Vercel's included-usage overages lead to account/deployment
+restrictions rather than automatically purchasing Pro capacity. **Spend
+Management is a Pro-only feature, so there is no $0 Spend Management switch
+to enable on Hobby.** The billing charges API returned `costs_not_found`;
+this is *not* evidence of zero invoices or permanent free eligibility.
+
+**Real provider-level quotas were applied and then reread** on the existing
+Neon Free staging project `withered-forest-05953681` (not production):
+
+| Hard staging project quota | Configured value |
+|---|---:|
+| `active_time_seconds` | 14,400 (4 hours) |
+| `compute_time_seconds` | 3,600 (1 hour) |
+| `written_data_bytes` | 67,108,864 (64 MiB) |
+| `data_transfer_bytes` | 67,108,864 (64 MiB) |
+| `logical_size_bytes` | 67,108,864 (64 MiB per branch) |
+| Compute range | Fixed 0.25 CU |
+
+These are real Neon project settings, **not merely application counters**.
+Exhausting a resource quota can stop testing. These project limits do *not*
+cap GitHub Actions usage, Vercel traffic, a different Neon project, or other
+external services. The existing application staging guard still limits
+successfully authenticated requests to 60 per day globally and 12 per tester.
+
+**Operating rule:** do not switch Vercel Hobby or Neon Free to a paid plan;
+do not enable billable storage, monitoring, paid AI inference, new marketplace
+integrations, or automatic deployment. If resources are exhausted, stop the
+remote operation and keep offline functions available rather than widening
+limits automatically. Never change the above quotas without a fresh review.
+
+Evidence and limitations:
+- https://vercel.com/docs/plans/hobby
+- https://vercel.com/docs/spend-management
+- https://neon.com/docs/introduction/plans
+- https://neon.com/blog/provision-postgres-neon-api
