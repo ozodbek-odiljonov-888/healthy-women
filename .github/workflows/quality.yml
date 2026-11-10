@@ -13,7 +13,7 @@ on:
       - '.github/workflows/android-release.yml'
       - '.github/workflows/quality.yml'
   pull_request:
-    branches: [main]
+    branches: [main, feature/v1-8-telegram-auth-foundation]
     paths:
       - 'site/**'
       - 'tests/**'
