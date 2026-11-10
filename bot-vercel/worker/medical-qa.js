@@ -3,7 +3,7 @@ import {ADDITIONAL_MEDICAL_TOPICS,TRAINING_UTTERANCES,UNSUPPORTED_TRAINING_UTTER
 // No paid models, API calls, patient database, request logs or model claims.
 // Editorial sources: NHS and ACOG. This is NOT a diagnosis or emergency service.
 const DISCLAIMER="\n\nℹ️ Bu umumiy ma’lumot, tashxis emas. Botga shaxsiy tibbiy tarix yoki maxfiy ma’lumot yubormang.";
-const UNKNOWN="Bu savol bo‘yicha tekshirilgan bilimlar bazasida aniq javob topilmadi. Savolni umumiy tarzda qayta yozing yoki tibbiy mutaxassisga murojaat qiling. Dori dozasini, retseptni yoki shaxsiy tashxisni bot belgilamaydi.";
+const UNKNOWN="Bu savol bo‘yicha ishonchli qisqa javob topilmadi. Savolni umumiy tarzda qayta yozing yoki shifokorga murojaat qiling. Dori dozasini, retseptni yoki shaxsiy tashxisni bot belgilamaydi.";
 const EMERGENCY_SOURCE="https://www.nhs.uk/symptoms/pelvic-pain/";
 const PREGNANCY_SOURCE="https://www.nhs.uk/pregnancy/common-symptoms/vaginal-bleeding/";
 
