@@ -34,7 +34,7 @@ test("saved day notes are properly HTML escaped",()=>{
  const malicious='<img src=x onerror="alert(1)">';
  const day=getCalendarDayDetails({date:today,today,checkins:[{date:today,pain:2,flow:"light",mood:"good",note:malicious}]});
  const html=renderCalendarDayDetails(day);
- assert(!html.includes("<img"));assert(!html.includes("onerror="));assert(html.includes("&lt;img"));
+ assert(!html.includes("<img"));assert(!html.includes('onerror="'));assert(html.includes("&lt;img"));assert(html.includes("onerror=&quot;"));
 });
 test("invalid selected days are refused and state remains local",()=>{
  assert.throws(()=>getCalendarDayDetails({date:"2026-02-30",today}),/noto‘g‘ri/);
