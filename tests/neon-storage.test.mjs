@@ -63,13 +63,16 @@ test("second user cannot read first user's encrypted snapshot",async()=>{
 });
 test("stale revision fails and current revision updates atomically",async()=>{
  const db=fakeSql(),storage=createNeonStorageAdapter(db);
+ assert.equal(await storage.compareAndSwap(9001,REV1,{revision:REV2,deleted:false,envelope:ENC}),false,"Cannot insert a missing account using an old revision");
  assert.equal(await storage.compareAndSwap(9001,null,{revision:REV1,deleted:false,envelope:ENC}),true);
  assert.equal(await storage.compareAndSwap(9001,null,{revision:REV2,deleted:false,envelope:ENC}),false);
  assert.equal(await storage.compareAndSwap(9001,REV1,{revision:REV2,deleted:false,envelope:ENC}),true);
  assert.equal(await storage.compareAndSwap(9001,REV1,{revision:REV3,deleted:false,envelope:ENC}),false);
  assert.equal((await storage.read(9001)).revision,REV2);
- assert.match(STORAGE_SQL.compareAndSwap,/ON CONFLICT/);
- assert.match(STORAGE_SQL.compareAndSwap,/existing\.revision IS NOT DISTINCT FROM \$5::uuid/);
+ assert.match(STORAGE_SQL.compareAndSwap,/WITH changed AS/);
+ assert.match(STORAGE_SQL.compareAndSwap,/existing\.revision = \$5::uuid/);
+ assert.match(STORAGE_SQL.compareAndSwap,/WHERE \$5::uuid IS NULL/);
+ assert.match(STORAGE_SQL.compareAndSwap,/ON CONFLICT \(telegram_user_id\) DO NOTHING/);
  assert.match(STORAGE_SQL.compareAndSwap,/existing\.deleted = false/);
 });
 test("erasure permanently tombstones the row and rejects stale resurrection",async()=>{
