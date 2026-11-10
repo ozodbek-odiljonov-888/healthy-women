@@ -14,7 +14,7 @@ on:
       - '.github/workflows/android-release.yml'
       - '.github/workflows/quality.yml'
   pull_request:
-    branches: [main, feature/v1-8-telegram-auth-foundation, feature/v1-9-encrypted-sync-contract, feature/v1-10-neon-atomic-storage, feature/v1-11-staging-sync-api, feature/v1-12-free-quota-guards, feature/v1-13-free-medical-qa, feature/v1-14-medical-training-corpus, feature/v1-15-500-medical-questions, feature/v1-16-medical-safety-audit, feature/v1-17-source-and-triage-audit, feature/v1-18-clinical-editorial-matrix, feature/v1-19-complex-medical-questions, feature/v1-20-speaker-context-safety, feature/v1-21-private-first-journal, feature/v1-22-empty-legacy-guard, feature/v1-23-offline-clinical-review-kit, feature/v1-24-release-preflight]
+    branches: [main, feature/v1-8-telegram-auth-foundation, feature/v1-9-encrypted-sync-contract, feature/v1-10-neon-atomic-storage, feature/v1-11-staging-sync-api, feature/v1-12-free-quota-guards, feature/v1-13-free-medical-qa, feature/v1-14-medical-training-corpus, feature/v1-15-500-medical-questions, feature/v1-16-medical-safety-audit, feature/v1-17-source-and-triage-audit, feature/v1-18-clinical-editorial-matrix, feature/v1-19-complex-medical-questions, feature/v1-20-speaker-context-safety, feature/v1-21-private-first-journal, feature/v1-22-empty-legacy-guard, feature/v1-23-offline-clinical-review-kit, feature/v1-24-release-preflight, feature/v1-25-pro-experience]
     paths:
       - 'site/**'
       - 'tests/**'
@@ -53,10 +53,10 @@ jobs:
           if-no-files-found: error
 
       - name: Generate read-only draft release readiness report
-        if: github.event_name == 'pull_request' && (github.head_ref == 'feature/v1-24-release-preflight' || github.head_ref == 'feature/v1-25-pro-experience')
+        if: github.event_name == 'pull_request' && (github.head_ref == 'feature/v1-24-release-preflight' || github.head_ref == 'feature/v1-25-pro-experience' || github.head_ref == 'feature/v1-26-calendar-daily-workflow')
         run: node scripts/release-preflight.mjs --json > "$RUNNER_TEMP/healthy-women-release-readiness.json"
       - name: Upload non-sensitive blocked release status
-        if: github.event_name == 'pull_request' && (github.head_ref == 'feature/v1-24-release-preflight' || github.head_ref == 'feature/v1-25-pro-experience')
+        if: github.event_name == 'pull_request' && (github.head_ref == 'feature/v1-24-release-preflight' || github.head_ref == 'feature/v1-25-pro-experience' || github.head_ref == 'feature/v1-26-calendar-daily-workflow')
         uses: actions/upload-artifact@v4
         with:
           name: Healthy-Women-Release-Preflight-BLOCKED
@@ -65,10 +65,10 @@ jobs:
           if-no-files-found: error
 
       - name: Package vetted v1.24 source code for export
-        if: github.event_name == 'pull_request' && (github.head_ref == 'feature/v1-24-release-preflight' || github.head_ref == 'feature/v1-25-pro-experience')
+        if: github.event_name == 'pull_request' && (github.head_ref == 'feature/v1-24-release-preflight' || github.head_ref == 'feature/v1-25-pro-experience' || github.head_ref == 'feature/v1-26-calendar-daily-workflow')
         uses: actions/upload-artifact@v4
         with:
-          name: Healthy-Women-v1.25-Full-Source-DRAFT
+          name: Healthy-Women-v1.26-Full-Source-DRAFT
           path: |
             .github/workflows/
             .github/scripts/
@@ -105,7 +105,7 @@ jobs:
 
 
   android-v124-debug:
-    if: github.event_name == 'pull_request' && (github.head_ref == 'feature/v1-24-release-preflight' || github.head_ref == 'feature/v1-25-pro-experience')
+    if: github.event_name == 'pull_request' && (github.head_ref == 'feature/v1-24-release-preflight' || github.head_ref == 'feature/v1-25-pro-experience' || github.head_ref == 'feature/v1-26-calendar-daily-workflow')
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
@@ -134,14 +134,14 @@ jobs:
       - name: Upload preview APK (NOT clinical release)
         uses: actions/upload-artifact@v4
         with:
-          name: Healthy-Women-v1.25-Android-Debug-Preview
+          name: Healthy-Women-v1.26-Android-Debug-Preview
           path: android/app/build/outputs/apk/debug/app-debug.apk
           retention-days: 7
           if-no-files-found: error
 
 
   browser-advanced-v125:
-    if: github.event_name == 'pull_request' && github.head_ref == 'feature/v1-25-pro-experience'
+    if: github.event_name == 'pull_request' && github.head_ref == 'feature/v1-25-pro-experience' || github.head_ref == 'feature/v1-26-calendar-daily-workflow'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -154,11 +154,15 @@ jobs:
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
       - name: Validate encryption, recovery and premium dashboard
-        run: node tests/e2e-browser.mjs && node tests/e2e-empty-legacy.mjs && node tests/e2e-analytics-v125.mjs
+        run: |
+          node tests/e2e-browser.mjs
+          node tests/e2e-empty-legacy.mjs
+          node tests/e2e-analytics-v125.mjs
+          if test -f tests/e2e-calendar-v126.mjs; then node tests/e2e-calendar-v126.mjs; fi
       - name: Upload fictional premium UI screenshots
         uses: actions/upload-artifact@v4
         with:
-          name: Healthy-Women-v1.25-Responsive-Screenshots
+          name: Healthy-Women-v1.26-Responsive-Screenshots
           path: ui-preview/
           if-no-files-found: error
           retention-days: 7

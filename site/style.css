@@ -36,3 +36,21 @@ body{background:radial-gradient(circle at 85% 0%,#f6ebf0 0%,transparent 36%),var
 /* Readable 12-month chart on narrow devices without whole-page overflow. */
 .pro-bars[data-months="12"]{overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin;scrollbar-color:#cb94a9 #f8edf2}
 .pro-bars[data-months="12"] .pro-bar-item{flex:0 0 42px}
+
+
+/* v1.26 — readable, actionable selected-day calendar details */
+.calendar-detail{margin-bottom:17px;background:linear-gradient(145deg,#fff,#fff8fb);border-color:#ecdce5}
+.calendar-detail h2{font-size:20px;line-height:1.35;margin:4px 0 14px}
+.calendar-detail .day-state{display:inline-flex;border:1px solid #eadde3;background:#faf3f6;color:#746070;border-radius:30px;padding:8px 12px;font-size:11px;font-weight:750;line-height:1.4}
+.calendar-detail .day-state.is-recorded{background:#fae0e9;color:#873f5c;border-color:#e8c3d0}
+.calendar-detail .day-state.is-estimated{background:#fff7e8;color:#80603f;border-color:#f1dfbc}
+.day-context{font-size:12px;color:#776777;line-height:1.7;margin:14px 0}
+.day-detail-heading{font-size:13px;margin:20px 0 8px}
+.day-note{background:white;border:1px solid #f0e1e7;border-left:3px solid #b96d8d;border-radius:12px;padding:13px;margin:9px 0;font-size:12px;overflow-wrap:anywhere}
+.day-note strong{display:block;color:#694458}.day-note span{display:block;color:#776775;line-height:1.65;margin-top:6px}
+.day-note p{margin:7px 0 0;color:#6e6070;line-height:1.6;white-space:pre-wrap}
+.day-actions{display:grid;gap:9px;margin-top:18px}
+.day-actions .button{white-space:normal;min-height:42px;line-height:1.45}
+.day[aria-pressed="true"]{outline:2px solid #9b4e70;outline-offset:-3px;box-shadow:inset 0 0 0 2px #fff}
+.day:focus-visible,.day-actions button:focus-visible{outline:3px solid #754167;outline-offset:2px}
+@media(max-width:850px){.calendar-detail{scroll-margin-top:22px}}

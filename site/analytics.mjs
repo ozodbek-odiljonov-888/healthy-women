@@ -1,11 +1,12 @@
 // Healthy Women v1.25: offline-only descriptive health analytics, never a diagnosis.
 import {summarizeSymptoms,overallSummary} from "./insights.mjs";
+import {formatUzChartMonth} from "./date-uz.mjs";
 const MONTHS=new Set([3,6,12]);
 const moodNames={good:"Yaxshi",neutral:"O‘rtacha",low:"Tushkun",anxious:"Bezovta"};
 const flowNames={none:"Yo‘q",light:"Kam",normal:"O‘rtacha",heavy:"Ko‘p","very-heavy":"Juda ko‘p"};
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const validDay=v=>typeof v==="string"&&/^\d{4}-\d{2}-\d{2}$/.test(v)&&!Number.isNaN(Date.parse(v+"T12:00:00Z"))&&new Date(v+"T12:00:00Z").toISOString().slice(0,10)===v;
-const monthName=key=>new Intl.DateTimeFormat("uz-UZ",{month:"short",year:"2-digit"}).format(new Date(Date.UTC(+key.slice(0,4),+key.slice(5,7)-1,1,12)));
+const monthName=key=>formatUzChartMonth(key);
 export function buildAnalytics(a,today,months=6){
  if(!MONTHS.has(months)||!validDay(today))throw Error("Invalid analytics period");
  const checkins=(Array.isArray(a?.checkins)?a.checkins:[]).filter(c=>c&&validDay(c.date)&&c.date<=today);
