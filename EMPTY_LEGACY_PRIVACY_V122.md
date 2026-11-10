@@ -48,3 +48,21 @@ Human clinical approval for all 50 educational answers, real-device
 testing and privacy/security review are still required before an
 actual patient-facing release. Automatic tests are not proof of
 clinical safety or universal bug-free operation.
+
+## Verified CI report — 2026-11-10
+
+Run: https://github.com/ozodbek-odiljonov-888/healthy-women/actions/runs/42864087986
+
+- Node.js: **290 passed / 290 total**, **0 failures** (49 test files).
+- Static/offline validation: **28 resources**, JS syntax and CSP: PASS.
+- Chromium complete E2E: PASS for first-use encryption, existing-record
+  migration, backups, restore, password rotation, wrong-password lock,
+  cross-tab update, corrupted legacy recovery, erasure, and encrypted restart.
+- Dedicated second Chromium E2E: PASS. A previously empty legacy key,
+  even when the setup dialog is dismissed, **cannot save a new unencrypted
+  entry**. No browser runtime error reported.
+- This CI proof uses **synthetic/fictitious** data. Physical-device and
+  independent security tests have not yet been performed.
+
+This is **not a release approval**. PR #17 is still draft; production website,
+Telegram bot and Android app are unchanged.
