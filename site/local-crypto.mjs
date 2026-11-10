@@ -66,11 +66,18 @@ async function decryptedRecord(raw,key) {
 export function hasEncryptedJournal(storage=globalThis.localStorage){
  return storage?.getItem(LOCAL_VAULT_KEY)!==null;
 }
-// New installations must not write raw medical records before enabling the
-// existing local vault. Older installations with an explicit legacy key are
-// preserved for a careful, user-consented migration instead of being modified.
+// New installs AND old installs with an empty legacy diary must encrypt
+// before the first medical record. A nonempty or damaged legacy journal is
+// preserved for deliberate, user-consented migration or safe recovery.
 export function needsEncryptedJournalSetup(storage=globalThis.localStorage){
- return !hasEncryptedJournal(storage)&&storage.getItem(LEGACY_EVENTS_KEY)===null;
+ if(hasEncryptedJournal(storage))return false;
+ const raw=storage.getItem(LEGACY_EVENTS_KEY);
+ if(raw===null)return true;
+ // Parsing huge or corrupt legacy data to determine emptiness is unsafe.
+ // Such data must remain untouched and should be handled by recovery UI.
+ if(raw.length>BOUND*2)return false;
+ try{return validateBackupEvents(JSON.parse(raw)).length===0;}
+ catch{return false;}
 }
 export function readPlainJournal(storage=globalThis.localStorage) {
  try {

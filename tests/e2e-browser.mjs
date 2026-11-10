@@ -25,9 +25,9 @@ await new Promise(done=>server.listen(0,"127.0.0.1",done));
 const base="http://127.0.0.1:"+server.address().port;
 let browser,page;
 const errors=[];
-async function configureNewEncryptedJournal(p,name){
+async function configureNewEncryptedJournal(p,name,expectedLegacy=null){
  await p.locator("#secureEnableDialog").waitFor({state:"visible"});
- assert.equal(await p.evaluate(()=>localStorage.getItem("healthywomen.events.v1")),null);
+ assert.equal(await p.evaluate(()=>localStorage.getItem("healthywomen.events.v1")),expectedLegacy);
  await p.locator("#secureNewPassword").fill(PASS);
  await p.locator("#secureNewRepeat").fill(PASS);
  const saved=p.waitForEvent("download");
@@ -58,7 +58,7 @@ try{
  page=await context.newPage();page.on("pageerror",e=>errors.push(String(e)));
  await page.addInitScript(()=>{
   if(sessionStorage.getItem("hw-legacy-fixture-seeded")!=="yes"){
-   localStorage.setItem("healthywomen.events.v1","[]");
+   localStorage.setItem("healthywomen.events.v1",JSON.stringify([{id:"legacy-period",type:"period",payload:{start:"2026-08-01",end:"2026-08-04"},updated_at:1790000000000,deleted:0}]));
    sessionStorage.setItem("hw-legacy-fixture-seeded","yes");
   }
  });
@@ -71,7 +71,7 @@ try{
  await page.locator('#checkinForm select[name="pain"]').selectOption("4");
  await page.locator('#checkinForm select[name="flow"]').selectOption("normal");
  await page.locator('#checkinForm button[type="submit"]').click();
- await page.waitForFunction(()=>JSON.parse(localStorage.getItem("healthywomen.events.v1")||"[]").length===1);
+ await page.waitForFunction(()=>JSON.parse(localStorage.getItem("healthywomen.events.v1")||"[]").length===2);
  assert.equal(await page.locator("#view-journal [data-edit-checkin]").count(),1);
  const originalLegacy=await page.evaluate(()=>localStorage.getItem("healthywomen.events.v1"));
  console.log("PASS: fictional daily diary entry saved.");
