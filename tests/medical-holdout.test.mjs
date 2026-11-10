@@ -60,3 +60,11 @@ test("holdout emergency phrasings outrank routine topic advice",()=>{
  }
  assert.deepEqual(failures,[]);
 });
+
+test("possible toxic shock receives toxic shock source, not an unrelated UTI link",()=>{
+ const caseText="Tampon ishlataman, isitma va toshma chiqdi";
+ const result=assessMedicalRisk(caseText);
+ assert.equal(result.level,"urgent");
+ assert.match(result.url,/toxic-shock-syndrome/);
+ assert.match(answerMedicalQuestion(caseText).text,/shoshilinch tibbiy yordam/i);
+});
