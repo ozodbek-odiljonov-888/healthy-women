@@ -12,7 +12,7 @@ const bleeding=(n)=>includesAny(n,["qon kel","qon ket","qon oq","hayz qoni","vag
 const pregnancy=(n)=>includesAny(n,["homilador","homiladorman","homiladorlik ehtimol","test ijobiy","test musbat"]);
 const pregnantNegative=(n)=>includesAny(n,["homilador emas","homiladorlik testi manfiy","test manfiy","test negativ"]);
 const shoulderTip=(n)=>includesAny(n,["yelka uchim ogri","yelka uchi ogri","yelkam uchida ogri","yelkaning uchida ogri"]);
-const padEachHour=(n)=>/\b(?:har\s*(?:bir|1)\s*soat(?:da)?\s*(?:prokladka|tampon)|(?:prokladka|tampon)\s*har\s*(?:bir|1)\s*soat(?:da)?|(?:prokladka|tampon).{0,28}\b1\s*soat(?:da)?|1\s*soat(?:da)?.{0,28}(?:prokladka|tampon))\b/.test(n);
+const padEachHour=(n)=>/\b(?:har\s*(?:(?:bir|1)\s*)?soat(?:da)?\s*(?:prokladka|tampon)|(?:prokladka|tampon)\s*har\s*(?:(?:bir|1)\s*)?soat(?:da)?|(?:prokladka|tampon).{0,28}\b1\s*soat(?:da)?|1\s*soat(?:da)?.{0,28}(?:prokladka|tampon))\b/.test(n);
 const saturated=(n)=>includesAny(n,["tolib qol","tez tolib","shimib","shimi","tolmoqda","toladi","tolgan","sopping"]);
 const afterMenopause=(n)=>includesAny(n,["menopauzadan keyin","menopauzadan song","menopauzadan keyingi","klimaksdan keyin","12 oydan beri hayz bolmay"]);
 const postmenopausalSpotting=(n)=>includesAny(n,["jigarrang","pushti","dog","ajralma","qon","spotting"]);
