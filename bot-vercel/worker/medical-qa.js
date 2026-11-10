@@ -95,7 +95,7 @@ export function assessMedicalRisk(raw){
     url:"https://www.nhs.uk/mental-health/conditions/postnatal-depression/"};
  }
  const expecting=any(n,pregnancy)&&!any(n,["homilador emas","test manfiy","test negativ"]);
- if(expecting&&any(n,["qattiq bosh ogri","kuchli bosh ogri","koz xiralash","korish xiralash","koz oldida chaq","yuzim shish","qovurga ostida ogri"])){
+ if(expecting&&any(n,["qattiq bosh ogri","kuchli bosh ogri","koz xiralash","kozim xiralash","korish xiralash","korishim xiralash","koz oldida chaq","yuzim shish","qovurga ostida ogri"])){
   return {level:"urgent",text:"⚠️ Homiladorlikdagi kuchli bosh og‘rig‘i, ko‘rish buzilishi yoki to‘satdan shish preeklampsiya kabi jiddiy holat bilan bog‘liq bo‘lishi mumkin. Darhol tug‘ruq bo‘limi yoki shifokorga murojaat qiling.",url:"https://www.nhs.uk/conditions/pre-eclampsia/"};
  }
  if(any(n,["homila harakati kamay","bola kam qimirl","bola qimirlam","bolam qimirlam","homila qimirlama","qornimdagi bola harakat","tepishi kamay"])){
