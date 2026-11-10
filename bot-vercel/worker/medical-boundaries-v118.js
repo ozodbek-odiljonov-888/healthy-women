@@ -3,7 +3,7 @@
 // This does not understand every dialect or guarantee medical safety.
 const COMPARISON=/\b(?:farq\w*|solishtir\w*|taqqosla\w*|qaysi biri|ikkalasi\w*)\b/;
 const CONDITION_PATTERNS=[
- ["pcos",/\b(?:pcos|polikistoz|pmos)\b/],
+ ["pcos",/\b(?:pcos(?:ni|ga|da|dan)?|polikistoz(?:ni)?|pmos)\b/],
  ["endometrioz",/\b(?:endometrioz|endometriosis)\b/],
  ["adenomioz",/\b(?:adenomioz|adenomyosis)\b/],
  ["mioma",/\b(?:mioma|fibroma|fibroid)\b/],
