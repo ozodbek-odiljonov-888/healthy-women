@@ -234,16 +234,26 @@ try{
  await second.close();
  console.log("PASS: second browser tab refreshes after another tab edits a diary record.");
 
- await page.evaluate(()=>localStorage.setItem("healthywomen.events.v1","{broken-example-json"));
- await page.reload();
- await page.locator("#rescueLegacy").waitFor({state:"visible"});
- const corrupted=await page.evaluate(()=>localStorage.getItem("healthywomen.events.v1"));
- await page.locator('#mainNav [data-view="journal"]').click();
- await page.locator('#checkinForm textarea[name="note"]').fill("FICTIONAL NEW ENTRY THAT MUST NOT OVERWRITE");
- await page.locator('#checkinForm button[type="submit"]').click();
- await page.waitForFunction(()=>document.querySelector("#diaryFormError")?.textContent?.length>0);
- assert.equal(await page.evaluate(()=>localStorage.getItem("healthywomen.events.v1")),corrupted);
- console.log("PASS: corrupt local journal remains preserved, and accidental overwrites are blocked.");
+ // Legacy corruption is tested in an isolated browser context. An encrypted
+ // session must not be forcibly downgraded to plaintext for test convenience.
+ const badContext=await browser.newContext({viewport:{width:1280,height:900}});
+ const badPage=await badContext.newPage();badPage.on("pageerror",e=>errors.push(String(e)));
+ await badPage.addInitScript(()=>{
+  if(sessionStorage.getItem("hw-broken-legacy-fixture")!=="yes"){
+   localStorage.setItem("healthywomen.events.v1","{broken-example-json");
+   sessionStorage.setItem("hw-broken-legacy-fixture","yes");
+  }
+ });
+ await badPage.goto(base+"/index.html");
+ await badPage.locator("#rescueLegacy").waitFor({state:"visible"});
+ const corrupted=await badPage.evaluate(()=>localStorage.getItem("healthywomen.events.v1"));
+ await badPage.locator('#mainNav [data-view="journal"]').click();
+ await badPage.locator('#checkinForm textarea[name="note"]').fill("FICTIONAL NEW ENTRY THAT MUST NOT OVERWRITE");
+ await badPage.locator('#checkinForm button[type="submit"]').click();
+ await badPage.waitForFunction(()=>document.querySelector("#diaryFormError")?.textContent?.length>0);
+ assert.equal(await badPage.evaluate(()=>localStorage.getItem("healthywomen.events.v1")),corrupted);
+ await badContext.close();
+ console.log("PASS: corrupt legacy journal remains intact; no accidental overwrite.");
 
  // The Privacy page must erase in one coordinated operation and notify other tabs.
  const erasedEpochBefore=await page.evaluate(()=>localStorage.getItem("healthywomen.erase-epoch.v1"));
@@ -255,17 +265,19 @@ try{
  const erasedEpochAfter=await privacyTab.evaluate(()=>localStorage.getItem("healthywomen.erase-epoch.v1"));
  assert.notEqual(erasedEpochAfter,erasedEpochBefore);
  await page.waitForFunction(()=>localStorage.getItem("healthywomen.events.v1")===null);
- await page.locator("#view-home .hero").waitFor({state:"visible"});
- assert.equal(await page.locator("#rescueLegacy").count(),0);
+ await page.locator("#secureEnableDialog").waitFor({state:"visible"});
+ assert.equal(await page.evaluate(()=>localStorage.getItem("healthywomen.events.v1")),null);
  await privacyTab.close();
+ await configureNewEncryptedJournal(page,"after-privacy-page-erasure.hwbak");
  await page.locator('#mainNav [data-view="journal"]').click();
  await page.locator('#checkinForm textarea[name="note"]').fill("FICTIONAL-FRESH-AFTER-ERASURE");
  await page.locator('#checkinForm select[name="pain"]').selectOption("2");
  await page.locator('#checkinForm select[name="flow"]').selectOption("light");
  await page.locator('#checkinForm button[type="submit"]').click();
- await page.waitForFunction(()=>JSON.parse(localStorage.getItem("healthywomen.events.v1")||"[]").length===1);
- assert(!(await page.evaluate(()=>localStorage.getItem("healthywomen.events.v1"))).includes("FICTIONAL-HEALTH-NOTE-NEVER-REAL"));
- console.log("PASS: privacy-page erasure clears old data, reloads other tabs and allows a fresh empty journal.");
+ await page.waitForFunction(()=>document.querySelectorAll("#view-journal [data-edit-checkin]").length===1);
+ assert.equal(await page.evaluate(()=>localStorage.getItem("healthywomen.events.v1")),null);
+ assert(!(await page.evaluate(()=>localStorage.getItem("healthywomen.encrypted-local.v1"))).includes("FICTIONAL-FRESH-AFTER-ERASURE"));
+ console.log("PASS: privacy-page erasure clears old data and fresh medical notes remain encrypted.");
 
  assert.deepEqual(errors,[]);
  console.log("PASS: no JavaScript runtime errors.");
