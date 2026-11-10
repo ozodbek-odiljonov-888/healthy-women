@@ -3,7 +3,7 @@
 // Authorization: signed Telegram initData. Transport: ciphertext envelopes only.
 // This handler is intentionally not wired into the existing PWA or webhook.
 import {verifyTelegramInitData} from "../worker/telegram-auth.js";
-import {createOpaqueSyncProtocol} from "../worker/opaque-sync-contract.js";
+import {createOpaqueSyncProtocol,validateOpaqueEnvelope} from "../worker/opaque-sync-contract.js";
 import {createNeonStorageFromEnv} from "../worker/neon-provider.js";
 
 const BODY_LIMIT=1_500_000;
@@ -22,8 +22,8 @@ const response=(data,status,origin,allowedOrigin,extra={})=>
  new Response(JSON.stringify(data),{status,headers:{
    ...HEADERS,...(origin && origin===allowedOrigin?{"Access-Control-Allow-Origin":origin}:{}),...extra
  }});
-function error(status,msg,origin,allowedOrigin){
- return response({error:msg},status,origin,allowedOrigin);
+function error(status,msg,origin,allowedOrigin,extra={}){
+ return response({error:msg},status,origin,allowedOrigin,extra);
 }
 function validRevision(value){return value===null||(typeof value==="string"&&UUID.test(value));}
 function exactlyFields(object,names){
@@ -118,6 +118,8 @@ export async function handleSyncRequest(request,{env={},loadStorage=loadDefaultS
  if(request.method==="PUT"){
   if(!exactlyFields(payload,["envelope","expectedRevision"])||!validRevision(payload.expectedRevision))
    return error(400,"Invalid request",origin,allowedOrigin);
+  try{validateOpaqueEnvelope(payload.envelope);}
+  catch{return error(400,"Encrypted envelope required",origin,allowedOrigin);}
  }
  if(request.method==="DELETE"){
   if(!exactlyFields(payload,["expectedRevision","confirmation"])
