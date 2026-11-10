@@ -29,6 +29,8 @@ try{
   });
   await page.goto(origin+"/index.html");
   await page.locator("#view-home .hero").waitFor();
+  // Viewing educational content is allowed before encryption; medical writes remain blocked.
+  await page.locator("#secureCancel").click();
   await page.locator('#mainNav [data-view="assistant"]').evaluate(el=>el.click());
   await page.locator("#aiConsent").waitFor();
   assert.equal(await page.locator("#askAiButton").isDisabled(),true);
