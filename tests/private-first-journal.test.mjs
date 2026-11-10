@@ -20,13 +20,32 @@ test("brand-new local storage requires encryption before first health note",()=>
  assert.equal(hasEncryptedJournal(storage),false);
  assert.equal(storage.getItem(LEGACY_EVENTS_KEY),null);
 });
-test("existing plaintext journal must survive without an automatic forced migration",()=>{
+test("empty legacy data never bypasses first-use encryption",()=>{
  const storage=fakeStorage();
- for(const legacy of ["[]","{broken historical record"]){
+ for(const legacy of ["[]"," [  ] ","\n[]\n"]){
+  storage.setItem(LEGACY_EVENTS_KEY,legacy);
+  assert.equal(needsEncryptedJournalSetup(storage),true);
+  assert.equal(storage.getItem(LEGACY_EVENTS_KEY),legacy);
+ }
+});
+test("nonempty and corrupt legacy data remain preserved for explicit recovery",()=>{
+ const storage=fakeStorage();
+ const existing=[{id:"historical",type:"period",payload:{start:"2026-10-01",end:"2026-10-04"},updated_at:1790000000000,deleted:0}];
+ for(const legacy of [JSON.stringify(existing),"{broken historical record", "[{}]", "null"]){
   storage.setItem(LEGACY_EVENTS_KEY,legacy);
   assert.equal(needsEncryptedJournalSetup(storage),false);
   assert.equal(storage.getItem(LEGACY_EVENTS_KEY),legacy);
  }
+});
+test("empty older diaries migrate without plaintext writes or data loss",async()=>{
+ const storage=fakeStorage();
+ storage.setItem(LEGACY_EVENTS_KEY," [ ] ");
+ assert.equal(needsEncryptedJournalSetup(storage),true);
+ const first=await migratePlainJournal(PASSWORD,storage);
+ assert.deepEqual(first.events,[]);
+ assert.equal(storage.getItem(LEGACY_EVENTS_KEY),null);
+ assert.equal(hasEncryptedJournal(storage),true);
+ assert.equal(needsEncryptedJournalSetup(storage),false);
 });
 test("fresh first-use setup stores only ciphertext, then reopens with the same password",async()=>{
  const storage=fakeStorage();
