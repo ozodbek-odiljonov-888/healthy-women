@@ -61,7 +61,7 @@ function contains(n,term){
  return false;
 }
 const any=(n,patterns)=>patterns.some(p=>contains(n,p));
-const faint=["hushdan ket","hushsiz","bosh aylan","koz oldi qorong","ozimdan ket"];
+const faint=["hushdan ket","hushsiz","bosh aylan","boshim aylan","koz oldi qorong","ozimdan ket"];
 const breath=["nafas qis","nafas ololma","nafas yetishma"];
 const severe=["chidab bolmas","juda kuchli ogri","qattiq ogri","tosatdan kuchli ogri","keskin ogri","toxtovsiz kuchli ogri"];
 const bleeding=["qon ket","qon kop","kop qon","qon oq","qon juda kop","prokladka","tampon"];
@@ -98,6 +98,8 @@ export function assessMedicalRisk(raw){
  return {level:"none"};
 }
 function scoreTopic(query,topic){
+ // Do not treat unrelated headaches, back pain or drug requests as period pain.
+ if(topic.key==="ogriq"&&!any(query,["hayz","hayzim","qorin","qornim","chanoq","tos","bachadon","dismenoreya"]))return 0;
  let points=0;
  for(const word of topic.words){
   if(contains(query,word)){
