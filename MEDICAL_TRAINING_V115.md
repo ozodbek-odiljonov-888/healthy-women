@@ -116,3 +116,25 @@ individual retsept yozish vazifasini bajarmaydi.
 
 **Hozirgi versiya faqat GitHub draft: hech kimning haqiqiy ma’lumoti
 sinovga olinmadi, jonli webhook va Mini App hali yangilanmadi.**
+
+## Klinik tahrir uchun CSV jadval (yangi)
+
+`scripts/export-medical-review.mjs` qo‘shimcha paket yoki internet
+so‘rovisiz 500 qatordan iborat UTF-8 CSV chiqaradi. Lokal terminalda:
+
+```bash
+node scripts/export-medical-review.mjs medical-review-v115.csv
+```
+
+CSV ustunlari: `topic_key`, `topic_title`, `synthetic_question`,
+`prepared_education_answer`, `public_medical_source`,
+`clinical_review_status`, `reviewer`, `reviewed_on`, `notes`.
+
+**Har bir qator `PENDING_CLINICAL_REVIEW` bilan boshlanadi.**
+Tibbiy mutaxassis uni rasmiy tasdiqlamaguncha mazkur jadval
+faqat tekshirish materiali hisoblanadi. Barcha 500 savol sun’iy
+yozilgani sabab, haqiqiy foydalanuvchi suhbatlari yoki bemorlar
+ma'lumotlari CSVga kiritilmagan.
+
+`tests/medical-review-export.test.mjs` eksportdagi 500 qator,
+50 mavzu, manba izchilligi va tasdiqlanmagan holatni tekshiradi.
