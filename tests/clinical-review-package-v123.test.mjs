@@ -19,7 +19,7 @@ test("offline reviewer booklet contains exactly 50 distinct real educational top
  assert.equal((page.match(/<span class="empty"/g)||[]).length,350);
  assert.equal((page.match(/href="https:\/\//g)||[]).length,50);
  assert(page.includes("0/50 klinik tasdiq"));
- assert(page.includes("PENDING")===false);
+ assert(!page.includes("APPROVED_BY_CLINICIAN"));
  assert.match(page,/Content-Security-Policy/);
  assert(!/<script\b/i.test(page));
 });
