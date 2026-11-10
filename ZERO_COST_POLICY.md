@@ -57,3 +57,17 @@ Manbalar:
 - https://neon.com/docs/introduction/plans
 - https://vercel.com/docs/plans/hobby
 - https://vercel.com/docs/limits/fair-use-guidelines
+
+## 2026-11-10: Neon Free bazasida haqiqiy staging tekshiruvi
+
+- Yangi loyiha, yangi compute, pullik dastur yoki Vercel deployment yaratilmagan. **Oldindan mavjud** `healthy-women-staging` Free loyihasidan foydalanildi.
+- Mavjud `healthy_women_staging` bazasiga `hw_private.sync_request_quota` qo‘shildi; staging rolga faqat SELECT/INSERT/UPDATE berildi, DELETE olib tashlandi.
+- Haqiqiy PostgreSQL’da bir xil **sun’iy, HMAC ko‘rinishidagi** kalitga bir vaqtda 3 ta `INSERT ... ON CONFLICT` sinov so‘rovi yuborildi, limit 2:
+  - 1-so‘rov: qabul qilindi;
+  - 2-so‘rov: qabul qilindi;
+  - 3-so‘rov: rad etildi;
+  - yakuniy `used=2`.
+- Sinov bazasida shu bitta sun’iy quota satri saqlanib qolgan. Unga hech qanday haqiqiy Telegram ID, IP, tibbiy qayd yoki kalit yozilmagan.
+- Ikkita deployment yaratilmadi, jonli botga yangi `DATABASE_URL` ulanmagan.
+- GitHub CI o‘tgan bo‘lsa ham **hosting darajasidagi billing rejasi aniq ko‘rinmadi**. Vercel billing xizmatidan xarajat ma'lumotini olish so‘rovi natija bermadi; uni $0 xarajatning qat’iy isboti deb qabul qilmang.
+- Bazadagi simulyatsiyalangan parallel sinov haqiqiy yuqori yuklama yoki DDoS sinovi emas; limitlar faqat avtorizatsiyalangan staging so‘rovlari uchun.
