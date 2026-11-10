@@ -64,7 +64,7 @@ const any=(n,patterns)=>patterns.some(p=>contains(n,p));
 const faint=["hushdan ket","hushsiz","bosh aylan","boshim aylan","koz oldi qorong","ozimdan ket"];
 const breath=["nafas qis","nafas ololma","nafas yetishma"];
 const severe=["chidab bolmas","juda kuchli ogri","qattiq ogri","tosatdan kuchli ogri","keskin ogri","toxtovsiz kuchli ogri"];
-const bleeding=["qon ket","qon kop","kop qon","qon oq","qon juda kop","prokladka","tampon"];
+const bleeding=["qon ket","qon kop","kop qon","qon oq","qon juda kop","qoni","qonim","hayz qoni","prokladka","tampon"];
 const pregnancy=["homilador","test ijobiy","test musbat","test pozitiv","homiladorlik ehtimol"];
 const pelvicPain=["qorin ogri","tos ogri","chanoq ogri","bir tomonlama ogri","pastki qorin","yelka uchida ogri"];
 const padHour=/(har (bir )?soat.{0,30}(prokladka|tampon)|(?:prokladka|tampon).{0,30}har (bir )?soat|1 soat.{0,30}(prokladka|tampon))/;
