@@ -37,8 +37,9 @@ test("wrong passphrase and a different authenticated Telegram account cannot dec
 });
 test("tampering with ciphertext, nonce or KDF parameters is rejected",async()=>{
  const mutate=(field,value)=>({...original,[field]:value});
- await assert.rejects(decryptSyncSnapshot(mutate("ciphertext",original.ciphertext.replace(/^./,"B")),PASSPHRASE,ACCOUNT));
- await assert.rejects(decryptSyncSnapshot(mutate("iv",original.iv.replace(/^./,"B")),PASSPHRASE,ACCOUNT));
+ const changed=(raw)=>((raw[0]==="A"?"B":"A")+raw.slice(1));
+ await assert.rejects(decryptSyncSnapshot(mutate("ciphertext",changed(original.ciphertext)),PASSPHRASE,ACCOUNT));
+ await assert.rejects(decryptSyncSnapshot(mutate("iv",changed(original.iv)),PASSPHRASE,ACCOUNT));
  assert.throws(()=>parseSyncEnvelope(mutate("iterations",1)));
  assert.throws(()=>parseSyncEnvelope(mutate("algorithm","AES-128-CBC")));
 });
