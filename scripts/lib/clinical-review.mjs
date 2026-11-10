@@ -2,6 +2,7 @@
 // A completed JSON file is evidence for human review, NOT proof of credentials.
 // This module is Node.js tooling only and is not part of the Telegram runtime.
 import {createHash} from "node:crypto";
+import {readFileSync} from "node:fs";
 import {MEDICAL_TOPICS} from "../../bot-vercel/worker/medical-qa.js";
 
 const SCHEMA="healthy-women-medical-review-v1";
@@ -9,6 +10,21 @@ const PENDING="PENDING_CLINICAL_REVIEW";
 const APPROVED="APPROVED_BY_CLINICIAN";
 const REQUIRED=["source_page_checked","uzbek_text_checked","safety_escalation_checked"];
 
+// Source-bound safety fingerprint covers BOTH triage code and normalization:
+ // changing urgent warnings must invalidate old review regardless of FAQ text.
+function hashSafetyRules(){
+ const paths=[
+  "../../bot-vercel/worker/medical-qa.js",
+  "../../bot-vercel/worker/medical-language-v116.js",
+  "../../bot-vercel/worker/medical-triage-v117.js"
+ ];
+ const digest=createHash("sha256");
+ for(const path of paths){
+  const content=readFileSync(new URL(path,import.meta.url));
+  digest.update(path).update(content);
+ }
+ return digest.digest("hex");
+}
 function hashTopic(topic){
  return createHash("sha256").update(JSON.stringify([
   topic.key,topic.title,topic.answer,topic.url,topic.words
@@ -20,6 +36,7 @@ export function createMedicalReviewTemplate(topics=MEDICAL_TOPICS){
   throw Error("Expected 50 unique medical topics");
  return {
   schema:SCHEMA,
+  safety_rules_sha256:hashSafetyRules(),
   disclaimer:"Draft sign-off checklist only. Must be reviewed by a qualified human clinician; no automated review or bot activation.",
   entries:topics.map(topic=>({
    topic_key:topic.key,topic_title:topic.title,
@@ -44,6 +61,8 @@ export function validateMedicalReviewSignoffs(file,topics=MEDICAL_TOPICS){
  if(!file||typeof file!=="object"||file.schema!==SCHEMA||!Array.isArray(file.entries)){
   return {ready:false,approved:0,total:topics.length,issues:["Invalid or missing medical review file"]};
  }
+ if(file.safety_rules_sha256!==hashSafetyRules())
+  issues.push("Safety triage or normalization changed since clinical review");
  const accepted=new Map();
  for(const item of file.entries){
   const key=item?.topic_key;
