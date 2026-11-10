@@ -1,6 +1,6 @@
 # Healthy Women v1.10 — Neon PostgreSQL storage adapter (draft)
 
-**NOT DEPLOYED. NO DATABASE HAS BEEN CREATED. NO PATIENT DATA IS STORED REMOTELY.**
+**NOT DEPLOYED TO THE LIVE BOT OR PWA. A separate Free-plan PostgreSQL STAGING project exists. No real patient data has been used.**
 
 The existing Telegram FAQ bot and static PWA remain unaffected. This is a
 **stacked draft** based on the v1.9 account-bound, end-to-end encrypted
@@ -26,7 +26,7 @@ Alternatives:
   introduce a distinct Worker/D1 deployment pathway.
 
 These services have different privacy contracts and operational trade-offs.
-No provider has been connected in this change.
+A separate Neon Free staging project was created and connected through the authorized Neon account on 2026-11-10. This is NOT connected to the live bot or PWA.
 
 ## What the candidate implements
 
@@ -50,8 +50,7 @@ No provider has been connected in this change.
 - `tests/neon-storage.test.mjs` tests the adapter's read, write, user
   separation, stale revision, tombstone, validation and parameterization
   using an in-memory SQL-result simulator and *fictional* data.
-- No DNS, cloud project, database connection, Vercel environment variable,
-  payment profile, deployment or Telegram webhook has been changed.
+- A separate Neon Free staging project was created after code preparation. No Vercel environment variable, live deployment, production database, payment profile or Telegram webhook was changed.
 
 ## IMPORTANT: not a complete clinical-grade security boundary
 
@@ -74,20 +73,14 @@ privacy/legal retention and re-enrollment policy is needed before launch.
 Deleting the record's ciphertext is not equivalent to guaranteed purge of
 database backups, logs, or exports.
 
-The available tests **do not connect to Neon**. The atomic SQL semantics,
-database permissions, connection timeouts, data retention and failure
-conditions still need integration testing in a dedicated staging project.
+The CI tests use a synthetic SQL-result simulator. The authorized staging project has also undergone **seven actual PostgreSQL sequential CAS checks**, described below. True concurrent two-session behavior, least-privilege role permissions, timeouts, data retention and failure conditions still need staging integration testing.
 The `sql.query` interface follows Neon's official serverless driver
 documentation: https://github.com/neondatabase/serverless/blob/main/CONFIG.md
 
 ## Future setup: DO NOT RUN ON PRODUCTION YET
 
-1. Create a **separate Neon Free test project** at https://console.neon.tech/
-   in a reviewed region appropriate for the deployment and privacy rules.
-   Verify it is explicitly on the Free plan, with no paid upgrade/add-ons.
-2. Back up any existing test database before schema changes. In the **Neon SQL
-   Editor** of that staging project, review and run
-   `db/migrations/001_opaque_snapshots.sql`.
+1. **Completed on 2026-11-10:** created `healthy-women-staging` in Frankfurt (`aws-eu-central-1`), Free plan, PostgreSQL 17, 0.25 CU. Project ID: `withered-forest-05953681`; database: `healthy_women_staging`. No Vercel integration.
+2. **Completed:** installed `hw_private.opaque_snapshots` in that otherwise empty staging database and verified its schema, constraints and absence of PUBLIC grants.
 3. Later, once deployment is separately authorized, place the Neon connection
    string only in the server project's protected Vercel environment variable
    `DATABASE_URL`. NEVER send it in chat or commit it to GitHub; do not add
@@ -115,3 +108,19 @@ documentation: https://github.com/neondatabase/serverless/blob/main/CONFIG.md
 
 **No passwords, Telegram tokens or real health data should be put into
 this draft PR or test output.**
+
+## 2026-11-10 live staging SQL verification (fictional metadata)
+
+- Confirmed the private schema and table are present in the isolated staging database.
+- Fixed the CAS SQL from `INSERT ... ON CONFLICT UPDATE` to an atomic `WITH changed AS (conditional UPDATE), created AS (INSERT ... SELECT ... WHERE expected IS NULL ... ON CONFLICT DO NOTHING)` statement. The old query had permitted initial insertion with a non-null expected revision.
+- Ran the corrected SQL on the real PostgreSQL 17.11 engine using one synthetic test account:
+  1. Non-null expected revision on absent account: **0 returned** (PASS)
+  2. Null expected revision on absent account: **1 returned** (PASS)
+  3. Stale revision on existing account: **0 returned** (PASS)
+  4. Correct revision update: **1 returned** (PASS)
+  5. Stale revision deletion: **0 returned** (PASS)
+  6. Current revision deletion: **1 returned** (PASS)
+  7. Attempt to resurrect a deleted row: **0 returned** (PASS)
+- A deletion tombstone for a fictional ID intentionally remains in the isolated staging database. No clinical content was inserted.
+- These are **sequential** tests. No true concurrent writes, multi-connection load test, application runtime connection or end-to-end Mini App sync has been verified.
+- A fully audited production deployment, minimal-retention policy, privacy-law compliance, independent security review and rollback plan are still required.
