@@ -62,3 +62,18 @@ body{background:radial-gradient(circle at 85% 0%,#f6ebf0 0%,transparent 36%),var
 .ai-consent{display:flex;gap:11px;align-items:flex-start;padding:13px;border:1px solid #e7dce4;border-radius:12px;background:white;font-size:12px;line-height:1.6}
 .ai-consent input{flex:0 0 auto;width:18px;height:18px;accent-color:#9b4e70;margin-top:1px}
 .ai-remote-card button{width:100%}.ai-remote-card button:disabled{opacity:.5;cursor:not-allowed}
+
+/* v1.28: accessible mobile navigation drawer. */
+.mobile-drawer-close,.mobile-menu-backdrop{display:none}
+.mobile-menu:focus-visible,.mobile-drawer-close:focus-visible,.nav-button:focus-visible{outline:3px solid #92516b;outline-offset:3px}
+@media(max-width:850px){
+ .sidebar.is-open{display:flex;position:fixed;z-index:71;inset:0 auto 0 0;width:min(87vw,330px);height:100dvh;min-height:0;overflow-y:auto;overscroll-behavior:contain;box-shadow:12px 0 45px rgba(47,24,41,.24);padding-top:17px}
+ .mobile-drawer-close{display:flex;align-self:flex-end;align-items:center;border:1px solid #ead9e2;border-radius:12px;background:#fff;padding:9px 14px;font-size:12px;font-weight:800;color:#914761}
+ .mobile-menu-backdrop:not([hidden]){display:block;position:fixed;inset:0;z-index:70;border:0;border-radius:0;background:rgba(37,24,37,.48);width:100%;height:100%}
+ body.hw-drawer-open{overflow:hidden}
+ .sidebar.is-open .sidebar-note{display:block}
+ .sidebar.is-open .brand{padding-bottom:15px}
+}
+
+/* The global .button display rule must not override the hidden state. */
+#installPwaButton[hidden]{display:none!important}

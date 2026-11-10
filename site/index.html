@@ -16,7 +16,9 @@
 </head>
 <body>
 <div class="app-shell">
-  <aside class="sidebar">
+  <button type="button" id="mobileMenuBackdrop" class="mobile-menu-backdrop" aria-label="Menyuni yopish" hidden></button>
+  <aside class="sidebar" id="mainSidebar" aria-label="Barcha bo‘limlar">
+    <button type="button" id="closeMobileMenu" class="mobile-drawer-close" aria-label="Menyuni yopish">× Yopish</button>
     <div class="brand"><span class="brand-mark">✿</span><div><strong>Healthy<span>Women</span></strong><small>Sog‘lom ayollar</small></div></div>
     <div class="sidebar-note">O‘zingizni tushunish — sog‘lom hayotning bir qismi.</div>
     <nav id="mainNav" aria-label="Asosiy menyu">
@@ -31,7 +33,7 @@
     <div class="sidebar-bottom"><span class="status-dot"></span> Offline rejim mavjud <small>Ma’lumotlar avval qurilmada saqlanadi.</small></div>
   </aside>
   <main class="content">
-    <header class="topbar"><button id="menuButton" class="mobile-menu" aria-label="Menyuni ochish">☰</button><div><p class="eyebrow">SALOMATLIGINGIZ — E’TIBORIMIZDA</p><h1 id="viewHeading">Bugungi holatingiz</h1></div><span id="todayBadge" class="today-badge"></span><button id="quickHide" type="button" class="quick-hide" aria-label="Shaxsiy qaydlarni ekranda yashirish" title="Ekranni yashirish">◉ Yashirish</button></header>
+    <header class="topbar"><button id="menuButton" type="button" class="mobile-menu" aria-label="Barcha bo‘limlar menyusini ochish" aria-expanded="false" aria-controls="mainSidebar">☰</button><div><p class="eyebrow">SALOMATLIGINGIZ — E’TIBORIMIZDA</p><h1 id="viewHeading">Bugungi holatingiz</h1></div><span id="todayBadge" class="today-badge"></span><button id="quickHide" type="button" class="quick-hide" aria-label="Shaxsiy qaydlarni ekranda yashirish" title="Ekranni yashirish">◉ Yashirish</button></header>
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
     <section id="view-home" class="view active"></section>
     <section id="view-calendar" class="view"></section>
