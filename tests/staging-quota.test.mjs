@@ -117,6 +117,6 @@ test("private SQL migration requires no paid provider or scheduled purge service
  assert(!/CREATE EXTENSION|CREATE TRIGGER|CREATE MATERIALIZED VIEW|CRON|pg_cron/i.test(src));
  const grants=readFileSync(new URL("../db/staging/002_quota_role_grants.sql",import.meta.url),"utf8");
  assert.match(grants,/GRANT SELECT, INSERT, UPDATE/);
- assert.match(grants,/REVOKE DELETE ON TABLE hw_private\\.sync_request_quota/);
+ assert(grants.includes("REVOKE DELETE ON TABLE hw_private.sync_request_quota"));
  assert(!/GRANT ALL|GRANT DELETE|GRANT CREATE/i.test(grants));
 });
