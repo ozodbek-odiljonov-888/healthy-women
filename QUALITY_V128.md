@@ -16,3 +16,5 @@
 - Avtomatik cloud sync **xavfsizlik sabab o‘chirilgan**. Shifrlangan lokal .hwbak eksport/tiklash mavjud.
 - 50 tibbiy mavzu **0/50** mustaqil klinik ko‘rik; maxfiylik auditi va ikki jismoniy qurilmadagi sinov o‘tmagan.
 - Zero-cost qoida: yangi pullik xizmat, server, DB yoki tarif faollashtirilmagan.
+
+- AI asinxron javoblari faqat o‘zining kutish xabarini yangilaydi: keyingi offline javobga tegmaydi; kundalik o‘chirilganda yoki qulflanganda javob qayta paydo bo‘lmaydi.

@@ -46,7 +46,7 @@ test('PWA install is opt-in and available only after browser install event',asyn
 test('site assets and setting metadata updated safely and offline',()=>{
  const sw=text('sw.js'),app=text('app.mjs');
  assert(sw.includes('"./install-ui.mjs"'));
- assert(sw.includes('healthy-women-pwa-v28-ux'));
+ assert(sw.includes('healthy-women-pwa-v28-reliability'));
  assert(!sw.includes('cache.put('));
  assert(app.includes('v1.28 — Sifat va qulaylik sinovi'));
  assert(app.includes('lastAiPublicTopic=pickAiTopic(q)'));
