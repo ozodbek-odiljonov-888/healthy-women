@@ -14,7 +14,7 @@ on:
       - '.github/workflows/android-release.yml'
       - '.github/workflows/quality.yml'
   pull_request:
-    branches: [main, feature/v1-8-telegram-auth-foundation, feature/v1-9-encrypted-sync-contract, feature/v1-10-neon-atomic-storage, feature/v1-11-staging-sync-api, feature/v1-12-free-quota-guards, feature/v1-13-free-medical-qa, feature/v1-14-medical-training-corpus, feature/v1-15-500-medical-questions, feature/v1-16-medical-safety-audit, feature/v1-17-source-and-triage-audit, feature/v1-18-clinical-editorial-matrix, feature/v1-19-complex-medical-questions, feature/v1-20-speaker-context-safety, feature/v1-21-private-first-journal, feature/v1-22-empty-legacy-guard]
+    branches: [main, feature/v1-8-telegram-auth-foundation, feature/v1-9-encrypted-sync-contract, feature/v1-10-neon-atomic-storage, feature/v1-11-staging-sync-api, feature/v1-12-free-quota-guards, feature/v1-13-free-medical-qa, feature/v1-14-medical-training-corpus, feature/v1-15-500-medical-questions, feature/v1-16-medical-safety-audit, feature/v1-17-source-and-triage-audit, feature/v1-18-clinical-editorial-matrix, feature/v1-19-complex-medical-questions, feature/v1-20-speaker-context-safety, feature/v1-21-private-first-journal, feature/v1-22-empty-legacy-guard, feature/v1-23-offline-clinical-review-kit]
     paths:
       - 'site/**'
       - 'tests/**'
@@ -49,6 +49,18 @@ jobs:
         with:
           name: Healthy-Women-50-Medical-Review-DRAFT
           path: ${{ runner.temp }}/healthy-women-clinical-review/
+          retention-days: 7
+          if-no-files-found: error
+
+      - name: Generate read-only draft release readiness report
+        if: github.event_name == 'pull_request' && github.head_ref == 'feature/v1-24-release-preflight'
+        run: node scripts/release-preflight.mjs --json > "$RUNNER_TEMP/healthy-women-release-readiness.json"
+      - name: Upload non-sensitive blocked release status
+        if: github.event_name == 'pull_request' && github.head_ref == 'feature/v1-24-release-preflight'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Healthy-Women-Release-Preflight-BLOCKED
+          path: ${{ runner.temp }}/healthy-women-release-readiness.json
           retention-days: 7
           if-no-files-found: error
 
