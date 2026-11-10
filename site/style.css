@@ -32,3 +32,7 @@ body{background:radial-gradient(circle at 85% 0%,#f6ebf0 0%,transparent 36%),var
 @media(max-width:850px){.pro-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.mobile-nav{grid-template-columns:repeat(5,minmax(0,1fr))}}
 @media(max-width:560px){.pro-home-banner{flex-direction:column;align-items:flex-start}.pro-shortcuts{gap:9px}.pro-shortcut{padding:16px;min-height:153px}.pro-shortcut strong{font-size:12px}.pro-intro{align-items:flex-start;flex-direction:column;gap:12px;padding:23px}.pro-filter-row{padding:9px 11px}.pro-segments button{padding:9px 12px}.pro-metrics{gap:9px}.pro-metrics article{padding:17px}.pro-metrics article>strong{font-size:25px}.pro-analysis-grid,.pro-summary-block{grid-template-columns:1fr}.pro-analysis-card{padding:18px}.pro-bars{height:184px}}
 @media(prefers-reduced-motion:reduce){.view{animation:none!important}.nav-button,.pro-shortcut{transition:none!important}}
+
+/* Readable 12-month chart on narrow devices without whole-page overflow. */
+.pro-bars[data-months="12"]{overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin;scrollbar-color:#cb94a9 #f8edf2}
+.pro-bars[data-months="12"] .pro-bar-item{flex:0 0 42px}
