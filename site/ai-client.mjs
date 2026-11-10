@@ -18,3 +18,20 @@ export async function askPublicAi(topic,{endpoint="",fetchFn=fetch}={}){
  return {text:payload.answer,source:typeof payload.source==="string"?payload.source:"AI ma'lumot",url:typeof payload.url==="string"&&payload.url.startsWith("https://")?payload.url:"",
  remaining:Number.isInteger(payload.remainingToday)?payload.remainingToday:null};
 }
+
+// Local-only topic classification; input never enters provider JSON or a server log.
+export function pickAiTopic(question){
+ const q=String(question||"").toLocaleLowerCase("uz").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[‘’ʻ']/g,"").replace(/[^a-z0-9\s]/g," ");
+ if(!q.trim()||q.length>280)return null;
+ if(/endometrioz/.test(q))return "endo";
+ if(/polikist|pcos/.test(q))return "pcos";
+ if(/oralig|orasida|hayzdan tashqari|dog lanish/.test(q))return "between";
+ if(/kop qon|qon kop|kop ket|prokladka|qon juda|juda kop/.test(q))return "heavy";
+ if(/ogri|spazm|kramp|qorin sanch/.test(q))return "pain";
+ if(/kechik|homilador|pregnan/.test(q))return "pregnancy";
+ if(/nomuntazam|tartibsiz/.test(q))return "irregular";
+ if(/parvarish|issiq kompress|grelka|mashq/.test(q))return "selfcare";
+ if(/necha kun davom|qonash davom|qon ketishi necha|tugash/.test(q))return "duration";
+ if(/sikl|hayz|menstrual/.test(q))return "cycle";
+ return null;
+}
