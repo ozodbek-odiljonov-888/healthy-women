@@ -113,6 +113,9 @@ function scoreTopic(query,topic){
  // Do not treat unrelated headaches, back pain or drug requests as period pain.
  if(topic.key==="ogriq"&&!any(query,["hayz","hayzim","qorin","qornim","chanoq","tos","bachadon","dismenoreya"]))return 0;
  let points=0;
+ if(topic.key==="nomuntazam"
+   &&any(query,["notekis","nomuntazam","tartibsiz","muntazam emas"])
+   &&!any(query,["pcos","polikistoz","mioma","endometrioz"]))points+=7;
  for(const word of topic.words){
   if(contains(query,word)){
    const tokens=normalizeMedicalQuery(word).split(" ");
