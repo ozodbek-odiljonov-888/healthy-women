@@ -3,7 +3,7 @@
 import {createNeonStorageAdapter} from "./neon-storage.js";
 
 /** No secret is logged or returned. Test code can inject an isolated driver. */
-export async function createNeonStorageFromEnv(env,loadDriver=()=>import("@neondatabase/serverless")){
+export async function getNeonSqlFromEnv(env,loadDriver=()=>import("@neondatabase/serverless")){
  const raw=env?.DATABASE_URL;
  if(typeof raw!=="string"||raw.length>4096)throw Error("Neon database connection is not configured");
  let url;
@@ -16,5 +16,9 @@ export async function createNeonStorageFromEnv(env,loadDriver=()=>import("@neond
  const module=await loadDriver();
  if(typeof module?.neon!=="function")throw Error("Neon driver unavailable");
  const sql=module.neon(raw);
- return createNeonStorageAdapter(sql);
+ if(!sql || typeof sql.query!=="function")throw Error("Parameterized Neon driver required");
+ return sql;
+}
+export async function createNeonStorageFromEnv(env,loadDriver=()=>import("@neondatabase/serverless")){
+ return createNeonStorageAdapter(await getNeonSqlFromEnv(env,loadDriver));
 }
