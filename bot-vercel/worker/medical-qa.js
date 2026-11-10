@@ -89,7 +89,7 @@ export function assessMedicalRisk(raw){
  if(expecting&&any(n,["qattiq bosh ogri","kuchli bosh ogri","koz xiralash","korish xiralash","koz oldida chaq","yuzim shish","qovurga ostida ogri"])){
   return {level:"urgent",text:"⚠️ Homiladorlikdagi kuchli bosh og‘rig‘i, ko‘rish buzilishi yoki to‘satdan shish preeklampsiya kabi jiddiy holat bilan bog‘liq bo‘lishi mumkin. Darhol tug‘ruq bo‘limi yoki shifokorga murojaat qiling.",url:"https://www.nhs.uk/conditions/pre-eclampsia/"};
  }
- if(any(n,["homila harakati kamay","bola kam qimirl","bola qimirlam","homila qimirlama","qornimdagi bola harakat","tepishi kamay"])){
+ if(any(n,["homila harakati kamay","bola kam qimirl","bola qimirlam","bolam qimirlam","homila qimirlama","qornimdagi bola harakat","tepishi kamay"])){
   return {level:"urgent",text:"⚠️ Homila harakati odatdagidan kamaygan yoki to‘xtagan bo‘lsa, darhol tug‘ruq bo‘limiga murojaat qiling; ertangi kungacha kutmang. Telefon yoki uy doppleri bunday holatni istisno qila olmaydi.",url:"https://www.nhs.uk/pregnancy/keeping-well/your-babys-movements/"};
  }
  if(expecting&&any(n,["suvim ket","homila suvi ket","qindan suv kel","suv ketib qoldi"])){
