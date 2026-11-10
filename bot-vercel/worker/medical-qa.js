@@ -3,6 +3,7 @@ import {ADDITIONAL_MEDICAL_TOPICS,UNSUPPORTED_TRAINING_UTTERANCES} from "./medic
 import {NEW_MEDICAL_TOPICS,buildTrainingCorpus500} from "./medical-training-v115.js";
 import {fixConservativeMedicalTypos,removeExplicitNegatedSymptoms} from "./medical-language-v116.js";
 import {priorityMedicalSafety} from "./medical-triage-v117.js";
+import {checkMedicalQuestionBoundaries} from "./medical-boundaries-v118.js";
 // No paid models, API calls, patient database, request logs or model claims.
 // Editorial sources: NHS and ACOG. This is NOT a diagnosis or emergency service.
 const DISCLAIMER="\n\nℹ️ Bu umumiy ma’lumot, tashxis emas. Botga shaxsiy tibbiy tarix yoki maxfiy ma’lumot yubormang.";
@@ -175,6 +176,8 @@ export function answerMedicalQuestion(raw){
  const risk=assessMedicalRisk(raw);
  if(risk.level!=="none")return {kind:"safety",articles:[],text:risk.text+"\nManba: "+risk.url+DISCLAIMER,urgent:true};
  const normalized=normalizeMedicalQuery(raw);
+ if(checkMedicalQuestionBoundaries(normalized).blocked)
+  return {kind:"unknown",articles:[],text:UNKNOWN+DISCLAIMER,urgent:false};
  if(UNSUPPORTED_EXACT.has(normalized)||PERSONAL_MEDICATION.test(normalized))
   return {kind:"unknown",articles:[],text:UNKNOWN+DISCLAIMER,urgent:false};
  const found=findMedicalTopics(raw,1);
