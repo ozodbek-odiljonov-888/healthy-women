@@ -64,22 +64,6 @@ jobs:
           retention-days: 7
           if-no-files-found: error
 
-  browser-private-first:
-    if: github.event_name == 'pull_request' && (github.head_ref == 'feature/v1-21-private-first-journal' || github.head_ref == 'feature/v1-22-empty-legacy-guard')
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-      - name: Install temporary Chromium testing dependencies
-        run: npm install --no-audit --no-fund --no-save playwright@1.56.1
-      - name: Install Chromium for isolated test runner
-        run: npx playwright install --with-deps chromium
-      - name: Verify first-launch encryption, legacy recovery and device flows
-        run: node tests/e2e-browser.mjs && node tests/e2e-empty-legacy.mjs
-
       - name: Package vetted v1.24 source code for export
         if: github.event_name == 'pull_request' && github.head_ref == 'feature/v1-24-release-preflight'
         uses: actions/upload-artifact@v4
@@ -101,6 +85,23 @@ jobs:
           include-hidden-files: true
           retention-days: 7
           if-no-files-found: error
+
+  browser-private-first:
+    if: github.event_name == 'pull_request' && (github.head_ref == 'feature/v1-21-private-first-journal' || github.head_ref == 'feature/v1-22-empty-legacy-guard')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install temporary Chromium testing dependencies
+        run: npm install --no-audit --no-fund --no-save playwright@1.56.1
+      - name: Install Chromium for isolated test runner
+        run: npx playwright install --with-deps chromium
+      - name: Verify first-launch encryption, legacy recovery and device flows
+        run: node tests/e2e-browser.mjs && node tests/e2e-empty-legacy.mjs
+
 
   android-v124-debug:
     if: github.event_name == 'pull_request' && github.head_ref == 'feature/v1-24-release-preflight'
