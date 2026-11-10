@@ -31,12 +31,13 @@ const csvCell=value=>{
 export function buildMedicalEditorialWorklist(
  topics=MEDICAL_TOPICS,
  training=TRAINING_UTTERANCES_500,
- audit=auditMedicalSourceURLs(topics)
+ audit=null
 ){
  if(topics.length!==50||new Set(topics.map(t=>t.key)).size!==50)
   throw Error("50 unique editorial topics required");
- const auditByKey=new Map(audit.rows.map(r=>[r.topic_key,r]));
- if(auditByKey.size!==50||audit.rows.length!==50)throw Error("Incomplete source URL inventory");
+ const checkedAudit=audit??auditMedicalSourceURLs(topics);
+ const auditByKey=new Map(checkedAudit.rows.map(r=>[r.topic_key,r]));
+ if(auditByKey.size!==50||checkedAudit.rows.length!==50)throw Error("Incomplete source URL inventory");
  return topics.map(topic=>{
   const source=auditByKey.get(topic.key);
   const questions=training[topic.key];
