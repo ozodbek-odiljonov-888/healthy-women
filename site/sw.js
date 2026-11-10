@@ -1,6 +1,6 @@
 // Healthy Women v1.1 — privacy-restricted offline application shell.
 // Never cache dynamic requests, API responses, health diary or URL query strings.
-const VERSION="healthy-women-pwa-v28-reliability";
+const VERSION="healthy-women-pwa-v28-final";
 const PREFIX="healthy-women-pwa-v";
 const CACHE_FILES=[
  "./","./index.html","./manifest.webmanifest","./icons/icon.svg",

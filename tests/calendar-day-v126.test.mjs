@@ -52,7 +52,7 @@ test("app wiring and offline assets both include calendar interaction",()=>{
  assert(app.includes("journalDraftDate||today"));
  assert(app.includes("selected=b.dataset.date;renderCalendar()"));
  assert(sw.includes('"./calendar-day.mjs"'));
- assert(sw.includes('healthy-women-pwa-v28-reliability'));
+ assert(sw.includes('healthy-women-pwa-v28-final'));
 });
 
 test("Uzbek dates never display Chromium ICU placeholders such as M11",()=>{

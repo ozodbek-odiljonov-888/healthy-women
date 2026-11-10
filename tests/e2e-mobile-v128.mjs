@@ -53,6 +53,7 @@ try{
   assert(await page.locator('#installPwaButton').isVisible());
   await page.locator('#installPwaButton').click();
   await page.waitForFunction(()=>document.querySelector('#installPwaStatus')?.textContent?.includes('o‘rnatilgan'));
+  assert(await page.locator('#installPwaButton').isHidden());
   await page.screenshot({path:'ui-preview/v128-settings-'+width+'.png',fullPage:true});
   const dimensions=await page.evaluate(()=>({client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth}));
   assert(dimensions.scroll<=dimensions.client+2,'Overflow: '+JSON.stringify(dimensions));
