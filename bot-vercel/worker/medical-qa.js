@@ -4,6 +4,8 @@ import {NEW_MEDICAL_TOPICS,buildTrainingCorpus500} from "./medical-training-v115
 import {fixConservativeMedicalTypos,removeExplicitNegatedSymptoms} from "./medical-language-v116.js";
 import {priorityMedicalSafety} from "./medical-triage-v117.js";
 import {assessComplexMedicalQuestion,COMPLEX_REPLY} from "./medical-complex-v119.js";
+import {assessMedicalSpeaker,OTHER_PERSON_CLARIFICATION,MIXED_PERSON_CLARIFICATION,
+ THIRD_PERSON_RISK_PREFIX,MIXED_PERSON_RISK_PREFIX} from "./medical-context-v120.js";
 // No paid models, API calls, patient database, request logs or model claims.
 // Editorial sources: NHS and ACOG. This is NOT a diagnosis or emergency service.
 const DISCLAIMER="\n\nℹ️ Bu umumiy ma’lumot, tashxis emas. Botga shaxsiy tibbiy tarix yoki maxfiy ma’lumot yubormang.";
@@ -173,9 +175,20 @@ export function findMedicalTopics(raw,max=2){
  return found.slice(0,Math.max(0,Math.min(1,max))).map(x=>x.topic);
 }
 export function answerMedicalQuestion(raw){
+ // Danger is checked BEFORE context clarification, including third-party
+ // or multi-sentence questions. Do not suppress a reported red flag.
  const risk=assessMedicalRisk(raw);
- if(risk.level!=="none")return {kind:"safety",articles:[],text:risk.text+"\nManba: "+risk.url+DISCLAIMER,urgent:true};
  const normalized=normalizeMedicalQuery(raw);
+ const speaker=assessMedicalSpeaker(String(raw??"").slice(0,700),normalized);
+ if(risk.level!=="none"){
+  const prefix=speaker.scope==="mixed"?MIXED_PERSON_RISK_PREFIX:
+    speaker.scope==="other"?THIRD_PERSON_RISK_PREFIX:"";
+  return {kind:"safety",articles:[],text:prefix+risk.text+"\nManba: "+risk.url+DISCLAIMER,urgent:true};
+ }
+ if(speaker.scope==="mixed"&&!speaker.generalQuestion)
+  return {kind:"clarify",articles:[],text:MIXED_PERSON_CLARIFICATION+DISCLAIMER,urgent:false,reason:"speaker_ambiguous"};
+ if(speaker.scope==="other"&&!speaker.generalQuestion)
+  return {kind:"clarify",articles:[],text:OTHER_PERSON_CLARIFICATION+DISCLAIMER,urgent:false,reason:"third_party"};
  const complex=assessComplexMedicalQuestion(normalized);
  if(complex)return {kind:"clarify",articles:[],text:COMPLEX_REPLY+DISCLAIMER,urgent:false,reason:complex.type};
  if(UNSUPPORTED_EXACT.has(normalized)||PERSONAL_MEDICATION.test(normalized))

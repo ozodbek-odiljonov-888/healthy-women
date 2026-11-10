@@ -17,7 +17,9 @@ function hashSafetyRules(){
   "../../bot-vercel/worker/medical-qa.js",
   "../../bot-vercel/worker/medical-language-v116.js",
   "../../bot-vercel/worker/medical-triage-v117.js",
-  "../../bot-vercel/worker/medical-complex-v119.js"
+  "../../bot-vercel/worker/medical-complex-v119.js",
+  "../../bot-vercel/worker/medical-context-v120.js",
+  "../../bot-vercel/worker/index.js"
  ];
  const digest=createHash("sha256");
  for(const path of paths){
