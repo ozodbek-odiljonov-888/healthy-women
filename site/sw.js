@@ -1,11 +1,11 @@
 // Healthy Women v1.1 — privacy-restricted offline application shell.
 // Never cache dynamic requests, API responses, health diary or URL query strings.
-const VERSION="healthy-women-pwa-v27-ai";
+const VERSION="healthy-women-pwa-v28-ux";
 const PREFIX="healthy-women-pwa-v";
 const CACHE_FILES=[
  "./","./index.html","./manifest.webmanifest","./icons/icon.svg",
  "./sw.js","./privacy.html","./style.css","./app.mjs","./config.js","./privacy.css","./privacy-page.mjs","./checkins.mjs","./checkin-ui.mjs",
- "./vault.mjs","./vault-ui.mjs","./cycle-safety.mjs","./insights.mjs","./analytics.mjs","./calendar-day.mjs","./date-uz.mjs","./ai-client.mjs",
+ "./vault.mjs","./vault-ui.mjs","./cycle-safety.mjs","./insights.mjs","./analytics.mjs","./calendar-day.mjs","./date-uz.mjs","./ai-client.mjs","./install-ui.mjs",
  "./reminders.mjs","./diary.mjs","./privacy-screen.mjs","./telegram-launch.mjs",
  "./local-crypto.mjs","./local-crypto-ui.mjs","./journal-guard.mjs","./legacy-recovery.mjs","./restore-safety.mjs","./erasure.mjs","./password-rotation-ui.mjs"
 ];
