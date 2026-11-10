@@ -8,7 +8,8 @@ export const CURRICULUM_V115_A=Object.freeze([
       "adenomioz",
       "adenomyosis",
       "adenomiozis",
-      "bachadon mushak qavati"
+      "bachadon mushak qavati",
+      "adenomioz belgilari"
     ],
     "answer": "Adenomiozda bachadon ichki qavatiga o‘xshash hujayralar bachadon mushak qavatiga kirib boradi. Kuchli hayz og‘rig‘i va ko‘p qon ketishi kuzatilishi mumkin, ammo bu belgilar boshqa sabablarda ham uchraydi. Ginekolog tekshiruvi zarur.",
     "url": "https://www.nhs.uk/conditions/adenomyosis/"
