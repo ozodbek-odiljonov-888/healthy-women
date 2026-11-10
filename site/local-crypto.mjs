@@ -66,6 +66,12 @@ async function decryptedRecord(raw,key) {
 export function hasEncryptedJournal(storage=globalThis.localStorage){
  return storage?.getItem(LOCAL_VAULT_KEY)!==null;
 }
+// New installations must not write raw medical records before enabling the
+// existing local vault. Older installations with an explicit legacy key are
+// preserved for a careful, user-consented migration instead of being modified.
+export function needsEncryptedJournalSetup(storage=globalThis.localStorage){
+ return !hasEncryptedJournal(storage)&&storage.getItem(LEGACY_EVENTS_KEY)===null;
+}
 export function readPlainJournal(storage=globalThis.localStorage) {
  try {
   const data=JSON.parse(storage.getItem(LEGACY_EVENTS_KEY)||"[]");
