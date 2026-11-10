@@ -18,7 +18,6 @@ compute or block writes. Therefore the app must continue working **offline**,
 display a clear failure and support independent encrypted backups.
 Official links:
 - https://neon.com/docs/introduction/plans
-- https://neon.com/docs/introduction/free-plan
 - https://neon.com/pricing
 
 Alternatives:
