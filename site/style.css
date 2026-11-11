@@ -77,3 +77,9 @@ body{background:radial-gradient(circle at 85% 0%,#f6ebf0 0%,transparent 36%),var
 
 /* The global .button display rule must not override the hidden state. */
 #installPwaButton[hidden]{display:none!important}
+
+/* v1.33 explicit, accessible educational AI topic selector */
+.ai-topic-label{display:grid;gap:8px;font-size:12px;font-weight:700;color:#775269;line-height:1.5}
+#aiTopicSelect{display:block;width:100%;min-height:46px;border:1px solid #dcc7d1;border-radius:12px;padding:10px 13px;background:#fff;color:#563a4b;font:inherit;font-size:14px;cursor:pointer}
+#aiTopicSelect:focus-visible{outline:3px solid #9b4e70;outline-offset:2px}
+#aiTopicHint{min-height:19px}
