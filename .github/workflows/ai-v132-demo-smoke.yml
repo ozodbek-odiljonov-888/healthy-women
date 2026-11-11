@@ -1,0 +1,50 @@
+name: Four-person demo real-AI one-shot smoke
+on:
+  pull_request:
+    branches: [feature/v1-30-ai-readiness-gate]
+    paths:
+      - .github/workflows/ai-v132-demo-smoke.yml
+jobs:
+  demo-real-end-to-end:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    permissions:
+      contents: read
+    steps:
+      - name: Site, Telegram webhook, AI CORS and one fictional public topic
+        run: |
+          node --input-type=module <<'NODE'
+          import {randomUUID} from "node:crypto";
+          const site="https://healthy-women.vercel.app";
+          const api="https://healthy-women-bot.vercel.app";
+          const result={site:false,bot:false,webhook:false,aiStatus:false,preflight:false,modelCall:false};
+          try{
+           const [web,bot,status,preflight,unauthorized]=await Promise.all([
+            fetch(site,{signal:AbortSignal.timeout(10000),redirect:"error"}),
+            fetch(api+"/api/bot-status",{signal:AbortSignal.timeout(10000)}),
+            fetch(api+"/api/ai-status",{signal:AbortSignal.timeout(10000)}),
+            fetch(api+"/api/ai",{method:"OPTIONS",headers:{Origin:site,"Access-Control-Request-Method":"POST","Access-Control-Request-Headers":"content-type,x-hw-demo-id"},signal:AbortSignal.timeout(10000)}),
+            fetch(api+"/webhook",{method:"POST",headers:{"Content-Type":"application/json"},body:'{"update_id":123456}',signal:AbortSignal.timeout(10000)})
+           ]);
+           const [bd,sd]=await Promise.all([bot.json(),status.json()]);
+           result.site=web.status===200&&(await web.text()).includes("Healthy Women");
+           result.bot=bot.status===200&&bd.online===true&&bd.username==="healthy_womens_bot";
+           result.webhook=bd.webhookReady===true&&unauthorized.status===403;
+           result.aiStatus=status.status===200&&sd.enabled===true&&sd.topics===10;
+           result.preflight=preflight.status===204&&preflight.headers.get("access-control-allow-origin")===site
+            &&(preflight.headers.get("access-control-allow-headers")||"").includes("X-HW-Demo-Id");
+           if(!Object.values(result).slice(0,5).every(Boolean))throw Error("preflight failed");
+           const resp=await fetch(api+"/api/ai",{method:"POST",
+            headers:{"Origin":site,"Content-Type":"application/json","X-HW-Demo-Id":randomUUID()},
+            body:JSON.stringify({topic:"selfcare",consent:true}),
+            signal:AbortSignal.timeout(25000),redirect:"error"});
+           const payload=await resp.json().catch(()=>({}));
+           result.modelCall=resp.status===200&&resp.headers.get("access-control-allow-origin")===site
+            &&typeof payload.answer==="string"&&payload.answer.length>15&&payload.model==="gemini-3.1-flash-lite";
+           result.aiHttp=resp.status;
+           // Never log content, API key, chat ID, medical prompt, or deployment credentials.
+          }catch{result.runtimeError=true;}
+          console.log(JSON.stringify(result));
+          if(!Object.values(result).slice(0,6).every(Boolean))process.exit(1);
+          NODE
