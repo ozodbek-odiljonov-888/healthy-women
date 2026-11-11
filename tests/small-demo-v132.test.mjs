@@ -11,7 +11,7 @@ const post=(id,where=origin)=>new Request(endpoint,{method:"POST",headers:{Origi
 test("four testers on one WiFi retain different anonymous client quotas",async()=>{
  const clientHashes=[],networks=[];
  for(const id of ids){
-  const response=await handleAiRequest(post(id),{env,reserve:async(({clientHash,networkHash})=>{
+  const response=await handleAiRequest(post(id),{env,reserve:async({clientHash,networkHash})=>{
    clientHashes.push(clientHash);networks.push(networkHash);return {allowed:true,remaining_daily:24,remaining_client:2};
   },generate:async()=> "Fictional educational topic only."});
   assert.equal(response.status,200);

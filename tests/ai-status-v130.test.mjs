@@ -31,5 +31,5 @@ test("site requires explicit status check before send and precaches module",()=>
  const app=readFileSync(new URL("../site/app.mjs",import.meta.url),"utf8");
  const sw=readFileSync(new URL("../site/sw.js",import.meta.url),"utf8");
  assert(app.includes("checkAiAvailability()"));assert(app.includes("!aiRemoteStatus?.enabled"));
- assert(sw.includes("./ai-status.mjs"));assert(sw.includes("healthy-women-pwa-v30-ai-status"));
+ assert(sw.includes("./ai-status.mjs"));assert(sw.includes("healthy-women-pwa-v32-small-demo"));
 });
