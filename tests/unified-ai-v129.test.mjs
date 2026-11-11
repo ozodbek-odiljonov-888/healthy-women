@@ -78,7 +78,7 @@ test("site CSP, public config, service worker and privacy notice cover AI",()=>{
  const privacy=readFileSync(new URL("privacy.html",root),"utf8");
  assert(html.includes("connect-src 'self' https://healthy-women-bot.vercel.app"));
  assert(cfg.includes('window.HEALTHY_WOMEN_AI_API="https://healthy-women-bot.vercel.app/api/ai"'));
- assert(sw.includes("healthy-women-pwa-v29-unified-ai"));
+ assert(sw.includes("healthy-women-pwa-v30-ai-status"));
  assert(privacy.includes("Ixtiyoriy AI"));
  for(const forbidden of ["GEMINI_API_KEY","AI_DATABASE_URL","AI_IP_PEPPER","BOT_TOKEN"])assert(!cfg.includes(forbidden));
 });
