@@ -44,7 +44,7 @@ try{
   if(width===390)await page.locator('.mobile-nav [data-view="settings"]').click();
   else await page.locator('#mainNav [data-view="settings"]').click();
   assert(await page.locator('#view-settings').isVisible());
-  assert((await page.locator('#view-settings').textContent()).includes('v1.28'));
+  assert((await page.locator('#view-settings').textContent()).includes('v1.30'));
   assert((await page.locator('#installPwaStatus').textContent()).includes('Android Chrome'));
   await page.evaluate(()=>{
    const event=new Event('beforeinstallprompt',{cancelable:true});
