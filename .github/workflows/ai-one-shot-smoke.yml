@@ -1,0 +1,39 @@
+name: AI Free Tier Single Synthetic Smoke
+on:
+  pull_request:
+    branches: [feature/v1-29-unified-ai]
+    paths:
+      - .github/workflows/ai-one-shot-smoke.yml
+jobs:
+  single-real-ai-request:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    permissions:
+      contents: read
+    steps:
+      - name: One fixed public educational topic; never print the response body
+        run: |
+          node --input-type=module <<'NODE'
+          const origin="https://healthy-women.vercel.app";
+          const endpoint="https://healthy-women-bot.vercel.app/api/ai";
+          let result={http:null,cors:false,answerPresent:false,source:null,model:null,remainingToday:null};
+          try{
+            const response=await fetch(endpoint,{method:"POST",
+              headers:{"Origin":origin,"Content-Type":"application/json"},
+              body:JSON.stringify({consent:true,topic:"cycle"}),
+              signal:AbortSignal.timeout(30000),redirect:"error",cache:"no-store"});
+            const data=await response.json().catch(()=>({}));
+            result={http:response.status,cors:response.headers.get("access-control-allow-origin")===origin,
+              answerPresent:typeof data.answer==="string"&&data.answer.length>=20,
+              source:typeof data.source==="string"?data.source:null,
+              model:typeof data.model==="string"?data.model:null,
+              remainingToday:Number.isInteger(data.remainingToday)?data.remainingToday:null,
+              errorCode:response.status===200?null:(typeof data.error==="string"?"provider_or_quota_error":"non_json_error")};
+            console.log(JSON.stringify(result));
+            if(response.status!==200||!result.cors||!result.answerPresent||result.model!=="gemini-3.1-flash-lite")process.exitCode=1;
+          }catch{
+            console.log(JSON.stringify({...result,errorCode:"network_or_timeout"}));
+            process.exitCode=1;
+          }
+          NODE
