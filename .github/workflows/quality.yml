@@ -14,7 +14,7 @@ on:
       - '.github/workflows/android-release.yml'
       - '.github/workflows/quality.yml'
   pull_request:
-    branches: [main, feature/v1-8-telegram-auth-foundation, feature/v1-9-encrypted-sync-contract, feature/v1-10-neon-atomic-storage, feature/v1-11-staging-sync-api, feature/v1-12-free-quota-guards, feature/v1-13-free-medical-qa, feature/v1-14-medical-training-corpus, feature/v1-15-500-medical-questions, feature/v1-16-medical-safety-audit, feature/v1-17-source-and-triage-audit, feature/v1-18-clinical-editorial-matrix, feature/v1-19-complex-medical-questions, feature/v1-20-speaker-context-safety, feature/v1-21-private-first-journal, feature/v1-22-empty-legacy-guard, feature/v1-23-offline-clinical-review-kit, feature/v1-24-release-preflight, feature/v1-25-pro-experience, feature/v1-26-calendar-daily-workflow, feature/v1-27-free-ai-hard-cap, feature/v1-28-ux-reliability, feature/v1-29-unified-ai, feature/v1-30-ai-readiness-gate]
+    branches: [main, feature/v1-8-telegram-auth-foundation, feature/v1-9-encrypted-sync-contract, feature/v1-10-neon-atomic-storage, feature/v1-11-staging-sync-api, feature/v1-12-free-quota-guards, feature/v1-13-free-medical-qa, feature/v1-14-medical-training-corpus, feature/v1-15-500-medical-questions, feature/v1-16-medical-safety-audit, feature/v1-17-source-and-triage-audit, feature/v1-18-clinical-editorial-matrix, feature/v1-19-complex-medical-questions, feature/v1-20-speaker-context-safety, feature/v1-21-private-first-journal, feature/v1-22-empty-legacy-guard, feature/v1-23-offline-clinical-review-kit, feature/v1-24-release-preflight, feature/v1-25-pro-experience, feature/v1-26-calendar-daily-workflow, feature/v1-27-free-ai-hard-cap, feature/v1-28-ux-reliability, feature/v1-29-unified-ai, feature/v1-30-ai-readiness-gate, feature/v1-32-4-person-demo]
     paths:
       - 'site/**'
       - 'tests/**'
@@ -53,10 +53,10 @@ jobs:
           if-no-files-found: error
 
       - name: Generate read-only draft release readiness report
-        if: github.event_name == 'pull_request' && (github.head_ref == 'feature/v1-24-release-preflight' || github.head_ref == 'feature/v1-25-pro-experience' || (github.head_ref == 'feature/v1-26-calendar-daily-workflow' || github.head_ref == 'feature/v1-27-free-ai-hard-cap' || github.head_ref == 'feature/v1-28-ux-reliability' || github.head_ref == 'feature/v1-29-unified-ai' || github.head_ref == 'feature/v1-30-ai-readiness-gate' || github.head_ref == 'feature/v1-32-4-person-demo'))
+        if: github.event_name == 'pull_request' && (github.head_ref == 'feature/v1-24-release-preflight' || github.head_ref == 'feature/v1-25-pro-experience' || (github.head_ref == 'feature/v1-26-calendar-daily-workflow' || github.head_ref == 'feature/v1-27-free-ai-hard-cap' || github.head_ref == 'feature/v1-28-ux-reliability' || github.head_ref == 'feature/v1-29-unified-ai' || github.head_ref == 'feature/v1-30-ai-readiness-gate' || github.head_ref == 'feature/v1-32-4-person-demo' || github.head_ref == 'feature/v1-33-ai-topic-ux-fix'))
         run: node scripts/release-preflight.mjs --json > "$RUNNER_TEMP/healthy-women-release-readiness.json"
       - name: Upload non-sensitive blocked release status
-        if: github.event_name == 'pull_request' && (github.head_ref == 'feature/v1-24-release-preflight' || github.head_ref == 'feature/v1-25-pro-experience' || (github.head_ref == 'feature/v1-26-calendar-daily-workflow' || github.head_ref == 'feature/v1-27-free-ai-hard-cap' || github.head_ref == 'feature/v1-28-ux-reliability' || github.head_ref == 'feature/v1-29-unified-ai' || github.head_ref == 'feature/v1-30-ai-readiness-gate' || github.head_ref == 'feature/v1-32-4-person-demo'))
+        if: github.event_name == 'pull_request' && (github.head_ref == 'feature/v1-24-release-preflight' || github.head_ref == 'feature/v1-25-pro-experience' || (github.head_ref == 'feature/v1-26-calendar-daily-workflow' || github.head_ref == 'feature/v1-27-free-ai-hard-cap' || github.head_ref == 'feature/v1-28-ux-reliability' || github.head_ref == 'feature/v1-29-unified-ai' || github.head_ref == 'feature/v1-30-ai-readiness-gate' || github.head_ref == 'feature/v1-32-4-person-demo' || github.head_ref == 'feature/v1-33-ai-topic-ux-fix'))
         uses: actions/upload-artifact@v4
         with:
           name: Healthy-Women-Release-Preflight-BLOCKED
@@ -65,7 +65,7 @@ jobs:
           if-no-files-found: error
 
       - name: Package vetted v1.24 source code for export
-        if: github.event_name == 'pull_request' && (github.head_ref == 'feature/v1-24-release-preflight' || github.head_ref == 'feature/v1-25-pro-experience' || (github.head_ref == 'feature/v1-26-calendar-daily-workflow' || github.head_ref == 'feature/v1-27-free-ai-hard-cap' || github.head_ref == 'feature/v1-28-ux-reliability' || github.head_ref == 'feature/v1-29-unified-ai' || github.head_ref == 'feature/v1-30-ai-readiness-gate' || github.head_ref == 'feature/v1-32-4-person-demo'))
+        if: github.event_name == 'pull_request' && (github.head_ref == 'feature/v1-24-release-preflight' || github.head_ref == 'feature/v1-25-pro-experience' || (github.head_ref == 'feature/v1-26-calendar-daily-workflow' || github.head_ref == 'feature/v1-27-free-ai-hard-cap' || github.head_ref == 'feature/v1-28-ux-reliability' || github.head_ref == 'feature/v1-29-unified-ai' || github.head_ref == 'feature/v1-30-ai-readiness-gate' || github.head_ref == 'feature/v1-32-4-person-demo' || github.head_ref == 'feature/v1-33-ai-topic-ux-fix'))
         uses: actions/upload-artifact@v4
         with:
           name: Healthy-Women-v1.33-Full-Source-DRAFT
@@ -105,7 +105,7 @@ jobs:
 
 
   android-v124-debug:
-    if: github.event_name == 'pull_request' && (github.head_ref == 'feature/v1-24-release-preflight' || github.head_ref == 'feature/v1-25-pro-experience' || (github.head_ref == 'feature/v1-26-calendar-daily-workflow' || github.head_ref == 'feature/v1-27-free-ai-hard-cap' || github.head_ref == 'feature/v1-28-ux-reliability' || github.head_ref == 'feature/v1-29-unified-ai' || github.head_ref == 'feature/v1-30-ai-readiness-gate' || github.head_ref == 'feature/v1-32-4-person-demo'))
+    if: github.event_name == 'pull_request' && (github.head_ref == 'feature/v1-24-release-preflight' || github.head_ref == 'feature/v1-25-pro-experience' || (github.head_ref == 'feature/v1-26-calendar-daily-workflow' || github.head_ref == 'feature/v1-27-free-ai-hard-cap' || github.head_ref == 'feature/v1-28-ux-reliability' || github.head_ref == 'feature/v1-29-unified-ai' || github.head_ref == 'feature/v1-30-ai-readiness-gate' || github.head_ref == 'feature/v1-32-4-person-demo' || github.head_ref == 'feature/v1-33-ai-topic-ux-fix'))
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
@@ -141,7 +141,7 @@ jobs:
 
 
   browser-advanced-v125:
-    if: github.event_name == 'pull_request' && github.head_ref == 'feature/v1-25-pro-experience' || (github.head_ref == 'feature/v1-26-calendar-daily-workflow' || github.head_ref == 'feature/v1-27-free-ai-hard-cap' || github.head_ref == 'feature/v1-28-ux-reliability' || github.head_ref == 'feature/v1-29-unified-ai' || github.head_ref == 'feature/v1-30-ai-readiness-gate' || github.head_ref == 'feature/v1-32-4-person-demo')
+    if: github.event_name == 'pull_request' && github.head_ref == 'feature/v1-25-pro-experience' || (github.head_ref == 'feature/v1-26-calendar-daily-workflow' || github.head_ref == 'feature/v1-27-free-ai-hard-cap' || github.head_ref == 'feature/v1-28-ux-reliability' || github.head_ref == 'feature/v1-29-unified-ai' || github.head_ref == 'feature/v1-30-ai-readiness-gate' || github.head_ref == 'feature/v1-32-4-person-demo' || github.head_ref == 'feature/v1-33-ai-topic-ux-fix')
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
