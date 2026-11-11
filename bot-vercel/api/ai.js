@@ -63,9 +63,13 @@ const defaultGenerate=async({apiKey,topic,fetchFn=fetch})=>{
   method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":apiKey},
   body:JSON.stringify({systemInstruction:{parts:[{text:SYSTEM}]},contents:[{role:"user",parts:[{text:topic.question}]}],
    generationConfig:{candidateCount:1,maxOutputTokens:AI_LIMITS.maxOutputTokens,temperature:0.2,thinkingConfig:{thinkingLevel:"minimal"}}}),
-  signal:AbortSignal.timeout(10000),redirect:"error",cache:"no-store"
+  signal:AbortSignal.timeout(20000),redirect:"error",cache:"no-store"
  });
- if(!res.ok)throw Error("provider unavailable");
+ if(!res.ok){
+  const problem=new Error("provider unavailable");
+  problem.code=res.status===429?"provider_quota":"provider_error";
+  throw problem;
+ }
  const json=await res.json();const answer=safeOutput(json?.candidates?.[0]?.content?.parts?.map(x=>x.text||"").join(""));
  if(!answer)throw Error("empty response");return answer;
 };
@@ -87,7 +91,10 @@ export async function runFixedTopicAi({topic,identity,networkHash=null,env=proce
   if(!answer)return {ok:false,status:503,error:"AI javobi mavjud emas. Offline javobdan foydalaning."};
   return {ok:true,status:200,answer,source:AI_TOPICS[topic].source,url:AI_TOPICS[topic].url,
    remainingToday:Math.max(0,Math.min(Number(quota.remaining_daily)||0,Number(quota.remaining_client)||0)),model:AI_MODEL};
- }catch{return {ok:false,status:503,error:"AI vaqtincha ishlamayapti. Offline javobdan foydalaning."};}
+ }catch(err){
+  if(err?.code==="provider_quota")return {ok:false,status:429,error:"Google Free Tier so‘rov limiti vaqtincha tugagan. Offline javobdan foydalaning."};
+  return {ok:false,status:503,error:err?.name==="TimeoutError"?"AI javobi kechikdi. Offline javobdan foydalaning.":"AI vaqtincha ishlamayapti. Offline javobdan foydalaning."};
+ }
 }
 export async function runTelegramTopicAi({topic,chatId,env=process.env,reserve=defaultReserve,generate=defaultGenerate}={}){
  if(!Number.isSafeInteger(chatId)||chatId<=0)return {ok:false,status:400,error:"Noto‘g‘ri Telegram identifikatori."};

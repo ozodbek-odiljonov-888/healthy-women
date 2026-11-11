@@ -20,3 +20,6 @@
 - Google Free Tierʼda serverga yuborilgan umumiy taʼlimiy mavzular Google mahsulotlarini yaxshilash uchun ishlatilishi mumkin. Shaxsiy qayd matnlari AIʼga yuborilmaydi.
 - AI kaliti haqiqatan Free Tierʼdagi Gemini Project womens loyihasiga tegishli ekanini Vercelʼda keyinroq inson tasdiqlashi kerak; Vercel sensitive secret qiymatini API orqali o‘qib bo‘lmaydi. Agar shubha bo‘lsa AI_MODE=off qiling.
 - O‘zgarishlar eski v1.30 production kodiga kirguncha yangi demo APK va manbalardan foydalaning.
+
+## AI kechikishi
+Gemini Free Tier javobi baʼzan 10 soniyadan uzoq davom etadi. Bitta sinov soʻrovi serverda 20 soniyadan, brauzerda 26 soniyadan soʻng bekor qilinadi; avtomatik qayta urinish va pullik tarifga oʻtish yoʻq. Gemini javob bermasa kvota rezervi ishlatilgan boʻlishi mumkin; foydalanuvchi offline maʼlumotlardan foydalanadi. Google 429 limitini 503 tarmoq xatosidan ajratish qoʻshildi.

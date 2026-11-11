@@ -35,7 +35,7 @@ export async function askPublicAi(topic,{endpoint="",fetchFn=fetch}={}){
  const res=await fetchFn(endpoint,{method:"POST",
   headers:{"Content-Type":"application/json",...(demoId?{"X-HW-Demo-Id":demoId}:{})},
   body:JSON.stringify({topic,consent:true}),
-  signal:AbortSignal.timeout(13000),cache:"no-store",credentials:"omit",redirect:"error",referrerPolicy:"no-referrer"});
+  signal:AbortSignal.timeout(26000),cache:"no-store",credentials:"omit",redirect:"error",referrerPolicy:"no-referrer"});
  let payload={};try{payload=await res.json();}catch{}
  if(!res.ok||typeof payload?.answer!=="string"||!payload.answer.trim())
   throw Error(res.status===429?"Bugungi bepul AI limiti tugadi.":"AI hozir javob bermadi. Mahalliy javobdan foydalaning.");
