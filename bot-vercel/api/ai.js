@@ -4,6 +4,7 @@ import {createHash} from "node:crypto";
 import {AI_TOPICS,AI_MODEL,AI_LIMITS} from "../worker/ai-topics.js";
 
 const maxBytes=200,allowedMethods="POST, OPTIONS";
+const DEMO_ID=/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const baseHeaders={"Content-Type":"application/json; charset=utf-8","Cache-Control":"private, no-store","Referrer-Policy":"no-referrer","X-Content-Type-Options":"nosniff","Content-Security-Policy":"default-src 'none'","Vary":"Origin"};
 // Fixed, opt-in origins. No wildcard CORS, even for native WebViews.
 const canonicalHttpsOrigin=value=>{
@@ -41,10 +42,12 @@ async function parseSmallJson(request){
  return JSON.parse(new TextDecoder("utf-8",{fatal:true}).decode(all));
 }
 export const anonymousKey=(ip,pepper)=>createHash("sha256").update(pepper+"\n"+ip).digest("hex");
-const defaultReserve=async({env,clientHash})=>{
+const defaultReserve=async({env,clientHash,networkHash=null})=>{
  const {neon}=await import("@neondatabase/serverless");
  const sql=neon(env.AI_DATABASE_URL);
- const rows=await sql`SELECT allowed,remaining_daily,remaining_client FROM hw_ai_reserve_free(${clientHash})`;
+ const rows=networkHash
+  ? await sql`SELECT allowed,remaining_daily,remaining_client FROM hw_ai_reserve_demo_free(${clientHash},${networkHash})`
+  : await sql`SELECT allowed,remaining_daily,remaining_client FROM hw_ai_reserve_free(${clientHash})`;
  if(!Array.isArray(rows)||rows.length!==1||typeof rows[0]?.allowed!=="boolean")throw Error("quota unavailable");
  return rows[0];
 };
@@ -60,22 +63,26 @@ const defaultGenerate=async({apiKey,topic,fetchFn=fetch})=>{
   method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":apiKey},
   body:JSON.stringify({systemInstruction:{parts:[{text:SYSTEM}]},contents:[{role:"user",parts:[{text:topic.question}]}],
    generationConfig:{candidateCount:1,maxOutputTokens:AI_LIMITS.maxOutputTokens,temperature:0.2,thinkingConfig:{thinkingLevel:"minimal"}}}),
-  signal:AbortSignal.timeout(10000),redirect:"error",cache:"no-store"
+  signal:AbortSignal.timeout(20000),redirect:"error",cache:"no-store"
  });
- if(!res.ok)throw Error("provider unavailable");
+ if(!res.ok){
+  const problem=new Error("provider unavailable");
+  problem.code=res.status===429?"provider_quota":"provider_error";
+  throw problem;
+ }
  const json=await res.json();const answer=safeOutput(json?.candidates?.[0]?.content?.parts?.map(x=>x.text||"").join(""));
  if(!answer)throw Error("empty response");return answer;
 };
 /** Dependency injection for offline tests only. Not configurable by clients. */
 // All three platforms share a single server-quota reservation.
 // Never send raw chat, personal ID, period dates or symptom history upstream.
-export async function runFixedTopicAi({topic,identity,env=process.env,reserve=defaultReserve,generate=defaultGenerate}={}){
+export async function runFixedTopicAi({topic,identity,networkHash=null,env=process.env,reserve=defaultReserve,generate=defaultGenerate}={}){
  if(!aiConfigReady(env))return {ok:false,status:503,error:"AI hozircha yoqilmagan. Offline javobdan foydalaning."};
  if(typeof topic!=="string"||!Object.hasOwn(AI_TOPICS,topic)||typeof identity!=="string"||!identity||identity.length>120)
   return {ok:false,status:400,error:"Faqat umumiy mavzu tanlanadi."};
  const clientHash=anonymousKey(identity,env.AI_IP_PEPPER);
  let quota;
- try{quota=await reserve({env,clientHash});}
+ try{quota=await reserve({env,clientHash,networkHash});}
  catch{return {ok:false,status:503,error:"Bepul AI kvotasi vaqtincha mavjud emas."};}
  if(!quota?.allowed)return {ok:false,status:429,error:"Bepul AI limiti tugadi. Offline javobdan foydalaning."};
  try{
@@ -84,7 +91,10 @@ export async function runFixedTopicAi({topic,identity,env=process.env,reserve=de
   if(!answer)return {ok:false,status:503,error:"AI javobi mavjud emas. Offline javobdan foydalaning."};
   return {ok:true,status:200,answer,source:AI_TOPICS[topic].source,url:AI_TOPICS[topic].url,
    remainingToday:Math.max(0,Math.min(Number(quota.remaining_daily)||0,Number(quota.remaining_client)||0)),model:AI_MODEL};
- }catch{return {ok:false,status:503,error:"AI vaqtincha ishlamayapti. Offline javobdan foydalaning."};}
+ }catch(err){
+  if(err?.code==="provider_quota")return {ok:false,status:429,error:"Google Free Tier so‘rov limiti vaqtincha tugagan. Offline javobdan foydalaning."};
+  return {ok:false,status:503,error:err?.name==="TimeoutError"?"AI javobi kechikdi. Offline javobdan foydalaning.":"AI vaqtincha ishlamayapti. Offline javobdan foydalaning."};
+ }
 }
 export async function runTelegramTopicAi({topic,chatId,env=process.env,reserve=defaultReserve,generate=defaultGenerate}={}){
  if(!Number.isSafeInteger(chatId)||chatId<=0)return {ok:false,status:400,error:"Noto‘g‘ri Telegram identifikatori."};
@@ -94,7 +104,7 @@ export async function handleAiRequest(request,{env=process.env,reserve=defaultRe
  const origin=request.headers.get("Origin")||"";
  if(!isEnabled(request,env,origin))return response({error:"AI preview unavailable"},503,origin,env);
  if(request.method==="OPTIONS")return new Response(null,{status:204,headers:{...baseHeaders,"Access-Control-Allow-Origin":origin,
-  "Access-Control-Allow-Methods":allowedMethods,"Access-Control-Allow-Headers":"Content-Type","Access-Control-Max-Age":"0"}});
+  "Access-Control-Allow-Methods":allowedMethods,"Access-Control-Allow-Headers":"Content-Type, X-HW-Demo-Id","Access-Control-Max-Age":"0"}});
  if(request.method!=="POST")return response({error:"Method not allowed"},405,origin,env,{Allow:allowedMethods});
  if(!/^application\/json(?:\s*;\s*charset=utf-8)?$/i.test(request.headers.get("Content-Type")||""))
   return response({error:"JSON required"},415,origin,env);
@@ -104,7 +114,12 @@ export async function handleAiRequest(request,{env=process.env,reserve=defaultRe
   return response({error:"General educational topic and consent required"},400,origin,env);
  const ip=(request.headers.get("x-vercel-forwarded-for")||"").split(",")[0].trim();
  if(!ip||ip.length>64||!/^[0-9a-fA-F.:]+$/.test(ip))return response({error:"Rate limit unavailable"},503,origin,env);
- const result=await runFixedTopicAi({topic:payload.topic,identity:"web:"+ip,env,reserve,generate});
+ const demoId=request.headers.get("x-hw-demo-id")||"";
+ if(demoId&&!DEMO_ID.test(demoId))return response({error:"Invalid anonymous demo identity"},400,origin,env);
+ // Separate tester quotas behind a shared Wi-Fi IP; a separate DB network cap limits resets.
+ const networkHash=anonymousKey("network:"+ip,env.AI_IP_PEPPER);
+ const result=await runFixedTopicAi({topic:payload.topic,identity:"web:"+ip+(demoId?":"+demoId:""),
+   networkHash,env,reserve,generate});
  if(!result.ok)return response({error:result.error},result.status,origin,env,
    result.status===429?{"Retry-After":"60"}:{});
  const {ok,status,...body}=result;

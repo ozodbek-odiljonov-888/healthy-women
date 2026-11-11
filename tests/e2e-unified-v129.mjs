@@ -30,7 +30,7 @@ try{
   });
   await page.route(api,async route=>{
    const req=route.request();
-   requests.push({method:req.method(),data:JSON.parse(req.postData()||"{}"),origin:req.headers()["origin"]});
+   requests.push({method:req.method(),data:JSON.parse(req.postData()||"{}"),origin:req.headers()["origin"],demoId:req.headers()["x-hw-demo-id"]});
    await route.fulfill({status:200,contentType:"application/json",headers:{"Access-Control-Allow-Origin":origin,"Cache-Control":"no-store"},body:JSON.stringify({
      answer:"Fictional general educational response",source:"NHS",url:"https://www.nhs.uk/symptoms/period-pain/",remainingToday:2
    })});
@@ -53,6 +53,7 @@ try{
   assert.equal(requests[0].method,"POST");
   assert.deepEqual(requests[0].data,{topic:"pain",consent:true});
   assert.equal(requests[0].origin,origin);
+  assert.match(requests[0].demoId,/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
   assert.deepEqual(errors,[]);
   await context.close();
   console.log("PASS unified v1.29 AI real config/CSP, user consent, offline fallback, privacy at "+width+"px");
