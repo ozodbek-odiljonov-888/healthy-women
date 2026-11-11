@@ -59,7 +59,7 @@ const defaultGenerate=async({apiKey,topic,fetchFn=fetch})=>{
  const res=await fetchFn(`https://generativelanguage.googleapis.com/v1beta/models/${AI_MODEL}:generateContent`,{
   method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":apiKey},
   body:JSON.stringify({systemInstruction:{parts:[{text:SYSTEM}]},contents:[{role:"user",parts:[{text:topic.question}]}],
-   generationConfig:{maxOutputTokens:AI_LIMITS.maxOutputTokens,temperature:0.2}}),
+   generationConfig:{candidateCount:1,maxOutputTokens:AI_LIMITS.maxOutputTokens,temperature:0.2,thinkingConfig:{thinkingLevel:"minimal"}}}),
   signal:AbortSignal.timeout(10000),redirect:"error",cache:"no-store"
  });
  if(!res.ok)throw Error("provider unavailable");

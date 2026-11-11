@@ -25,6 +25,9 @@ try{
   const page=await context.newPage(),requests=[],errors=[];
   page.on("pageerror",error=>errors.push(String(error)));
   // Unlike v1.27 smoke test, do NOT override config.js — test real build.
+  await page.route("https://healthy-women-bot.vercel.app/api/ai-status",async route=>{
+   await route.fulfill({status:200,contentType:"application/json",headers:{"Access-Control-Allow-Origin":origin},body:JSON.stringify({enabled:true,freeTierVerified:true})});
+  });
   await page.route(api,async route=>{
    const req=route.request();
    requests.push({method:req.method(),data:JSON.parse(req.postData()||"{}"),origin:req.headers()["origin"]});
@@ -41,6 +44,8 @@ try{
   await page.locator("#chatInput").fill("Hayz og‘rig‘i nima?");
   await page.locator("#chatForm button[type=submit]").click();
   assert.equal(requests.length,0);
+  await page.locator("#checkAiStatusButton").click();
+  await page.locator("#aiStatusText").getByText("Bepul AI tekshirildi.").waitFor();
   await page.locator("#aiConsent").check();
   await page.locator("#askAiButton").click();
   await page.locator("#chatMessages").getByText("Fictional general educational response",{exact:false}).waitFor();

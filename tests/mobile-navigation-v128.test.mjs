@@ -46,9 +46,9 @@ test('PWA install is opt-in and available only after browser install event',asyn
 test('site assets and setting metadata updated safely and offline',()=>{
  const sw=text('sw.js'),app=text('app.mjs');
  assert(sw.includes('"./install-ui.mjs"'));
- assert(sw.includes('healthy-women-pwa-v29-unified-ai'));
+ assert(sw.includes('healthy-women-pwa-v30-ai-status'));
  assert(!sw.includes('cache.put('));
- assert(app.includes('v1.28 — Sifat va qulaylik sinovi'));
+ assert(app.includes('v1.30 — AI ulanishi va xavfsizlik sinovi'));
  assert(text('style.css').includes('#installPwaButton[hidden]{display:none!important}'));
  assert(app.includes('lastAiPublicTopic=pickAiTopic(q)'));
  assert(app.includes('q?pickAiTopic(q):lastAiPublicTopic'));
