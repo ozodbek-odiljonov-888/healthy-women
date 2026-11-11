@@ -1,4 +1,4 @@
-name: Four-person demo real-AI one-shot smoke
+name: Four-person demo real-AI production recheck
 on:
   pull_request:
     branches: [feature/v1-30-ai-readiness-gate]
