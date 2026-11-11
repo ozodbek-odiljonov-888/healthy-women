@@ -68,7 +68,7 @@ jobs:
         if: github.event_name == 'pull_request' && (github.head_ref == 'feature/v1-24-release-preflight' || github.head_ref == 'feature/v1-25-pro-experience' || (github.head_ref == 'feature/v1-26-calendar-daily-workflow' || github.head_ref == 'feature/v1-27-free-ai-hard-cap' || github.head_ref == 'feature/v1-28-ux-reliability' || github.head_ref == 'feature/v1-29-unified-ai' || github.head_ref == 'feature/v1-30-ai-readiness-gate' || github.head_ref == 'feature/v1-32-4-person-demo'))
         uses: actions/upload-artifact@v4
         with:
-          name: Healthy-Women-v1.32-Full-Source-DRAFT
+          name: Healthy-Women-v1.33-Full-Source-DRAFT
           path: |
             .github/workflows/
             .github/scripts/
@@ -134,7 +134,7 @@ jobs:
       - name: Upload preview APK (NOT clinical release)
         uses: actions/upload-artifact@v4
         with:
-          name: Healthy-Women-v1.32-Android-Debug-Preview
+          name: Healthy-Women-v1.33-Android-Debug-Preview
           path: android/app/build/outputs/apk/debug/app-debug.apk
           retention-days: 7
           if-no-files-found: error
@@ -162,10 +162,11 @@ jobs:
           if test -f tests/e2e-ai-v127.mjs; then node tests/e2e-ai-v127.mjs; fi
           if test -f tests/e2e-mobile-v128.mjs; then node tests/e2e-mobile-v128.mjs; fi
           if test -f tests/e2e-unified-v129.mjs; then node tests/e2e-unified-v129.mjs; fi
+          if test -f tests/e2e-ai-topic-v133.mjs; then node tests/e2e-ai-topic-v133.mjs; fi
       - name: Upload fictional premium UI screenshots
         uses: actions/upload-artifact@v4
         with:
-          name: Healthy-Women-v1.32-Responsive-Screenshots
+          name: Healthy-Women-v1.33-Responsive-Screenshots
           path: ui-preview/
           if-no-files-found: error
           retention-days: 7

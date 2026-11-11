@@ -1,5 +1,13 @@
 // Explicit user click only. The raw question, diary and session never leave this file.
 export const REMOTE_AI_TOPICS=new Set(["cycle","duration","pain","heavy","irregular","pregnancy","between","pcos","endo","selfcare"]);
+export const AI_TOPIC_LABELS=Object.freeze({
+ cycle:"Hayz sikli va kalendar",duration:"Hayz davomiyligi",pain:"Hayz og‘rig‘i",heavy:"Ko‘p qon ketishi",irregular:"Nomuntazam hayz",
+ pregnancy:"Hayz kechikishi",between:"Hayzlar oralig‘ida qon",pcos:"PCOS",endo:"Endometrioz",selfcare:"O‘zini parvarishlash"
+});
+export function resolveAiTopic({question="",selected=null}={}){
+ const detected=pickAiTopic(question);
+ return REMOTE_AI_TOPICS.has(selected)?selected:detected;
+}
 const API_HOST="healthy-women-bot.vercel.app";
 const DEMO_STORAGE_KEY="healthywomen.ai-demo-device.v1";
 const DEMO_UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
