@@ -22,6 +22,9 @@ try{
   const page=await context.newPage();const errors=[],sent=[];
   page.on("pageerror",error=>errors.push(String(error)));
   await page.route("**/config.js",route=>route.fulfill({status:200,contentType:"application/javascript",body:'window.HEALTHY_WOMEN_API="";window.HEALTHY_WOMEN_AI_API="'+api+'";'}));
+  await page.route("https://healthy-women-bot.vercel.app/api/ai-status",async route=>{
+    await route.fulfill({status:200,contentType:"application/json",headers:{"access-control-allow-origin":origin},body:JSON.stringify({enabled:true,freeTierVerified:true})});
+  });
   await page.route(api,async route=>{
    const req=route.request();sent.push(JSON.parse(req.postData()||"{}"));
    await route.fulfill({status:200,contentType:"application/json",headers:{"access-control-allow-origin":origin,"cache-control":"no-store"},
@@ -39,6 +42,8 @@ try{
   await page.locator("#chatForm button[type=submit]").click(); // Offline, no request.
   assert.equal(sent.length,0);
   await page.locator("#chatInput").fill("Hayz og‘rig‘i haqida");
+  await page.locator("#checkAiStatusButton").click();
+  await page.locator("#aiStatusText").getByText("Bepul AI tekshirildi.").waitFor();
   await page.locator("#aiConsent").check();
   await page.locator("#askAiButton").click();
   await page.locator("#chatMessages").getByText("Sinov uchun umumiy AI javobi",{exact:false}).waitFor();
